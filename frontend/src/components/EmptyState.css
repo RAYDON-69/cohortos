@@ -1,0 +1,31 @@
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--slate-700);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-card);
+  background: var(--white);
+}
+
+.empty-mark {
+  font-size: 28px;
+  color: var(--sage-300);
+  line-height: 1;
+}
+
+.empty-title {
+  font-weight: 600;
+  color: var(--ink);
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+
+.empty-body {
+  font-size: 12px;
+  max-width: 36ch;
+  margin: 0 auto;
+}
+
+.empty-action {
+  margin-top: 16px;
+}

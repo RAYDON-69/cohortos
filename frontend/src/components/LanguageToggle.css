@@ -1,0 +1,27 @@
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--white);
+}
+
+.lang-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--slate-700);
+  cursor: pointer;
+  min-height: 32px;
+  transition: background-color var(--motion-fast) var(--easing-out),
+    color var(--motion-fast) var(--easing-out);
+}
+.lang-btn.active {
+  background: var(--sage-700);
+  color: var(--white);
+}
+.lang-btn:hover:not(.active) {
+  background: var(--sage-100);
+}

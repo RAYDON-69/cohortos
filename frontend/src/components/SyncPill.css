@@ -1,0 +1,78 @@
+/* Connectivity / sync pill — §4.4 exact four states */
+
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--sage-100);
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--sage-900);
+  cursor: default;
+  transition: background-color var(--motion-normal) var(--easing-inout),
+    border-color var(--motion-normal) var(--easing-inout);
+}
+
+.sync-pill:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.sync-pill-conflict {
+  cursor: pointer;
+  background: var(--error-bg);
+  border-color: var(--error);
+  color: var(--error);
+}
+.sync-pill-conflict:hover {
+  filter: brightness(0.98);
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+/* Offline — gold-500, neutral (never error red) */
+.sync-dot-offline {
+  background: var(--gold-500);
+}
+/* Syncing — peri-300 */
+.sync-dot-syncing {
+  background: var(--peri-300);
+  animation: sync-pulse 1.2s ease-in-out infinite;
+}
+/* Synced — sage-700 */
+.sync-dot-synced {
+  background: var(--sage-700);
+}
+/* Conflict — error */
+.sync-dot-conflict {
+  background: var(--error);
+}
+
+@keyframes sync-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-dot-syncing {
+    animation: none;
+  }
+}
+
+.sync-label {
+  white-space: nowrap;
+}

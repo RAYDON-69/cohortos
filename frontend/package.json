@@ -1,0 +1,125 @@
+{
+  "name": "cohortos-frontend",
+  "private": true,
+  "version": "0.11.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "a11y": "vitest run --reporter=verbose src/**/*.a11y.test.tsx",
+    "electron": "COHORTOS_DEV=1 electron .",
+    "audit:tokens": "node -e \"const fs=require('fs');const path=require('path');function walk(d,a=[]){for(const f of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,f.name);if(f.isDirectory()&&f.name!=='node_modules')walk(p,a);else if(/\\.(tsx|ts|css)$/.test(f.name)&&!p.endsWith('tokens.css'))a.push(p)}return a}const hex=/#[0-9A-Fa-f]{3,8}/g;let bad=[];for(const f of walk('src')){const t=fs.readFileSync(f,'utf8');const m=t.match(hex);if(m)bad.push(f+': '+m.join(','))}if(bad.length){console.error(bad.join('\\n'));process.exit(1)}console.log('token audit clean')\"",
+    "dist:linux": "electron-builder --linux",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "lucide-react": "^0.511.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.6.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "@vitest/coverage-v8": "^3.1.4",
+    "axe-core": "^4.10.3",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "jsdom": "^26.1.0",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^3.1.4",
+    "vitest-axe": "^0.1.0"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "com.cohortos.desk",
+    "productName": "CohortOS",
+    "directories": {
+      "output": "release-desktop"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist/cohortos-api",
+        "to": "bin/cohortos-api"
+      },
+      {
+        "from": "../api",
+        "to": "backend/api",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../services",
+        "to": "backend/services",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../models",
+        "to": "backend/models",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.education"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

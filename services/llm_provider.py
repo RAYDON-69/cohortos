@@ -1,0 +1,294 @@
+"""
+Pluggable LLM providers for CohortOS AI (SPEC §9.3).
+
+- MockLLMProvider: deterministic, offline, used by all tests.
+- GeminiProvider: stub that simulates free-tier behaviour and degrades on
+  429 / offline / missing key — real network calls are injected later.
+"""
+
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+import hashlib
+import re
+
+
+class LLMError(Exception):
+    """Base LLM failure."""
+
+
+class RateLimitError(LLMError):
+    """Free-tier 429 / quota exhausted."""
+
+
+class OfflineError(LLMError):
+    """No network / provider unavailable."""
+
+
+@dataclass
+class LLMRequest:
+    prompt: str
+    system: str = ""
+    tier: str = "cheap"  # cheap | premium
+    max_tokens: int = 1024
+    temperature: float = 0.2
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class LLMResponse:
+    text: str
+    model: str = "mock"
+    tier: str = "cheap"
+    tokens_in: int = 0
+    tokens_out: int = 0
+    raw: Dict[str, Any] = field(default_factory=dict)
+
+
+class LLMProvider(ABC):
+    """Provider contract — all paths must be offline-safe when provider is offline."""
+
+    @abstractmethod
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        """Raise RateLimitError or OfflineError on degrade conditions."""
+
+    @abstractmethod
+    def is_available(self) -> bool:
+        """False when offline or key missing."""
+
+    def name(self) -> str:
+        return self.__class__.__name__
+
+
+class MockLLMProvider(LLMProvider):
+    """
+    Deterministic mock for tests and offline demos.
+
+    Behaviour controlled via constructor flags and prompt content markers:
+    - prompt contains '__MISMATCH__' → verification answers differ
+    - prompt contains '__LOW_CONF__' → low-confidence style answer
+    - force_rate_limit=True → always RateLimitError
+    - force_offline=True → always OfflineError
+    """
+
+    def __init__(
+        self,
+        force_rate_limit: bool = False,
+        force_offline: bool = False,
+        default_confidence_hint: float = 0.9,
+    ):
+        self.force_rate_limit = force_rate_limit
+        self.force_offline = force_offline
+        self.default_confidence_hint = default_confidence_hint
+        self.call_count = 0
+        self.last_request: Optional[LLMRequest] = None
+
+    def is_available(self) -> bool:
+        return not self.force_offline
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        self.call_count += 1
+        self.last_request = request
+        if self.force_offline:
+            raise OfflineError("Mock provider forced offline")
+        if self.force_rate_limit:
+            raise RateLimitError("Mock free-tier quota exceeded (429)")
+
+        prompt = request.prompt or ""
+        system = request.system or ""
+        is_verify = "verify" in system.lower() or "re-derive" in system.lower() or "verification" in prompt.lower()
+
+        if "__MISMATCH__" in prompt and is_verify:
+            text = (
+                "ANSWER: 42 (different derivation)\n"
+                "HOW: Alternative path that disagrees with first pass.\n"
+                "WHY: Intentional mismatch for self-verification test."
+            )
+        elif "__LOW_CONF__" in prompt:
+            text = (
+                "ANSWER: Uncertain — insufficient grounded sources.\n"
+                "HOW: Could not derive a reliable step-by-step solution.\n"
+                "WHY: Retrieved chunks do not cover the asked concept."
+            )
+        elif "classify" in system.lower() or "classify this question" in prompt.lower():
+            # Simple keyword classification
+            q = prompt.lower()
+            qtype = "mcq" if any(x in q for x in ("mcq", "option", "a)", "b)", "choose")) else "written"
+            subject = "physics" if "physics" in q or "force" in q or "motion" in q else "general"
+            topic = "mechanics" if any(x in q for x in ("force", "newton", "motion", "velocity")) else "general"
+            board = "hsc" if "hsc" in q else ("medical" if "medical" in q else "general")
+            text = f"TYPE:{qtype}\nSUBJECT:{subject}\nTOPIC:{topic}\nBOARD:{board}"
+        elif "analytics" in system.lower() or "misconception" in prompt.lower():
+            text = (
+                "SUGGESTION: 3 students share a rotational-dynamics misconception.\n"
+                "RECAP: 15-min free-body + torque recap.\n"
+                "MCQS: 15 targeted items on moment of inertia.\n"
+                "IMPACT: high"
+            )
+        else:
+            # Standard Answer / How / Why — stable across generate/verify prompts
+            # so self-verification matches unless __MISMATCH__ is present.
+            text = (
+                "ANSWER: F = m a (Newton's second law).\n"
+                "HOW: Step 1 identify knowns; Step 2 apply relevant law; "
+                "Step 3 check units/signs.\n"
+                "WHY: Grounded in retrieved coaching notes for this topic."
+            )
+
+        return LLMResponse(
+            text=text,
+            model="mock-v1",
+            tier=request.tier,
+            tokens_in=max(1, len(prompt) // 4),
+            tokens_out=max(1, len(text) // 4),
+            raw={"mock": True, "call": self.call_count},
+        )
+
+
+class GeminiProvider(LLMProvider):
+    """
+    Google Gemini provider (free-tier / BYOK).
+
+    Uses google-generativeai when installed and a key is present.
+    Degrades exactly as SPEC §9.3: missing key / offline → OfflineError,
+    429 / quota → RateLimitError. Never raises raw SDK exceptions to callers.
+    """
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        online: bool = True,
+        force_rate_limit: bool = False,
+        model_cheap: str = "gemini-1.5-flash",
+        model_premium: str = "gemini-1.5-pro",
+    ):
+        import os
+        self.api_key = (api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip() or None
+        self.online = online
+        self.force_rate_limit = force_rate_limit
+        self.model_cheap = model_cheap
+        self.model_premium = model_premium
+        self.call_count = 0
+        self._client = None
+        self._sdk_available = False
+        if self.api_key:
+            try:
+                import google.generativeai as genai  # type: ignore
+                genai.configure(api_key=self.api_key)
+                self._client = genai
+                self._sdk_available = True
+            except ImportError:
+                self._sdk_available = False
+            except Exception:
+                self._sdk_available = False
+
+    def is_available(self) -> bool:
+        return bool(self.api_key) and self.online and not self.force_rate_limit and self._sdk_available
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        self.call_count += 1
+        if not self.online:
+            raise OfflineError("Gemini provider offline — queue or use cache")
+        if not self.api_key:
+            raise OfflineError("No Gemini API key configured")
+        if self.force_rate_limit:
+            raise RateLimitError("Gemini free-tier quota exceeded (429)")
+        if not self._sdk_available or self._client is None:
+            # SDK not installed: structured degrade (not a crash)
+            raise OfflineError(
+                "google-generativeai is not installed. "
+                "pip install google-generativeai  — or use MockLLMProvider offline."
+            )
+
+        model_name = self.model_premium if request.tier == "premium" else self.model_cheap
+        try:
+            model = self._client.GenerativeModel(model_name)
+            prompt_parts = []
+            if request.system:
+                prompt_parts.append(request.system)
+            prompt_parts.append(request.prompt)
+            result = model.generate_content(
+                "\n\n".join(prompt_parts),
+                generation_config={
+                    "max_output_tokens": request.max_tokens,
+                    "temperature": request.temperature,
+                },
+            )
+            text = getattr(result, "text", None) or ""
+            if not text and getattr(result, "candidates", None):
+                # safety blocks etc.
+                text = str(result.candidates[0]) if result.candidates else ""
+            return LLMResponse(
+                text=text or "[empty Gemini response]",
+                model=model_name,
+                tier=request.tier,
+                tokens_in=len(request.prompt) // 4,
+                tokens_out=len(text) // 4,
+                raw={"provider": "gemini", "model": model_name},
+            )
+        except Exception as e:
+            msg = str(e).lower()
+            if "429" in msg or "quota" in msg or "resource exhausted" in msg:
+                raise RateLimitError(f"Gemini quota exceeded: {e}") from e
+            if "offline" in msg or "network" in msg or "connect" in msg:
+                raise OfflineError(f"Gemini network failure: {e}") from e
+            # Unknown: treat as offline-safe degrade
+            raise OfflineError(f"Gemini call failed: {e}") from e
+
+def parse_answer_blocks(text: str) -> Dict[str, str]:
+    """Extract ANSWER / HOW / WHY blocks from model text."""
+    result = {"answer": "", "how": "", "why": ""}
+    current = None
+    lines = text.splitlines()
+    buf: List[str] = []
+
+    def flush():
+        nonlocal buf, current
+        if current and buf:
+            result[current] = "\n".join(buf).strip()
+        buf = []
+
+    for line in lines:
+        upper = line.strip().upper()
+        if upper.startswith("ANSWER:") or upper.startswith("ANSWER "):
+            flush()
+            current = "answer"
+            rest = line.split(":", 1)[-1].strip() if ":" in line else ""
+            buf = [rest] if rest else []
+        elif upper.startswith("HOW:") or upper.startswith("HOW "):
+            flush()
+            current = "how"
+            rest = line.split(":", 1)[-1].strip() if ":" in line else ""
+            buf = [rest] if rest else []
+        elif upper.startswith("WHY:") or upper.startswith("WHY "):
+            flush()
+            current = "why"
+            rest = line.split(":", 1)[-1].strip() if ":" in line else ""
+            buf = [rest] if rest else []
+        else:
+            if current is not None:
+                buf.append(line)
+    flush()
+    if not any(result.values()) and text.strip():
+        result["answer"] = text.strip()
+    return result
+
+
+def parse_classification(text: str) -> Dict[str, str]:
+    out = {"question_type": "written", "subject": "general", "topic": "general", "board": "general"}
+    for line in text.splitlines():
+        if ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        k, v = k.strip().upper(), v.strip().lower()
+        if k == "TYPE":
+            out["question_type"] = v if v in ("mcq", "written", "cq") else "written"
+        elif k == "SUBJECT":
+            out["subject"] = v
+        elif k == "TOPIC":
+            out["topic"] = v
+        elif k == "BOARD":
+            out["board"] = v
+    return out

@@ -1,0 +1,55 @@
+.inline-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.inline-confirm-msg {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.inline-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(46, 58, 36, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.modal-dialog {
+  background: var(--white);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+.modal-consequence {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 12px 0 24px;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Destructive primary uses error for finality on irreversible actions */
+.btn-destructive {
+  background: var(--error) !important;
+  color: var(--white) !important;
+}
+.btn-destructive:hover:not(:disabled) {
+  filter: brightness(0.92);
+}

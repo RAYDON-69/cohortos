@@ -1,0 +1,146 @@
+.data-table-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.data-table-head {
+  display: flex;
+  background: var(--sage-100);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sage-700);
+  padding: 0;
+}
+
+.data-table-th {
+  flex: 1;
+  padding: 9px 16px;
+  min-width: 0;
+}
+.data-table-th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.data-table-th.sortable:hover {
+  color: var(--sage-900);
+}
+.sort-chevron {
+  color: var(--sage-700);
+  font-weight: 700;
+}
+
+.data-table-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  min-height: 44px;
+  transition: background-color var(--motion-fast) var(--easing-out);
+}
+.data-table-row:last-child {
+  border-bottom: none;
+}
+.data-table-row.clickable {
+  cursor: pointer;
+}
+.data-table-row.clickable:hover {
+  background: var(--sage-100);
+}
+
+.data-table-td {
+  flex: 1;
+  padding: 12px 16px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.skeleton-row .skeleton-bar {
+  height: 12px;
+  background: var(--sage-100);
+  border-radius: 4px;
+  width: 70%;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-row .skeleton-bar {
+    animation: none;
+  }
+}
+
+.data-table-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--slate-700);
+}
+.data-table-empty .empty-title {
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.data-table-empty .empty-body {
+  font-size: 12px;
+}
+.data-table-empty .empty-action {
+  margin-top: 16px;
+}
+
+.data-table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--cream-bg);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.data-table-page-size select {
+  margin-left: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  font-family: var(--body);
+  font-size: 13px;
+}
+.data-table-pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mobile: drop non-essential columns §4.3 */
+@media (max-width: 760px) {
+  .data-table-th.optional,
+  .data-table-td.optional {
+    display: none;
+  }
+}
+
+/* Sticky header for long tables (Batch 5 / §4.3) */
+.data-table-scroll {
+  max-height: min(70vh, 720px);
+  overflow: auto;
+}
+.data-table-scroll .data-table-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--sage-100);
+  box-shadow: 0 1px 0 var(--border);
+}

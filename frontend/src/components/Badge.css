@@ -1,0 +1,101 @@
+/* Status badges §4.2 — three vocabularies kept visually distinct */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* Attendance */
+.badge-attendance-present {
+  background: var(--sage-100);
+  color: var(--sage-700);
+}
+.badge-attendance-late {
+  background: var(--gold-bg);
+  color: var(--gold-700);
+}
+.badge-attendance-absent {
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+/* Payment — locked is deliberately darkest */
+.badge-payment-locked {
+  background: var(--sage-900);
+  color: var(--white);
+}
+.badge-payment-unpaid {
+  background: var(--sage-100);
+  color: var(--sage-700);
+}
+.badge-payment-due {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.badge-payment-paid {
+  background: var(--sage-100);
+  color: var(--sage-700);
+}
+
+/* AI grounding */
+.badge-ai-grounded {
+  background: var(--sage-100);
+  color: var(--sage-700);
+}
+.badge-ai-ungrounded {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.badge-ai-confidence-low {
+  background: var(--error-bg);
+  color: var(--error);
+}
+.badge-ai-confidence-medium {
+  background: var(--peri-bg);
+  color: var(--peri-text);
+}
+.badge-ai-confidence-high {
+  background: var(--sage-100);
+  color: var(--sage-700);
+}
+
+/* Source annotation — neutral, never shares attendance/payment colors as primary meaning */
+.badge-source-biometric,
+.badge-source-manual,
+.badge-source-cross-batch,
+.badge-source-manual-override {
+  background: var(--sage-100);
+  color: var(--slate-700);
+  font-weight: 500;
+}
+
+.badge-neutral-neutral,
+.badge-neutral-info {
+  background: var(--peri-bg);
+  color: var(--peri-text);
+}
+
+/* Dots — gold-500 only for late (decorative), never as sole status */
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  flex-shrink: 0;
+}
+.badge-dot-late {
+  background: var(--gold-500);
+}
+.badge-dot-present {
+  background: var(--sage-700);
+}
+.badge-dot-absent {
+  background: var(--error);
+}

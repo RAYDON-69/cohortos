@@ -1,0 +1,20 @@
+/* OfflineBanner — connectivity degradation, never "broken" */
+.offline-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-500);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.offline-banner strong {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold-700);
+}

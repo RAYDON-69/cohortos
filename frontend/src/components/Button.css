@@ -1,0 +1,78 @@
+/* Button — design-system.md §4.1 exact tokens */
+
+.btn {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 11px 22px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px; /* touch target */
+  transition: background-color var(--motion-fast) var(--easing-out),
+    color var(--motion-fast) var(--easing-out),
+    border-color var(--motion-fast) var(--easing-out);
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 13px;
+  min-height: 40px; /* still ≥40px for desk touch */
+}
+
+.btn-primary {
+  background: var(--sage-700);
+  color: var(--white);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--sage-900);
+}
+.btn-primary:active:not(:disabled) {
+  background: var(--sage-900);
+  filter: brightness(0.95);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--sage-700);
+  border: 1px solid var(--sage-700);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--sage-100);
+}
+.btn-outline:active:not(:disabled) {
+  background: var(--sage-200);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--slate-700);
+  text-decoration: underline;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.btn-ghost:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.btn-disabled,
+.btn:disabled {
+  background: var(--sage-100);
+  color: var(--slate-700);
+  cursor: not-allowed;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-loading {
+  cursor: wait;
+  opacity: 0.85;
+}
+.btn-loading-label::after {
+  content: "…";
+  margin-left: 2px;
+}
