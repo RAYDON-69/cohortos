@@ -1,0 +1,146 @@
+/**
+ * CohortOS Design Tokens — exact from design-system.html / design-system.md §2
+ * Do not invent hex values, spacing, radii, or shadows.
+ */
+
+:root {
+  /* Base colors §2.1 */
+  --cream-bg: #FBF9F3;
+  --white: #FFFFFF;
+  --sage-100: #EAF1DF;
+  --sage-200: #DDEACB;
+  --sage-300: #C2D8B9;
+  --sage-500: #93AC7C;
+  --sage-700: #5C7548;
+  --sage-900: #2E3A24;
+  --slate-500: #738290;
+  --slate-700: #546270;
+  --peri-300: #A1B5D8;
+  --peri-bg: #EDF1F9;
+  --peri-text: #4A5D82;
+  --ink: #2B2E28;
+  --border: #DDE4D2;
+  --error: #B3554A;
+  --error-bg: #F7E9E7;
+
+  /* Status / semantic §2.2 */
+  --gold-500: #B98A2E;
+  --gold-700: #8A6620;
+  --gold-bg: #FBF0DA;
+
+  /* Shadow — one value only §2.5 */
+  --shadow: 0 4px 16px rgba(46, 58, 36, 0.08);
+
+  /* Typography §2.3 */
+  --display: "Fraunces", Georgia, serif;
+  --body: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+
+  /* Spacing scale §2.5 — exact: 4, 8, 12, 16, 20, 24, 32, 48, 64 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius §2.5 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-pill: 100px;
+
+  /* Breakpoints (for reference; media queries use raw values) */
+  --bp-mobile: 760px;
+  --bp-tablet: 1080px;
+
+  /* Motion §2.6 */
+  --motion-fast: 120ms;
+  --motion-normal: 150ms;
+  --motion-slow: 200ms;
+  --easing-out: ease-out;
+  --easing-inout: ease-in-out;
+}
+
+/* Focus ring — mandatory on every interactive element §2.4 / §7 */
+:focus-visible {
+  outline: 2px solid var(--peri-300);
+  outline-offset: 2px;
+}
+
+/* Reduced motion §2.6 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Base reset + body */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  background: var(--cream-bg);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Utility type roles */
+.view-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--ink);
+}
+
+.card-title {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.eyebrow {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sage-700);
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--slate-700);
+}
+
+.mono-data {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.muted {
+  color: var(--slate-700);
+}

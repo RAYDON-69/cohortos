@@ -1,0 +1,159 @@
+/* AppShell §3.1 — sidebar 232px, collapses to horizontal strip ≤760px */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--cream-bg);
+}
+
+.app-sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5) var(--space-3);
+}
+
+.app-brand {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 var(--space-2) var(--space-5);
+  color: var(--ink);
+}
+
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.app-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--motion-fast) var(--easing-out);
+  min-height: 40px;
+}
+.app-nav-item:hover:not(:disabled):not(.active) {
+  background: var(--sage-100);
+}
+.app-nav-item.active {
+  background: var(--sage-700);
+  color: var(--white);
+}
+.app-nav-item.disabled {
+  cursor: not-allowed;
+  color: var(--slate-700);
+  opacity: 0.85;
+}
+.app-nav-locked {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--slate-700);
+}
+.app-nav-item.active .app-nav-locked {
+  color: var(--sage-200);
+}
+
+.app-profile {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--white);
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.app-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-content {
+  flex: 1;
+  padding: 28px;
+  max-width: 1080px;
+  width: 100%;
+}
+
+/* ≤760px: sidebar → horizontal scroll strip (not hamburger) §3.1 */
+@media (max-width: 760px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    gap: 4px;
+  }
+
+  .app-brand {
+    display: none; /* profile also hidden on mobile strip */
+  }
+
+  .app-nav {
+    flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+    gap: 4px;
+  }
+
+  .app-nav-item {
+    flex-shrink: 0;
+    width: auto;
+    padding: 8px 12px;
+  }
+
+  .app-nav-locked {
+    display: none;
+  }
+
+  .app-profile {
+    display: none;
+  }
+
+  .app-topbar {
+    padding: 10px 16px;
+  }
+
+  .app-content {
+    padding: 16px;
+  }
+}

@@ -1,0 +1,10 @@
+# CohortOS hard dependencies
+pytest>=7.0,<9
+fastapi>=0.110
+uvicorn>=0.27
+PyJWT>=2.8
+httpx>=0.27
+
+# Optional — enable deferred features
+# google-generativeai>=0.8   # Gemini SDK
+# pyzk>=0.9                  # ZKTeco biometric

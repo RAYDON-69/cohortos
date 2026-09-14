@@ -1,0 +1,30 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--cream-bg);
+}
+
+.login-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+
+.foundation-demo {
+  max-width: 720px;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--sage-100);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
