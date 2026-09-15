@@ -350,3 +350,15 @@ StorageProvider/GoogleDriveStorageProvider **code not modified** (Drive credenti
 **Result: 7 passed / 0 failed.**
 
 Route clarification: failed `link_device_user` now returns error `"student not found"` (was `"link failed"`) for clearer CSV feedback.
+
+
+## CI fix — desktop-release Set up Node (2026-09-15)
+
+**Failure:** `actions/setup-node@v4` with `cache: npm` and `cache-dependency-path: frontend/package-lock.json` →  
+`Error: Some specified paths were not resolved, unable to cache dependencies.`
+
+**Cause:** Repo has `frontend/package.json` only — **no** `package-lock.json` (root or frontend). Cache path did not exist.
+
+**Change (scoped):** Removed `cache:` and `cache-dependency-path` from the single `setup-node` step. Kept explicit `node-version: "20"`.
+
+**Note:** `npm ci` in the next step still requires a lockfile; if Install fails next, generate/commit `frontend/package-lock.json` or switch that step to `npm install` (separate change).
