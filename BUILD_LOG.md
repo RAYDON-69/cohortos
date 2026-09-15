@@ -415,3 +415,16 @@ Root cause: workflow copies `dist/cohortos-api.exe` → `dist/cohortos-api.exe` 
 ### Windows binary again
 - **Error:** Git Bash treats `cohortos-api.exe` and `cohortos-api` as the same path → `cp: ... are the same file`.
 - **Fix:** Stop copying between those names. Verify `dist/cohortos-api.exe` in place (size + PE MZ). Packager picks up `.exe` via extraResources filter.
+
+
+## Desktop release — ALL GREEN (2026-09-15)
+
+Run: https://github.com/RAYDON-69/cohortos/actions/runs/34961460073 (`e41ed18`)
+
+| Job | Conclusion |
+|-----|------------|
+| Package linux | **success** (through Upload installers) |
+| Package win | **success** (through Upload installers) |
+| Package mac | **success** (through Upload installers) |
+
+Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
