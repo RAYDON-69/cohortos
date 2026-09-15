@@ -26,9 +26,7 @@ export function CentreSetupWizardScreen() {
   const navigate = useNavigate();
   const { tenantId } = useTenant();
   const connectivity = useConnectivity();
-  const offline = Boolean(
-    connectivity && ("isOffline" in connectivity ? connectivity.isOffline : connectivity.state === "offline")
-  );
+  const offline = connectivity.isOffline;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

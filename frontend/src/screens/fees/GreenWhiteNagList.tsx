@@ -4,7 +4,7 @@ import { buildDeskNav } from "../../nav/deskNav";
 import { AppShell } from "../../shell/AppShell";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
-import { PaymentBadge } from "../../components/Badge";
+import { Badge, PaymentBadge } from "../../components/Badge";
 import { FormField, SelectInput, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getDelayedCandidates, setNotifyFlag, loadTokens } from "../../api/client"

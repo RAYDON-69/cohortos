@@ -60,15 +60,54 @@ jobs:
 
       - name: Build cohortos-api binary (this OS)
         run: |
+          set -euo pipefail
           pyinstaller cohortos-api.spec --noconfirm --clean
           mkdir -p dist
-          # Normalize output path for electron-builder extraResources
-          if [ -f "dist/cohortos-api/cohortos-api" ]; then
-            cp dist/cohortos-api/cohortos-api dist/cohortos-api
-          elif [ -f "dist/cohortos-api.exe" ]; then
-            cp dist/cohortos-api.exe dist/cohortos-api.exe
+          # Normalize for electron-builder extraResources: ../dist/cohortos-api
+          # Unix onefile → dist/cohortos-api
+          # Windows onefile → dist/cohortos-api.exe (also copy to dist/cohortos-api for extraResources path)
+          # onedir → dist/cohortos-api/cohortos-api
+          if [ -f "dist/cohortos-api.exe" ]; then
+            # Never cp A→A; produce the extensionless path packager expects
+            cp dist/cohortos-api.exe dist/cohortos-api
+            API_BIN="dist/cohortos-api.exe"
+          elif [ -f "dist/cohortos-api" ] && [ ! -d "dist/cohortos-api" ]; then
+            API_BIN="dist/cohortos-api"
+          elif [ -f "dist/cohortos-api/cohortos-api" ]; then
+            cp dist/cohortos-api/cohortos-api /tmp/cohortos-api-bin
+            rm -rf dist/cohortos-api
+            mv /tmp/cohortos-api-bin dist/cohortos-api
+            API_BIN="dist/cohortos-api"
+          else
+            echo "ERROR: PyInstaller output not found under dist/"
+            ls -laR dist/ || true
+            exit 1
           fi
-          ls -la dist/ || true
+          if [ ! -f "$API_BIN" ]; then
+            echo "ERROR: missing binary at $API_BIN"
+            exit 1
+          fi
+          SIZE=$(wc -c < "$API_BIN" | tr -d ' ')
+          echo "API binary ready: $API_BIN ($SIZE bytes)"
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "ERROR: binary too small ($SIZE bytes)"
+            exit 1
+          fi
+          # Windows PE: MZ header check
+          if [ -f "dist/cohortos-api.exe" ]; then
+            HDR=$(od -An -tx1 -N 2 dist/cohortos-api.exe | tr -d ' \n')
+            echo "PE header bytes: $HDR"
+            case "$HDR" in
+              *4d*5a*|*4D*5A*) echo "PE MZ header OK" ;;
+              *) echo "ERROR: dist/cohortos-api.exe is not a PE executable"; exit 1 ;;
+            esac
+            # Packager path must also exist and be non-trivial
+            if [ ! -f "dist/cohortos-api" ]; then
+              echo "ERROR: dist/cohortos-api (extraResources target) missing after copy"
+              exit 1
+            fi
+          fi
+          ls -la dist/
         shell: bash
 
       - name: Set up Node

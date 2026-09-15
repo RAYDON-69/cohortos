@@ -389,3 +389,18 @@ Root cause: workflow copies `dist/cohortos-api.exe` → `dist/cohortos-api.exe` 
 **Change:** In `.github/workflows/desktop-release.yml`, the single matrix step `Install frontend deps` (`working-directory: frontend`) now runs `npm install` instead of `npm ci`. One job template serves linux/win/mac — same path, same step.
 
 **Still open:** Package win fails after successful PyInstaller on post-build `cp` of `dist/cohortos-api.exe` onto itself under `bash -e`.
+
+
+## CI — Windows binary path + TypeScript build (2026-09-15)
+
+### Bug 1 — Package win: Build cohortos-api binary
+- **Symptom:** `cp: 'dist/cohortos-api.exe' and 'dist/cohortos-api.exe' are the same file` exit 1 under bash -e.
+- **Root cause:** Normalize step copied the Windows onefile output onto itself. PyInstaller had already succeeded.
+- **Fix:** Copy `dist/cohortos-api.exe` → `dist/cohortos-api` (path electron-builder `extraResources` expects). Fail if missing/small; PE MZ header check on Windows.
+
+### Bug 2 — Package linux/mac: Build renderer (`tsc -b && vite build`)
+- **Errors:**
+  - `useAuth.ts`: `sendOtp` typed as `typeof requestOtp` but implementation is `(phone, tenantId?) => …`
+  - `GreenWhiteNagList.tsx`: `Badge` used without import
+  - `CentreSetupWizard.tsx`: `connectivity.state` narrowed to `never` via `"isOffline" in connectivity`
+- **Fix:** Correct `sendOtp` type; import `Badge`; use `connectivity.isOffline`.

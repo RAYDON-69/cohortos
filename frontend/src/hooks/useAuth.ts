@@ -87,7 +87,10 @@ export function useAuth() {
   } satisfies AuthState & {
     tenantId: string;
     refresh: () => Promise<void>;
-    sendOtp: typeof requestOtp;
+    sendOtp: (
+      phone: string,
+      tenantId?: string
+    ) => ReturnType<typeof requestOtp>;
     loginWithOtp: (
       phone: string,
       code: string,
