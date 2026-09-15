@@ -404,3 +404,14 @@ Root cause: workflow copies `dist/cohortos-api.exe` → `dist/cohortos-api.exe` 
   - `GreenWhiteNagList.tsx`: `Badge` used without import
   - `CentreSetupWizard.tsx`: `connectivity.state` narrowed to `never` via `"isOffline" in connectivity`
 - **Fix:** Correct `sendOtp` type; import `Badge`; use `connectivity.isOffline`.
+
+
+## CI iteration — electron-builder channel + Windows path (2026-09-15)
+
+### electron-builder linux/mac
+- **Error:** `TypeError: Cannot read properties of null (reading 'channel')` in `updateInfoBuilder.computeChannelNames` when no `repository` in package.json and publish metadata is attempted even with `--publish never`.
+- **Fix:** Set `repository` in `frontend/package.json` and `build.publish: null`. Broaden `extraResources` to `../dist/` with filter `cohortos-api` + `cohortos-api.exe`.
+
+### Windows binary again
+- **Error:** Git Bash treats `cohortos-api.exe` and `cohortos-api` as the same path → `cp: ... are the same file`.
+- **Fix:** Stop copying between those names. Verify `dist/cohortos-api.exe` in place (size + PE MZ). Packager picks up `.exe` via extraResources filter.

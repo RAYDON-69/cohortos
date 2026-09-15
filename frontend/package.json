@@ -58,8 +58,12 @@
     ],
     "extraResources": [
       {
-        "from": "../dist/cohortos-api",
-        "to": "bin/cohortos-api"
+        "from": "../dist/",
+        "to": "bin",
+        "filter": [
+          "cohortos-api",
+          "cohortos-api.exe"
+        ]
       },
       {
         "from": "../api",
@@ -120,6 +124,11 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RAYDON-69/cohortos.git"
   }
 }

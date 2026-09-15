@@ -67,13 +67,14 @@ jobs:
           # Unix onefile → dist/cohortos-api
           # Windows onefile → dist/cohortos-api.exe (also copy to dist/cohortos-api for extraResources path)
           # onedir → dist/cohortos-api/cohortos-api
+          # Git Bash on Windows treats cohortos-api and cohortos-api.exe as the same path —
+          # never cp between those two names. Verify the real onefile output in place.
           if [ -f "dist/cohortos-api.exe" ]; then
-            # Never cp A→A; produce the extensionless path packager expects
-            cp dist/cohortos-api.exe dist/cohortos-api
             API_BIN="dist/cohortos-api.exe"
           elif [ -f "dist/cohortos-api" ] && [ ! -d "dist/cohortos-api" ]; then
             API_BIN="dist/cohortos-api"
           elif [ -f "dist/cohortos-api/cohortos-api" ]; then
+            # onedir layout → flatten to onefile path for extraResources filter
             cp dist/cohortos-api/cohortos-api /tmp/cohortos-api-bin
             rm -rf dist/cohortos-api
             mv /tmp/cohortos-api-bin dist/cohortos-api
@@ -93,19 +94,13 @@ jobs:
             echo "ERROR: binary too small ($SIZE bytes)"
             exit 1
           fi
-          # Windows PE: MZ header check
-          if [ -f "dist/cohortos-api.exe" ]; then
+          if [ "$API_BIN" = "dist/cohortos-api.exe" ]; then
             HDR=$(od -An -tx1 -N 2 dist/cohortos-api.exe | tr -d ' \n')
             echo "PE header bytes: $HDR"
             case "$HDR" in
               *4d*5a*|*4D*5A*) echo "PE MZ header OK" ;;
               *) echo "ERROR: dist/cohortos-api.exe is not a PE executable"; exit 1 ;;
             esac
-            # Packager path must also exist and be non-trivial
-            if [ ! -f "dist/cohortos-api" ]; then
-              echo "ERROR: dist/cohortos-api (extraResources target) missing after copy"
-              exit 1
-            fi
           fi
           ls -la dist/
         shell: bash
