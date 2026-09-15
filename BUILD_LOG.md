@@ -428,3 +428,22 @@ Run: https://github.com/RAYDON-69/cohortos/actions/runs/34961460073 (`e41ed18`)
 | Package mac | **success** (through Upload installers) |
 
 Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
+
+
+## Artifact validation — cohortos-linux (2026-09-15)
+
+**Source:** Actions run 34961460073 artifact `cohortos-linux` (277 MB zip).
+
+**Contents:**
+- `CohortOS-0.11.0.AppImage` (ELF, ~139 MB) — extracts cleanly via `--appimage-extract`
+- `linux-unpacked/` — Electron binary + `resources/bin/cohortos-api` (ELF, ~31 MB) + backend python + `app.asar`
+- `builder-debug.yml`
+
+**Sandbox checks:**
+- Zip extract: OK
+- AppImage `--appimage-help` / `--appimage-extract`: OK
+- Direct AppImage run: fails here with `dlopen(): error loading libfuse.so.2` (no libfuse2 in this environment; no DISPLAY)
+- `resources/bin/cohortos-api` present and is ELF; `ldd` shows no missing system libs for the API binary
+- Unpacked Electron needs its adjacent `.so` files (`libffmpeg.so` etc.) on `LD_LIBRARY_PATH` when run outside the full tree
+
+**Human launch (Linux Mint 22.x XFCE):** install `libfuse2` if AppImage won't start, `chmod +x`, run from a graphical session.
