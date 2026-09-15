@@ -380,3 +380,12 @@ cp: 'dist/cohortos-api.exe' and 'dist/cohortos-api.exe' are the same file
 ```
 
 Root cause: workflow copies `dist/cohortos-api.exe` → `dist/cohortos-api.exe` (same path) under `bash -e`, which fails on Windows. Not a PyInstaller compile failure. Fix deferred pending founder review of this log.
+
+
+## CI — npm ci → npm install (2026-09-15)
+
+**Abandoned:** generating `frontend/package-lock.json` in the agent sandbox (npm hung / timed out; partial lock was out of sync with `package.json` and still failed `npm ci` on runners).
+
+**Change:** In `.github/workflows/desktop-release.yml`, the single matrix step `Install frontend deps` (`working-directory: frontend`) now runs `npm install` instead of `npm ci`. One job template serves linux/win/mac — same path, same step.
+
+**Still open:** Package win fails after successful PyInstaller on post-build `cp` of `dist/cohortos-api.exe` onto itself under `bash -e`.
