@@ -1,0 +1,123 @@
+# CohortOS desk installers — Windows (nsis + portable), Mac (dmg), Linux (AppImage)
+# Runs on GitHub-hosted runners (enough RAM for electron-builder + PyInstaller).
+# Do NOT run electron-builder in the 1.2GiB agent sandbox — it will OOM / hang.
+#
+# Trigger: push tag v* or manual workflow_dispatch.
+# Artifacts: release-desktop/* uploaded per OS job.
+
+name: Desktop release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Comma list: linux,win,mac (default all)"
+        required: false
+        default: "linux,win,mac"
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Per-OS matrix: API binary must match the installer OS (prd §25) ──
+  package:
+    name: Package ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-22.04
+            api_out: cohortos-api
+            eb_args: --linux AppImage
+          - os: win
+            runner: windows-2022
+            api_out: cohortos-api.exe
+            eb_args: --win nsis portable
+          - os: mac
+            runner: macos-14
+            api_out: cohortos-api
+            eb_args: --mac dmg
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps + PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+        working-directory: .
+
+      - name: Build cohortos-api binary (this OS)
+        run: |
+          pyinstaller cohortos-api.spec --noconfirm --clean
+          mkdir -p dist
+          # Normalize output path for electron-builder extraResources
+          if [ -f "dist/cohortos-api/cohortos-api" ]; then
+            cp dist/cohortos-api/cohortos-api dist/cohortos-api
+          elif [ -f "dist/cohortos-api.exe" ]; then
+            cp dist/cohortos-api.exe dist/cohortos-api.exe
+          fi
+          ls -la dist/ || true
+        shell: bash
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build renderer
+        working-directory: frontend
+        run: npm run build
+
+      - name: electron-builder ${{ matrix.os }}
+        working-directory: frontend
+        env:
+          # Optional: set GH secrets for signing when ready
+          # CSC_LINK / CSC_KEY_PASSWORD (Windows)
+          # APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID (Mac notarization)
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder ${{ matrix.eb_args }} --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: cohortos-${{ matrix.os }}
+          path: |
+            frontend/release-desktop/*
+          if-no-files-found: warn
+
+  # Optional: attach artifacts to the GitHub Release when triggered by a tag
+  release:
+    name: Attach to GitHub Release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: installers
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installers/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
