@@ -362,3 +362,21 @@ Route clarification: failed `link_device_user` now returns error `"student not f
 **Change (scoped):** Removed `cache:` and `cache-dependency-path` from the single `setup-node` step. Kept explicit `node-version: "20"`.
 
 **Note:** `npm ci` in the next step still requires a lockfile; if Install fails next, generate/commit `frontend/package-lock.json` or switch that step to `npm install` (separate change).
+
+
+## CI — package-lock + Windows binary log (2026-09-15)
+
+### Fixed
+- Generated and committed `frontend/package-lock.json` so `npm ci` works in Desktop release.
+- Lockfile not in `.gitignore`.
+
+### Still open — Package win
+PyInstaller **completed successfully** (`Building EXE from EXE-00.toc completed successfully`, results in `D:\a\cohortos\cohortos\dist`).
+Step failed after that on bash normalize:
+
+```
+cp: 'dist/cohortos-api.exe' and 'dist/cohortos-api.exe' are the same file
+##[error]Process completed with exit code 1.
+```
+
+Root cause: workflow copies `dist/cohortos-api.exe` → `dist/cohortos-api.exe` (same path) under `bash -e`, which fails on Windows. Not a PyInstaller compile failure. Fix deferred pending founder review of this log.
