@@ -198,7 +198,7 @@ export function BiometricDevicesScreen() {
         ) : devices.length === 0 ? (
           <EmptyState
             title="No devices yet"
-            description="Add your device IP and port below. If you do not have a device, use the manual attendance grid."
+            body="Add your device IP and port below. If you do not have a device, use the manual attendance grid."
           />
         ) : (
           <div className="stack-gap">

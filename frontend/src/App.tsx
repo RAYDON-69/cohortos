@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {
   startConnectivityPoll,

@@ -307,12 +307,12 @@ export function VaultManagementScreen() {
                 Protection relaxed
               </div>
             )}
-            <h3 className="card-title">{selected.title}</h3>
+            <h3 className="card-title">{String(selected.title ?? "")}</h3>
             <p className="caption">
-              {selected.resource_type} · {selected.topic || "—"} · level{" "}
-              {selected.protection_level}
+              {String(selected.resource_type ?? "")} · {String(selected.topic || "—")} · level{" "}
+              {String(selected.protection_level ?? "")}
             </p>
-            {(selected.file_path || selected.url) && (
+            {(Boolean(selected.file_path) || Boolean((selected as { url?: string }).url)) && (
               <p style={{ marginTop: 12 }}>
                 <Button variant="primary" size="sm" onClick={() => void onOpenResource(selected.id)}>
                   Open / view file

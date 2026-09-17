@@ -920,7 +920,7 @@ export async function uploadVaultResource(
 }
 
 export function vaultContentUrl(tenantId: string, resourceId: string) {
-  return `${getApiBase()}${tenantPath(tenantId, `/vault/${resourceId}/content`)}`;
+  return `${getApiBaseUrl()}${tenantPath(tenantId, `/vault/${resourceId}/content`)}`;
 }
 
 export async function createVaultResource(
