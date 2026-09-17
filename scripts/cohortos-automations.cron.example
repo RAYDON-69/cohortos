@@ -1,0 +1,3 @@
+# CohortOS scheduled automations — install with: crontab -e
+# Every 30 minutes, hit local API for each tenant listed in COHORTOS_AUTO_TENANTS
+*/30 * * * * cd /path/to/cohortos && . ./env && for t in $(echo $COHORTOS_AUTO_TENANTS | tr ',' ' '); do curl -sS -X POST -H "Authorization: Bearer $COHORTOS_CRON_TOKEN" "http://127.0.0.1:8741/t/$t/automations/run-fee-reminders" >> data/automation-cron.log 2>&1; done

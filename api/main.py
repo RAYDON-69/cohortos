@@ -1220,30 +1220,66 @@ def create_api_app(
         batches = cm.batch.list_batches() if hasattr(cm, "batch") else []
         exams = cm.exam.list_exams() if hasattr(cm, "exam") else []
         q = str(body.get("question") or "").lower()
+        tool_trace = []
+        # Tool: list_students
+        def tool_list_students():
+            rows = students or []
+            tool_trace.append({"tool": "list_students", "count": len(rows)})
+            return rows
+        # Tool: list_batches
+        def tool_list_batches():
+            rows = batches or []
+            tool_trace.append({"tool": "list_batches", "count": len(rows)})
+            return rows
+        # Tool: list_exams
+        def tool_list_exams():
+            rows = exams or []
+            tool_trace.append({"tool": "list_exams", "count": len(rows)})
+            return rows
+        # Tool: struggle_students (analytics when batch known)
+        def tool_struggle(batch_id: str = ""):
+            out = []
+            if batch_id and hasattr(cm.exam, "students_likely_to_struggle"):
+                out = cm.exam.students_likely_to_struggle(batch_id=batch_id) or []
+            tool_trace.append({"tool": "struggle_students", "batch_id": batch_id, "count": len(out)})
+            return out
+
+        st = tool_list_students()
+        bt = tool_list_batches()
+        ex = tool_list_exams()
         grounded = {
-            "student_count": len(students or []),
-            "batch_count": len(batches or []),
-            "exam_count": len(exams or []),
-            "student_names": [s.get("name") for s in (students or [])[:20]],
+            "student_count": len(st),
+            "batch_count": len(bt),
+            "exam_count": len(ex),
+            "student_names": [s.get("name") for s in st[:20]],
         }
-        # Local grounded response always (works offline); external LLM only if key set
         answer = (
             f"Centre snapshot: {grounded['student_count']} students, "
             f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "
         )
         if "struggle" in q or "weak" in q:
-            answer += "Open Analytics → struggle list for exam-based risk flags."
+            bid = ""
+            if bt:
+                bid = str(bt[0].get("id") or "")
+            struggle = tool_struggle(bid)
+            if struggle:
+                names = [str(s.get("name") or s.get("student_id")) for s in struggle[:8]]
+                answer += "Students flagged by analytics: " + ", ".join(names) + "."
+            else:
+                answer += "No struggle flags yet (need exam results). Open Analytics when data exists."
         elif "batch" in q:
-            answer += "Batches: " + ", ".join(
-                str(b.get("name") or b.get("id")) for b in (batches or [])[:10]
-            )
+            answer += "Batches: " + ", ".join(str(b.get("name") or b.get("id")) for b in bt[:10])
+        elif "student" in q or "how many" in q:
+            answer += f"Student roster size is {len(st)}."
         else:
             answer += "Ask about batches, student counts, or struggling students for grounded answers."
         return {
             "answer": answer,
             "grounded": grounded,
+            "tools_used": tool_trace,
             "provider_configured": bool(keys.get("api_key")),
-            "used_external_llm": False,  # pilot: data-grounded local answer; external call when key + network
+            "used_external_llm": False,
+            "needs_for_external_llm": "Set centre AI key via Settings → AI API keys (OpenAI/Anthropic).",
         }
 
     @app.post("/t/{tenant_id}/automations/run-fee-reminders")
@@ -2396,6 +2432,19 @@ def create_api_app(
                     "Billing is past the grace window. Desk is read-only."
                 )
             grace_ends_at = cm.config.get("billing.grace_ends_at") if hasattr(cm, "config") else None
+            # Offline seal file (survives offline own-Drive installs)
+            try:
+                data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
+                seal_path = data_dir / f"license_seal_{tenant_id}.json"
+                if seal_path.exists():
+                    import json as _json
+                    seal = _json.loads(seal_path.read_text(encoding="utf-8"))
+                    if seal.get("locked"):
+                        locked = True
+                        status = "lockout"
+                        reason = seal.get("reason") or reason or "Access disabled by founder"
+            except Exception:
+                pass
         except Exception:
             pass
         return {
@@ -2406,6 +2455,43 @@ def create_api_app(
         }
 
 
+
+    # ── Centre setup wizard
+
+    @app.post("/founder/tenants/{tenant_id}/license")
+    def founder_set_license(
+        tenant_id: str,
+        body: Dict[str, Any] = Body(...),
+        x_founder_token: Optional[str] = Header(None, alias="X-Founder-Token"),
+    ):
+        """Enable/disable centre access. Persists lockout flag into tenant config + offline seal file."""
+        if not x_founder_token:
+            raise HTTPException(status_code=403, detail="Missing X-Founder-Token")
+        # Validate founder token via dashboard call (raises if invalid)
+        try:
+            registry.founder.dashboard(founder_token=x_founder_token)
+        except Exception as e:
+            raise HTTPException(status_code=403, detail=f"Invalid founder token: {e}")
+        locked = bool(body.get("locked"))
+        reason = str(body.get("reason") or ("Access disabled by founder" if locked else ""))
+        cm = registry.get_app(tenant_id)
+        cm.config.set("billing.lockout", "lockout" if locked else "0")
+        cm.config.set("billing.lockout_reason", reason if locked else "")
+        # Offline seal: written next to tenant data so fully offline clients still see lock on launch
+        seal = {
+            "tenant_id": tenant_id,
+            "locked": locked,
+            "reason": reason if locked else None,
+            "updated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        }
+        try:
+            data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
+            data_dir.mkdir(parents=True, exist_ok=True)
+            seal_path = data_dir / f"license_seal_{tenant_id}.json"
+            seal_path.write_text(__import__("json").dumps(seal), encoding="utf-8")
+        except Exception:
+            pass
+        return {"ok": True, "tenant_id": tenant_id, "locked": locked, "reason": reason if locked else None}
 
     # ── Centre setup wizard (Batch 4 / Addendum §1.C) ──────────────────
 

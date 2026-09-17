@@ -75,3 +75,13 @@ Frontend still depends on storing `refresh_token` (localStorage / safeStorage) a
 - Vault: attach file instead of typing a path; use Open/view.
 - Settings → AI API keys for BYO key.
 - Biometric steps are plain language; still may not auto-sync without device library on host.
+
+
+## Phase 3 (2026-09-17)
+
+### Engineer
+- E2E API harness green (8 tests). License offline seal works.
+- npm/vite still unreliable in agent sandbox → GUI screenshot of production React bundle not obtained.
+
+### First-time user
+- Login visual direction captured in evidence/login.png (static). Founder should still open real desk for GlobalSearch and vault file picker feel.

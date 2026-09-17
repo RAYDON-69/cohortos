@@ -1,0 +1,5 @@
+UI not reachable on :5173 — npm/vite harness incomplete in this environment.
+Page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5173/login
+Call log:
+  - navigating to "http://127.0.0.1:5173/login", waiting until "load"
+

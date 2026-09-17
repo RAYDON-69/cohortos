@@ -72,11 +72,34 @@ export function PricingScreen() {
 
   return (
     <AppShell brand={t("appName")} navItems={nav} crumb="Founder · Pricing">
-      <h2 className="view-title">Pricing & tiers</h2>
+      <h2 className="view-title">Pricing & offers</h2>
+      <p className="caption muted" style={{ marginBottom: 12 }}>
+        Publish clear monthly/annual packages for coaching centres. Quotes use the live pricing engine.
+      </p>
       <p className="caption muted" style={{ marginBottom: 16 }}>
         Tier limits and base prices from the pricing engine. Quotes support monthly and annual
         cycles.
       </p>
+
+      <section style={{ marginBottom: 24 }}>
+        <div className="eyebrow">Current offers</div>
+        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
+          <Card>
+            <h3 className="card-title">Trial</h3>
+            <p className="caption">14-day free desk access for a new centre.</p>
+            <p className="mono-data">৳0</p>
+          </Card>
+          <Card>
+            <h3 className="card-title">Standard</h3>
+            <p className="caption">Full attendance, fees, exams, vault.</p>
+            <p className="mono-data">See tiers below</p>
+          </Card>
+          <Card>
+            <h3 className="card-title">Annual</h3>
+            <p className="caption">Pay yearly — quote shows cycle discount when configured.</p>
+          </Card>
+        </div>
+      </section>
 
       {error && (
         <div className="warning-banner" role="alert">

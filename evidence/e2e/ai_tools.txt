@@ -1,0 +1,26 @@
+{
+  "answer": "Centre snapshot: 0 students, 0 batches, 0 exams. Student roster size is 0.",
+  "grounded": {
+    "student_count": 0,
+    "batch_count": 0,
+    "exam_count": 0,
+    "student_names": []
+  },
+  "tools_used": [
+    {
+      "tool": "list_students",
+      "count": 0
+    },
+    {
+      "tool": "list_batches",
+      "count": 0
+    },
+    {
+      "tool": "list_exams",
+      "count": 0
+    }
+  ],
+  "provider_configured": false,
+  "used_external_llm": false,
+  "needs_for_external_llm": "Set centre AI key via Settings \u2192 AI API keys (OpenAI/Anthropic)."
+}

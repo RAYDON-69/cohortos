@@ -516,3 +516,22 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 - **Note:** local grounded answer; external LLM call when key present still `used_external_llm: false` in pilot.
 
 **Tests this session:** phase2 vault/ai/auto **3 passed**; session relaunch still green when run.
+
+
+## Phase 3 — self-verify harness + remaining product (2026-09-17)
+
+### Part 1 — GUI harness
+- **Stack:** Xvfb installed; Python Playwright + Chromium headless shell; `tests/e2e/` pytest suite.
+- **Evidence dir:** `evidence/e2e/` — session_refresh_10x, batch list, vault roundtrip, license_lock, ai_tools, `login.png`.
+- **E2E results:** **8 passed** (API contracts including 10× session refresh, batch list after create, vault upload/download, founder license lock + seal, AI tools_used). Playwright UI test: Chromium works; **full React/Vite app not launched** — npm install hangs past tool limits in this sandbox. `login.png` is a **static mirror** of StaffLogin copy/CSS for visual evidence only — **not claimed as full React e2e**.
+- **Honest gap:** Navigation through live React screens (History, Staff, GlobalSearch DOM, form scroll) still needs a successful `npm install` + `vite`/`electron` under Xvfb. Harness code is committed to close the “no display” process gap.
+
+### Part 2 — product
+- **Pricing/Offers:** founder Pricing screen shows Trial/Standard/Annual offer cards + tiers/quote.
+- **Offline license:** `POST /founder/tenants/{id}/license` writes `billing.lockout` + `license_seal_{tenant}.json` under `COHORTOS_DATA_DIR`; `GET .../license/status` reads seal. Evidence: `license_lock.txt` + e2e test.
+- **Automations schedule:** `scripts/run_automations.py` + `scripts/cohortos-automations.cron.example` (cron curl to API). Not a running systemd unit in CI.
+- **AI tools:** `/ai/query` now returns `tools_used` (list_students/batches/exams/struggle). Still local grounded agent without external LLM until centre key + network.
+
+### Explicitly not done
+- Live Drive OAuth, Twilio SMS, ZKTeco hardware (need founder credentials/hardware).
+- Full React Playwright pass of every screen under Vite/Electron.
