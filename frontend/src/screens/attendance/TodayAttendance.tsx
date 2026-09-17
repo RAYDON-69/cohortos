@@ -182,7 +182,7 @@ export function TodayAttendanceScreen() {
               void mark(r.student_id, "present");
             }}
           >
-            P
+            Present
           </Button>
           <Button
             size="sm"
@@ -193,7 +193,7 @@ export function TodayAttendanceScreen() {
               void mark(r.student_id, "late");
             }}
           >
-            L
+            Late
           </Button>
           <Button
             size="sm"
@@ -204,7 +204,7 @@ export function TodayAttendanceScreen() {
               void mark(r.student_id, "absent");
             }}
           >
-            A
+            Absent
           </Button>
         </div>
       ),

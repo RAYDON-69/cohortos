@@ -78,6 +78,22 @@ export function AdmissionsListScreen() {
     load();
   }, [load]);
 
+  // Refetch batches when user returns to this tab or another screen created a batch
+  useEffect(() => {
+    const onFocus = () => {
+      void load();
+    };
+    const onBatches = () => {
+      void load();
+    };
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("cohortos:batches-changed", onBatches as EventListener);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("cohortos:batches-changed", onBatches as EventListener);
+    };
+  }, [load]);
+
   useEffect(() => {
     if (!batchId) return;
     previewRoll(tenantId, batchId)

@@ -22,6 +22,8 @@ import { ConflictLogScreen } from "./screens/settings/ConflictLog";
 import { BackupExportScreen } from "./screens/settings/BackupExport";
 import { BiometricDevicesScreen } from "./screens/settings/BiometricDevices";
 import { StorageProviderScreen } from "./screens/settings/StorageProvider";
+import { SettingsHubScreen } from "./screens/settings/SettingsHub";
+import { SupportLegalScreen } from "./screens/support/SupportLegal";
 import { ReviewQueueScreen } from "./screens/teacher/ReviewQueue";
 import { FlaggedThreadsScreen } from "./screens/teacher/FlaggedThreads";
 import { StyleProfileScreen } from "./screens/teacher/StyleProfile";
@@ -58,6 +60,7 @@ export default function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <Routes>
       <Route path="/login" element={<StaffLogin />} />
       <Route path="/setup" element={<RequireAuth><CentreSetupWizardScreen /></RequireAuth>} />
@@ -76,6 +79,8 @@ export default function App() {
       <Route path="/settings/conflicts" element={<RequireAuth><ConflictLogScreen /></RequireAuth>} />
       <Route path="/settings/backup" element={<RequireAuth><BackupExportScreen /></RequireAuth>} />
       <Route path="/settings/biometric" element={<RequireAuth><BiometricDevicesScreen /></RequireAuth>} />
+      <Route path="/settings" element={<RequireAuth><SettingsHubScreen /></RequireAuth>} />
+      <Route path="/support" element={<RequireAuth><SupportLegalScreen /></RequireAuth>} />
       <Route path="/settings/storage" element={<RequireAuth><StorageProviderScreen /></RequireAuth>} />
       <Route path="/teacher/review" element={<RequireAuth><ReviewQueueScreen /></RequireAuth>} />
       <Route path="/teacher/threads" element={<RequireAuth><FlaggedThreadsScreen /></RequireAuth>} />
@@ -96,5 +101,6 @@ export default function App() {
       <Route path="/" element={<Navigate to="/attendance" replace />} />
       <Route path="*" element={<Navigate to="/attendance" replace />} />
     </Routes>
+    </ErrorBoundary>
   );
 }

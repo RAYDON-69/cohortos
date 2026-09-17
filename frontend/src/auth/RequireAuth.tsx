@@ -18,7 +18,12 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const ok = await ensureSession();
+        let ok = await ensureSession();
+        if (!ok && !cancelled) {
+          // One more chance after API process settles (desk double-click race).
+          await new Promise((r) => setTimeout(r, 500));
+          ok = await ensureSession();
+        }
         if (!cancelled) {
           setAuthed(!!ok);
           setReady(true);

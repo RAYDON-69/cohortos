@@ -26,6 +26,26 @@ function readOrCreateSecret(file, bytes = 32) {
   return v;
 }
 
+
+function waitForApi(url, attempts = 40, delayMs = 250) {
+  return new Promise((resolve) => {
+    let n = 0;
+    const tick = () => {
+      n += 1;
+      const http = require("http");
+      const req = http.get(url, (res) => {
+        res.resume();
+        resolve(true);
+      });
+      req.on("error", () => {
+        if (n >= attempts) resolve(false);
+        else setTimeout(tick, delayMs);
+      });
+    };
+    tick();
+  });
+}
+
 function findApiBinary() {
   const names = process.platform === "win32" ? ["cohortos-api.exe", "cohortos-api"] : ["cohortos-api"];
   const dirs = [
@@ -82,7 +102,9 @@ function startLocalApi() {
   apiProc.on("exit", (code) => console.log("[CohortOS] API exited", code));
 }
 
-function createWindow() {
+async function createWindow() {
+  const ready = await waitForApi("http://127.0.0.1:8741/docs");
+  if (!ready) console.warn("[CohortOS] API did not become ready in time");
   const win = new BrowserWindow({
     width: 1280,
     height: 840,

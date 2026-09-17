@@ -447,3 +447,33 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 - Unpacked Electron needs its adjacent `.so` files (`libffmpeg.so` etc.) on `LD_LIBRARY_PATH` when run outside the full tree
 
 **Human launch (Linux Mint 22.x XFCE):** install `libfuse2` if AppImage won't start, `chmod +x`, run from a graphical session.
+
+
+## QA stress re-verification (2026-09-17)
+
+**Rule:** Prior completion claims discarded. Evidence from live API + code fixes only.
+
+### 1. Auth/session
+- **Repro (backend):** login → refresh 10× with rotated refresh tokens → all OK.
+- **Root cause (desk):** UI could call `ensureSession` before local API listened; `clearTokens` on any non-OK refresh; access token never disk-persisted (by design) so failed refresh ⇒ OTP.
+- **Fix:** `ensureSession` retries while refresh token still stored; clear tokens only on 401/403; Electron `waitForApi` before window load; RequireAuth secondary retry.
+- **Stress:** backend 10/10 refresh; Electron wait not GUI-tested in sandbox (no display).
+
+### 2. Blank dead-end screens
+- **Root cause:** no React error boundary; layout clip without scroll.
+- **Fix:** `ErrorBoundary` recovery UI with back link; `.app-main`/`.app-content` scroll.
+- **Stress:** boundary unit path is recovery UI; full click-path needs founder device retest.
+
+### 3. Internal Server Errors (exams/storage/analytics)
+- **Repro live:** exams + storage 200 empty; heatmap/struggle routes exist (404 only on wrong probe paths).
+- **Note:** intermittent 500s in pilot may be tenant/data or old build — retest on artifact from green CI after this push.
+
+### 4. Batches/Admissions
+- **Root cause:** Admissions batches loaded once; create on BatchSettings did not invalidate.
+- **Fix:** `cohortos:batches-changed` event + window focus refetch; AppShell scroll for clipped empty forms.
+
+### 5–14. Design, AI, automation, vault, biometric, SMS, monetization, support, settings, copy
+- **Settings hub + Support/legal** added (items 12–13 partial).
+- **Copy:** Present/Absent/Late; Fee reminders nav label.
+- **Remaining:** documented in `QA_AUDIT.md` as open product gaps — not falsely marked done.
+

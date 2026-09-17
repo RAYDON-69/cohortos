@@ -172,7 +172,10 @@ async function refreshAccessToken(): Promise<AuthTokens | null> {
       body: body ? JSON.stringify(body) : JSON.stringify({}),
     });
     if (!res.ok) {
-      clearTokens();
+      // Only end session on definitive auth rejection — not 5xx / 429.
+      if (res.status === 401 || res.status === 403) {
+        clearTokens();
+      }
       return null;
     }
     const data = (await res.json()) as AuthTokens;
@@ -1998,6 +2001,25 @@ export async function setupFirstBatch(
 /** Attempt silent refresh; returns true if we have a usable access token. */
 export async function ensureSession(): Promise<boolean> {
   if (memoryAccessToken) return true;
-  const tokens = await refreshAccessToken();
-  return !!(tokens && tokens.access_token);
+  // API may still be booting after app relaunch — retry before forcing OTP.
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const tokens = await refreshAccessToken();
+    if (tokens && tokens.access_token) return true;
+    // refreshAccessToken clears only on explicit auth failure (401/403), not network.
+    // If we still have a stored refresh token, keep trying.
+    let hasRt = false;
+    if (typeof localStorage !== "undefined") {
+      hasRt = !!localStorage.getItem(STORAGE_KEYS.refresh);
+    }
+    if (!hasRt && isElectron()) {
+      try {
+        hasRt = !!(await electronLoadRefresh());
+      } catch {
+        hasRt = false;
+      }
+    }
+    if (!hasRt) return false;
+    await new Promise((r) => setTimeout(r, 300 + attempt * 200));
+  }
+  return false;
 }

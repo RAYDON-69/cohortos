@@ -163,6 +163,12 @@ export function BatchSettingsScreen() {
       setCreateMsg(`Created “${newBatchName.trim()}”`);
       setNewBatchName("");
       await load();
+      // Notify other screens (Admissions dropdown) to refetch immediately
+      try {
+        window.dispatchEvent(new CustomEvent("cohortos:batches-changed"));
+      } catch {
+        /* ignore */
+      }
     } catch (e) {
       const err = e as ApiError;
       setError(err.detail || t("genericError"));
