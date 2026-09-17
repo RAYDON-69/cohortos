@@ -596,3 +596,29 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 ### Still blocked on founder
 - Google Drive OAuth, Twilio SMS, ZKTeco hardware
 - Confirm Groq/NIM completions on his network; enable a NIM chat model if 404
+
+
+## Fix: BiometricDevices.tsx TS/JSX syntax (blocking Package linux) — 2026-09-17
+
+### Root cause
+Plain-language rewrite introduced **invalid JavaScript identifiers** containing spaces:
+- `const [device library, setPyzk] = useState(...)` 
+- `setPyzk(Boolean(res.device library_available))`
+- `!device library && (...)`
+- truncated/broken JSX banner text
+
+That produced TS1005/TS1128/TS1381/TS1382/TS17002 across the file and failed `npm run build` on every matrix OS.
+
+### Fix
+Rewrote `frontend/src/screens/settings/BiometricDevices.tsx`:
+- Valid state: `libraryAvailable` / `setLibraryAvailable`
+- Reads `device_library_available` or legacy `pyzk_available` from API
+- Plain-language numbered steps; banner without "install pyzk"
+- All JSX tags closed
+
+### Verification
+- `typescript.transpileModule` diagnostics: **0** (SYNTAX_OK)
+- CI: added `.github/workflows/frontend-ci.yml` — `npm run build` on every push/PR that touches `frontend/`
+
+### Desktop release
+Push this commit and re-run **Desktop release** workflow so Package linux/win/mac pass Build renderer. Packaging success is confirmed on GitHub Actions (not this sandbox).

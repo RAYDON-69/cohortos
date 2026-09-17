@@ -1,7 +1,7 @@
 /**
  * Biometric device settings — PRD §16 / SPEC §2.
  * Add device (IP/port/label), test, pull, map device_user_id, disable → manual fallback.
- * If device library missing: show "Automatic device sync is not available on this computer yet — you can still map student IDs manually" and force manual (no crash).
+ * If device library missing: plain-language banner and force manual (no crash, no "install pyzk").
  */
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +40,7 @@ export function BiometricDevicesScreen() {
   const navigate = useNavigate();
   const { tenantId } = useTenant();
   const [devices, setDevices] = useState<BiometricDeviceRow[]>([]);
-  const [device library, setPyzk] = useState(true);
+  const [libraryAvailable, setLibraryAvailable] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -62,7 +62,13 @@ export function BiometricDevicesScreen() {
     try {
       const res = await getBiometricStatus(tenantId);
       setDevices(res.devices || []);
-      setPyzk(Boolean(res.device library_available));
+      // Backend may still call the field pyzk_available; accept both names.
+      const avail =
+        (res as { device_library_available?: boolean; pyzk_available?: boolean })
+          .device_library_available ??
+        (res as { pyzk_available?: boolean }).pyzk_available ??
+        true;
+      setLibraryAvailable(Boolean(avail));
     } catch (e) {
       setError((e as ApiError)?.detail || (e as Error)?.message || "Failed to load devices");
     } finally {
@@ -116,8 +122,10 @@ export function BiometricDevicesScreen() {
 
   async function onPull(id: string) {
     if (!tenantId) return;
-    if (!device library) {
-      setMsg("Automatic device sync is not available on this computer yet — you can still map student IDs manually — use manual entry");
+    if (!libraryAvailable) {
+      setMsg(
+        "Automatic device sync is not available on this computer yet — you can still map student IDs manually"
+      );
       return;
     }
     try {
@@ -158,64 +166,56 @@ export function BiometricDevicesScreen() {
       <div className="view" data-testid="biometric-devices">
         <h1 className="view-title">Biometric devices</h1>
         <p className="caption muted">
-          ZKTeco (or compatible) static IP devices. Biometric is authoritative; manual fills gaps.
+          Connect a fingerprint / face device on your network (static IP). Device marks are preferred;
+          the manual grid fills gaps when the device is offline.
         </p>
 
-        {!device library && (
-          <div className="warning-banner" role="status" data-testid="device library-missing">
-            Automatic device sync is not available on this computer yet — you can still map student IDs manually. Install device library on the desk machine, or use manual
-            attendance entry only.
-          </div>
-        )}
-
-        {loading && (
-          <div className="skeleton-block" role="status">
-            Loading devices…
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="warning-banner" role="alert">
-            {error}
-            <Button variant="ghost" size="sm" onClick={() => void load()}>
-              Retry
-            </Button>
+        {!libraryAvailable && (
+          <div className="warning-banner" role="status" data-testid="device-library-missing">
+            <p>
+              <strong>Automatic device sync is not available on this computer yet.</strong>
+            </p>
+            <p>
+              You can still map each student to a device user id below, and mark attendance manually.
+              When this desk machine has the device driver installed, pull and test will work here.
+            </p>
           </div>
         )}
 
         {msg && (
-          <p className="caption" role="status">
+          <p className="caption" role="status" data-testid="bio-msg">
             {msg}
           </p>
         )}
-
-        {!loading && !error && devices.length === 0 && (
-          <EmptyState
-            title="No devices — add IP"
-            body="Enter a static IP and label for your ZKTeco device. If the library is missing, attendance stays on the manual grid."
-          />
+        {error && (
+          <p className="error-text" role="alert">
+            {error}
+          </p>
         )}
 
-        {!loading && devices.length > 0 && (
-          <div className="card-stack">
+        {loading ? (
+          <p className="caption muted">Loading devices…</p>
+        ) : devices.length === 0 ? (
+          <EmptyState
+            title="No devices yet"
+            description="Add your device IP and port below. If you do not have a device, use the manual attendance grid."
+          />
+        ) : (
+          <div className="stack-gap">
             {devices.map((d) => (
-              <Card
-                key={d.id}
-                title={d.name || "Device"}
-                eyebrow={
-                  d.is_active === false
-                    ? `${d.ip_address}:${d.port} · disabled`
-                    : `${d.ip_address}:${d.port}`
-                }
-              >
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Card key={d.id} title={d.name || d.id}>
+                <p className="caption muted">
+                  {d.ip_address}:{d.port}
+                  {d.is_active === false ? " · disabled" : ""}
+                </p>
+                <div className="row-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <Button size="sm" variant="outline" onClick={() => void onTest(d.id)}>
                     Test connection
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={!device library || d.is_active === false}
+                    disabled={!libraryAvailable || d.is_active === false}
                     onClick={() => void onPull(d.id)}
                   >
                     Pull now
@@ -230,6 +230,12 @@ export function BiometricDevicesScreen() {
         )}
 
         <Card title="Add device" style={{ marginTop: 24 }}>
+          <ol className="caption muted" style={{ paddingLeft: 18, marginBottom: 12 }}>
+            <li>Write a short label (e.g. Front door).</li>
+            <li>Enter the device static IP and port (default 4370).</li>
+            <li>Add device, then Test connection.</li>
+            <li>Map each student to their device user id (or import a CSV).</li>
+          </ol>
           <FormField id="bio-name" label="Label" required>
             <TextInput id="bio-name" value={name} onChange={(e) => setName(e.target.value)} />
           </FormField>
@@ -249,7 +255,7 @@ export function BiometricDevicesScreen() {
           </Button>
         </Card>
 
-        <Card title="Map student ↔ device user id" style={{ marginTop: 16 }}>
+        <Card title="Map student to device user id" style={{ marginTop: 16 }}>
           <FormField id="link-stu" label="Student id">
             <TextInput
               id="link-stu"
