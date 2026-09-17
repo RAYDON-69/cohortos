@@ -622,3 +622,17 @@ Rewrote `frontend/src/screens/settings/BiometricDevices.tsx`:
 
 ### Desktop release
 Push this commit and re-run **Desktop release** workflow so Package linux/win/mac pass Build renderer. Packaging success is confirmed on GitHub Actions (not this sandbox).
+
+
+### Desktop release confirmation (run 35220668371, commit 6dbce15)
+- **Frontend CI**: success (`npm run build` / tsc + vite)
+- **Package linux**: success
+- **Package mac**: success
+- **Package win**: success
+- URL: https://github.com/RAYDON-69/cohortos/actions/runs/35220668371
+
+Also fixed follow-on TS errors that surfaced after BiometricDevices syntax fix:
+- Missing `ErrorBoundary` import/component
+- `getApiBase` → `getApiBaseUrl`
+- EmptyState `description` → `body`
+- Vault detail string casts for ReactNode
