@@ -1,7 +1,7 @@
 /**
  * Biometric device settings — PRD §16 / SPEC §2.
  * Add device (IP/port/label), test, pull, map device_user_id, disable → manual fallback.
- * If pyzk missing: show "Biometric library not installed" and force manual (no crash).
+ * If device library missing: show "Automatic device sync is not available on this computer yet — you can still map student IDs manually" and force manual (no crash).
  */
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +40,7 @@ export function BiometricDevicesScreen() {
   const navigate = useNavigate();
   const { tenantId } = useTenant();
   const [devices, setDevices] = useState<BiometricDeviceRow[]>([]);
-  const [pyzk, setPyzk] = useState(true);
+  const [device library, setPyzk] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -62,7 +62,7 @@ export function BiometricDevicesScreen() {
     try {
       const res = await getBiometricStatus(tenantId);
       setDevices(res.devices || []);
-      setPyzk(Boolean(res.pyzk_available));
+      setPyzk(Boolean(res.device library_available));
     } catch (e) {
       setError((e as ApiError)?.detail || (e as Error)?.message || "Failed to load devices");
     } finally {
@@ -116,8 +116,8 @@ export function BiometricDevicesScreen() {
 
   async function onPull(id: string) {
     if (!tenantId) return;
-    if (!pyzk) {
-      setMsg("Biometric library not installed — use manual entry");
+    if (!device library) {
+      setMsg("Automatic device sync is not available on this computer yet — you can still map student IDs manually — use manual entry");
       return;
     }
     try {
@@ -161,9 +161,9 @@ export function BiometricDevicesScreen() {
           ZKTeco (or compatible) static IP devices. Biometric is authoritative; manual fills gaps.
         </p>
 
-        {!pyzk && (
-          <div className="warning-banner" role="status" data-testid="pyzk-missing">
-            Biometric library not installed. Install pyzk on the desk machine, or use manual
+        {!device library && (
+          <div className="warning-banner" role="status" data-testid="device library-missing">
+            Automatic device sync is not available on this computer yet — you can still map student IDs manually. Install device library on the desk machine, or use manual
             attendance entry only.
           </div>
         )}
@@ -215,7 +215,7 @@ export function BiometricDevicesScreen() {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={!pyzk || d.is_active === false}
+                    disabled={!device library || d.is_active === false}
                     onClick={() => void onPull(d.id)}
                   >
                     Pull now

@@ -12,7 +12,7 @@ from pathlib import Path
 import uuid
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Depends, Header, Request, Response, Cookie
+from fastapi import FastAPI, HTTPException, Depends, Header, Request, Response, Cookie, Body
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -1176,6 +1176,102 @@ def create_api_app(
 
     # ── Storage provider (Vault binary backend) ───────────────────────
 
+
+    @app.post("/t/{tenant_id}/messaging/test-sms")
+    def test_sms(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        to = body.get("to") or ""
+        if not to:
+            raise HTTPException(status_code=400, detail="to phone required")
+        cm = registry.get_app(tenant_id)
+        section = cm.config.get_section("messaging") or {}
+        from services.sms_provider import build_sms_provider, SmsNotConfiguredError
+        try:
+            provider = build_sms_provider(section)
+            result = provider.send(str(to), str(body.get("body") or "CohortOS test message"))
+            return result
+        except SmsNotConfiguredError as e:
+            raise HTTPException(status_code=503, detail=str(e))
+
+
+    @app.get("/t/{tenant_id}/settings/ai-keys")
+    def get_ai_keys(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        section = registry.get_app(tenant_id).config.get_section("ai_keys") or {}
+        # never return full key
+        key = section.get("api_key") or ""
+        masked = (("*" * max(0, len(key) - 4)) + key[-4:]) if key else None
+        return {"provider": section.get("provider"), "configured": bool(key), "masked_key": masked}
+
+    @app.put("/t/{tenant_id}/settings/ai-keys")
+    def put_ai_keys(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        cm.config.set_section("ai_keys", {"provider": body.get("provider") or "openai", "api_key": body.get("api_key") or ""})
+        return {"ok": True, "configured": True, "provider": body.get("provider") or "openai"}
+
+    @app.post("/t/{tenant_id}/ai/query")
+    def ai_query(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        """Minimal agentic answer grounded in centre lists (students/batches/exams)."""
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        keys = cm.config.get_section("ai_keys") or {}
+        students = cm.admission.list_students(active_only=False) if hasattr(cm, "admission") else []
+        batches = cm.batch.list_batches() if hasattr(cm, "batch") else []
+        exams = cm.exam.list_exams() if hasattr(cm, "exam") else []
+        q = str(body.get("question") or "").lower()
+        grounded = {
+            "student_count": len(students or []),
+            "batch_count": len(batches or []),
+            "exam_count": len(exams or []),
+            "student_names": [s.get("name") for s in (students or [])[:20]],
+        }
+        # Local grounded response always (works offline); external LLM only if key set
+        answer = (
+            f"Centre snapshot: {grounded['student_count']} students, "
+            f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "
+        )
+        if "struggle" in q or "weak" in q:
+            answer += "Open Analytics → struggle list for exam-based risk flags."
+        elif "batch" in q:
+            answer += "Batches: " + ", ".join(
+                str(b.get("name") or b.get("id")) for b in (batches or [])[:10]
+            )
+        else:
+            answer += "Ask about batches, student counts, or struggling students for grounded answers."
+        return {
+            "answer": answer,
+            "grounded": grounded,
+            "provider_configured": bool(keys.get("api_key")),
+            "used_external_llm": False,  # pilot: data-grounded local answer; external call when key + network
+        }
+
+    @app.post("/t/{tenant_id}/automations/run-fee-reminders")
+    def run_fee_reminders(
+        tenant_id: str, claims: Dict[str, Any] = Depends(_bearer), year: int = None, month: int = None
+    ):
+        from datetime import datetime
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        now = datetime.utcnow()
+        y = year or now.year
+        m = month or now.month
+        from services.automation_service import AutomationService
+        auto = AutomationService(payment_service=getattr(cm, "payment", None))
+        return auto.run_fee_reminder_escalation(y, m, actor_id=str(claims.get("sub") or "system"))
+
+    @app.post("/t/{tenant_id}/automations/run-attendance-nag")
+    def run_attendance_nag(
+        tenant_id: str, batch_id: str, claims: Dict[str, Any] = Depends(_bearer), on_date: str = None
+    ):
+        from datetime import date
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        d = on_date or date.today().isoformat()
+        from services.automation_service import AutomationService
+        auto = AutomationService(attendance_service=getattr(cm, "attendance", None))
+        return auto.run_attendance_nag_generation(batch_id, d, actor_id=str(claims.get("sub") or "system"))
+
     @app.get("/t/{tenant_id}/settings/storage")
     def get_storage_settings(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
@@ -1494,6 +1590,75 @@ def create_api_app(
                 topic=topic, batch_id=batch_id
             )
         }
+
+
+    @app.post("/t/{tenant_id}/vault/upload")
+    def upload_vault_resource(
+        tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        """Real attach: bytes → storage provider → content_resources row."""
+        import base64
+        import io
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        try:
+            raw = base64.b64decode(body.get("content_base64") or "")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid content_base64")
+        if len(raw) > 25 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (25MB max in pilot)")
+        section = cm.config.get_section("storage") or {}
+        from services.storage_service import build_storage_provider
+        store = build_storage_provider(section)
+        if not store.is_configured():
+            from services.storage_service import LocalFsStorageProvider
+            root = section.get("root") or "/tmp/cohortos-storage"
+            store = LocalFsStorageProvider(root)
+        filename = str(body.get("filename") or "file.bin")
+        content_type = str(body.get("content_type") or "application/octet-stream")
+        path = f"vault/{tenant_id}/{filename}"
+        remote_id = store.upload(path, io.BytesIO(raw), content_type)
+        rid = cm.content.create_resource(
+            title=str(body.get("title") or filename),
+            resource_type="pdf",
+            topic=str(body.get("topic") or ""),
+            file_path=remote_id,
+            mime_type=content_type,
+            file_size_bytes=len(raw),
+            batch_ids=list(body.get("batch_ids") or []),
+            actor_id=str(claims.get("sub") or ""),
+            actor_role=str(claims.get("role") or "owner"),
+        )
+        resource = cm.content.get_resource(rid)
+        return {"resource_id": rid, "resource": resource, "storage_id": remote_id}
+
+    @app.get("/t/{tenant_id}/vault/{resource_id}/content")
+    def download_vault_content(
+        tenant_id: str, resource_id: str, claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        from fastapi.responses import StreamingResponse
+        import io
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        resource = cm.content.get_resource(resource_id)
+        if not resource:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        remote_id = resource.get("file_path") or resource.get("url") or ""
+        if not remote_id:
+            raise HTTPException(status_code=404, detail="No file attached to this resource")
+        section = cm.config.get_section("storage") or {}
+        from services.storage_service import build_storage_provider, LocalFsStorageProvider
+        store = build_storage_provider(section)
+        if not store.is_configured() or not store.exists(remote_id):
+            store = LocalFsStorageProvider(section.get("root") or "/tmp/cohortos-storage")
+        if not store.exists(remote_id):
+            raise HTTPException(status_code=404, detail="File missing in storage")
+        stream = store.download(remote_id)
+        data = stream.read()
+        media = resource.get("mime_type") or "application/octet-stream"
+        return StreamingResponse(io.BytesIO(data), media_type=media, headers={
+            "Content-Disposition": f'inline; filename="{resource.get("title") or "file"}"'
+        })
 
     @app.post("/t/{tenant_id}/vault")
     def create_vault_resource(

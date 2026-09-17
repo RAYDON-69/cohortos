@@ -3,6 +3,7 @@ import { SyncPill } from "../components/SyncPill";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "../i18n/LocaleContext";
+import { GlobalSearch } from "../components/GlobalSearch";
 import "./AppShell.css";
 
 /**
@@ -71,6 +72,7 @@ export function AppShell({
       <div className="app-main">
         <header className="app-topbar">
           <div className="app-crumb mono-data muted">{crumb || ""}</div>
+          <GlobalSearch />
           <div className="app-topbar-right">
             {topbarExtra}
             <SyncPill onConflictClick={onConflictClick} />

@@ -144,3 +144,30 @@ body {
 .muted {
   color: var(--slate-700);
 }
+
+/* ── Phase-2 contrast / surface scale (extends §2, does not invent random hex) ── */
+:root {
+  --surface-0: var(--cream-bg);
+  --surface-1: var(--white);
+  --surface-2: #F3F0E8; /* cream darkened for separation from page */
+  --surface-3: var(--sage-100);
+  --text-primary: var(--ink);
+  --text-secondary: var(--slate-700);
+  --text-muted: var(--slate-500);
+  --border-strong: #C5D0B8; /* stronger than --border for input edges */
+  --focus-ring: var(--peri-300);
+  --accent: var(--sage-700);
+  --accent-hover: var(--sage-900);
+  --accent-soft: var(--sage-100);
+
+  /* Type scale */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+}

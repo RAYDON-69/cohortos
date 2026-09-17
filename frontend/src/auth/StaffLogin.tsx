@@ -14,6 +14,7 @@ import {
   startCentreTrial,
 } from "../api/client";
 import "../components/Button.css";
+import "./StaffLogin.css";
 
 export function StaffLogin() {
   const { t } = useLocale();
@@ -137,10 +138,10 @@ export function StaffLogin() {
     <div className="login-page" data-testid="staff-login">
       <div className="login-card">
         <h1 className="view-title">{t("appName") || "CohortOS"}</h1>
-        <p className="caption muted">
+        <p className="login-lead">
           {mode === "login"
-            ? "Sign in with your phone"
-            : "Start a free centre trial"}
+            ? "Welcome back — sign in with your phone to open the desk"
+            : "Create your coaching centre in a few minutes"}
         </p>
 
         {error && (

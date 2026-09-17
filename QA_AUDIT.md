@@ -59,3 +59,19 @@ Frontend still depends on storing `refresh_token` (localStorage / safeStorage) a
 - Bring-your-own LLM API keys UI
 - Biometric non-technical onboarding rewrite
 
+
+
+## Phase 2 update (2026-09-17)
+
+### Engineer
+- Vault binary upload/download works in tests without Drive.
+- Global search indexes static tabs/features + live students list.
+- SMS/Drive still credential-gated.
+- AI query is data-grounded local synthesis; not full tool-using agent yet.
+
+### First-time user (expected)
+- Login should feel warmer (gradient card) — confirm on device.
+- Search box in top bar — try “attendance”, “staff”, a student name.
+- Vault: attach file instead of typing a path; use Open/view.
+- Settings → AI API keys for BYO key.
+- Biometric steps are plain language; still may not auto-sync without device library on host.

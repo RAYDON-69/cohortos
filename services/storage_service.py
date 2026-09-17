@@ -141,10 +141,47 @@ class GoogleDriveStorageProvider(StorageService):
 
     def upload(self, path: str, stream: BinaryIO, content_type: str = "application/octet-stream") -> str:
         self._require_configured()
-        # Without google-api client in pilot, persist via local cache and record mapping.
-        # Production path would call Drive resumable upload API here.
+        data = stream.read()
+        token = self._access_token or os.environ.get("COHORTOS_GDRIVE_ACCESS_TOKEN")
+        if token:
+            # Live Drive multipart upload (simple) when OAuth access token is present
+            import json
+            import urllib.request
+            import urllib.error
+            boundary = f"cohortos_{uuid.uuid4().hex}"
+            meta = {"name": path.strip("/").split("/")[-1] or "file.bin"}
+            if self._folder_id:
+                meta["parents"] = [self._folder_id]
+            body = (
+                f"--{boundary}\r\n"
+                f'Content-Type: application/json; charset=UTF-8\r\n\r\n'
+                f"{json.dumps(meta)}\r\n"
+                f"--{boundary}\r\n"
+                f"Content-Type: {content_type}\r\n\r\n"
+            ).encode() + data + f"\r\n--{boundary}--\r\n".encode()
+            req = urllib.request.Request(
+                "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+                data=body,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": f"multipart/related; boundary={boundary}",
+                },
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    out = json.loads(resp.read().decode())
+                    file_id = out.get("id") or uuid.uuid4().hex
+                    self._mapping[file_id] = f"drive:{file_id}"
+                    # Mirror locally for offline open
+                    self._local_cache.upload(file_id, io.BytesIO(data), content_type)
+                    return str(file_id)
+            except urllib.error.HTTPError as e:
+                err = e.read().decode(errors="replace")[:300]
+                raise StorageNotConfiguredError(f"Drive upload failed: {e.code} {err}") from e
+        # Fallback: local cache only (no live token)
         remote_id = path.strip("/") or f"gdrive/{uuid.uuid4().hex}"
-        self._local_cache.upload(remote_id, stream, content_type)
+        self._local_cache.upload(remote_id, io.BytesIO(data), content_type)
         self._mapping[remote_id] = f"drive:{remote_id}"
         return remote_id
 

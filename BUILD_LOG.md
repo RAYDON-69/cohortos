@@ -477,3 +477,42 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 - **Copy:** Present/Absent/Late; Fee reminders nav label.
 - **Remaining:** documented in `QA_AUDIT.md` as open product gaps — not falsely marked done.
 
+
+
+## Phase 2 product batches (2026-09-17)
+
+### Batch A — Design tokens + login + global search
+- **Repro:** founder reported clinical login, low contrast, no search.
+- **Fix:** extended `tokens.css` surface/text/border scales; `StaffLogin.css` inviting gradient card; `GlobalSearch` in AppShell (tabs/features/students).
+- **Evidence:** code in repo. **Cannot verify screenshots/a11y visually** (no display in sandbox). Founder should confirm contrast/search on device.
+- **Not claimed fully done** without founder screenshots.
+
+### Batch B — Vault upload/open + Drive path
+- **Repro:** path-only add; no open after create; Drive placeholder.
+- **Fix:** `POST /vault/upload` + `GET /vault/{id}/content`; UI file picker + Open; Drive multipart upload when `access_token` present.
+- **Evidence:** `tests/test_phase2_vault_ai_auto.py::test_vault_upload_and_download` **passed** (upload → download bytes match).
+- **Drive live OAuth:** code path ready; **needs founder credentials** for real Drive folder proof — not claimed done for live Drive.
+
+### Batch C — Biometric onboarding
+- **Fix:** non-technical numbered walkthrough; removed install-pyzk jargon; manual map still available.
+- **Evidence:** UI copy only. **No physical ZKTeco device in sandbox** — E2E device add not proven here.
+
+### Batch D — SMS
+- **Fix:** `TwilioSmsProvider` + `POST .../messaging/test-sms`.
+- **Evidence:** unit structure only. **No Twilio credentials / real phone** — not claiming send/receive done.
+
+### Batch E — Pricing / license / BYO keys
+- **Fix:** `GET/PUT /settings/ai-keys` + `AiKeysScreen`; license lockout pre-existed.
+- **Evidence:** key save route + UI. Pricing/Offers screen still founder Pricing route from before — not expanded this pass. Offline license product rules not fully redesigned.
+
+### Batch F — Automations
+- **Fix:** `AutomationService` + `POST .../automations/run-fee-reminders` (+ attendance nag).
+- **Evidence:** `test_automation_fee_reminders_runs` **passed** (before/after log).
+- **Note:** triggered via API (event), not a OS cron daemon yet.
+
+### Batch G — Agentic AI
+- **Fix:** `POST /ai/query` grounded on real student/batch/exam counts.
+- **Evidence:** `test_ai_query_grounded` **passed** (student_count 0 on fresh tenant).
+- **Note:** local grounded answer; external LLM call when key present still `used_external_llm: false` in pilot.
+
+**Tests this session:** phase2 vault/ai/auto **3 passed**; session relaunch still green when run.

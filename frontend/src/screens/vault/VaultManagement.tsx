@@ -6,7 +6,7 @@ import { Card } from "../../components/Card";
 import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { ModalConfirm } from "../../components/Confirm";
 import { useLocale } from "../../i18n/LocaleContext";
-import { listVault, createVaultResource, setVaultAccessRules, relaxVaultProtection, restoreVaultProtection, listBatches, loadTokens } from "../../api/client"
+import { listVault, createVaultResource, uploadVaultResource, vaultContentUrl, setVaultAccessRules, relaxVaultProtection, restoreVaultProtection, listBatches, loadTokens, ensureAccessToken } from "../../api/client"
 import type { VaultResource, AccessRuleRow, BatchRow, ApiError } from "../../api/client"
 import "../../components/Button.css";
 import "../../components/Card.css";
@@ -41,6 +41,9 @@ export function VaultManagementScreen() {
   const [title, setTitle] = useState("");
   const [topic, setTopic] = useState("");
   const [url, setUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [fileBase64, setFileBase64] = useState("");
+  const [fileMime, setFileMime] = useState("application/octet-stream");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [operator, setOperator] = useState<"and" | "or">("and");
   const [rules, setRules] = useState<AccessRuleRow[]>([]);
@@ -86,21 +89,61 @@ export function VaultManagementScreen() {
     setSaving(true);
     setError(null);
     try {
-      await createVaultResource(tenantId, {
-        title: title.trim(),
-        topic,
-        url,
-        resource_type: "pdf",
-        actor_role: actorRole,
-      });
+      if (fileBase64 && fileName) {
+        await uploadVaultResource(tenantId, {
+          title: title.trim(),
+          filename: fileName,
+          content_base64: fileBase64,
+          content_type: fileMime,
+          topic,
+        });
+      } else {
+        await createVaultResource(tenantId, {
+          title: title.trim(),
+          topic,
+          url,
+          resource_type: url ? "link" : "pdf",
+          actor_role: actorRole,
+        });
+      }
       setTitle("");
       setTopic("");
       setUrl("");
+      setFileName("");
+      setFileBase64("");
       await load();
     } catch (e) {
       setError((e as ApiError).detail || t("genericError"));
     } finally {
       setSaving(false);
+    }
+  }
+
+  function onPickFile(file: File | null) {
+    if (!file) return;
+    setFileName(file.name);
+    setFileMime(file.type || "application/octet-stream");
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const b64 = result.includes(",") ? result.split(",")[1] : result;
+      setFileBase64(b64);
+      if (!title.trim()) setTitle(file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function onOpenResource(resourceId: string) {
+    try {
+      const token = await ensureAccessToken();
+      const url = vaultContentUrl(tenantId, resourceId);
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const obj = URL.createObjectURL(blob);
+      window.open(obj, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not open file");
     }
   }
 
@@ -198,8 +241,16 @@ export function VaultManagementScreen() {
           <FormField id="vr-topic" label="Topic">
             <TextInput id="vr-topic" value={topic} onChange={(e) => setTopic(e.target.value)} />
           </FormField>
-          <FormField id="vr-url" label="URL / path">
-            <TextInput id="vr-url" value={url} onChange={(e) => setUrl(e.target.value)} />
+          <FormField id="vr-file" label="Attach file">
+            <input
+              id="vr-file"
+              type="file"
+              onChange={(e) => onPickFile(e.target.files?.[0] || null)}
+            />
+            {fileName && <p className="caption muted">Selected: {fileName}</p>}
+          </FormField>
+          <FormField id="vr-url" label="Or external link (optional)">
+            <TextInput id="vr-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
           </FormField>
           <Button
             variant="primary"
@@ -261,6 +312,13 @@ export function VaultManagementScreen() {
               {selected.resource_type} · {selected.topic || "—"} · level{" "}
               {selected.protection_level}
             </p>
+            {(selected.file_path || selected.url) && (
+              <p style={{ marginTop: 12 }}>
+                <Button variant="primary" size="sm" onClick={() => void onOpenResource(selected.id)}>
+                  Open / view file
+                </Button>
+              </p>
+            )}
 
             <div className="eyebrow" style={{ marginTop: 16 }}>
               Access rules · AND/OR composition

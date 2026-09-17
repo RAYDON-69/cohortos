@@ -18,6 +18,7 @@ const LINKS: { to: string; title: string; body: string }[] = [
   { to: "/settings/storage", title: "File storage", body: "Local or Google Drive backend for vault files." },
   { to: "/settings/backup", title: "Backup & export", body: "Local database snapshots." },
   { to: "/settings/conflicts", title: "Sync conflicts", body: "Owner review of offline sync conflicts." },
+  { to: "/settings/ai-keys", title: "AI API keys", body: "Bring your own OpenAI or Claude key." },
   { to: "/support", title: "Support & legal", body: "Contact, about, terms, and feedback." },
 ];
 

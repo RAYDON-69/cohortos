@@ -187,7 +187,7 @@ async function refreshAccessToken(): Promise<AuthTokens | null> {
   }
 }
 
-async function ensureAccessToken(): Promise<string | null> {
+export async function ensureAccessToken(): Promise<string | null> {
   const { access_token } = loadTokens();
   if (access_token) return access_token;
 
@@ -899,6 +899,28 @@ export async function listVault(tenantId: string, topic?: string, batchId?: stri
   if (batchId) q.set("batch_id", batchId);
   const qs = q.toString() ? `?${q}` : "";
   return apiRequest<{ resources: VaultResource[] }>(tenantPath(tenantId, `/vault${qs}`));
+}
+
+
+export async function uploadVaultResource(
+  tenantId: string,
+  body: {
+    title: string;
+    filename: string;
+    content_base64: string;
+    content_type?: string;
+    topic?: string;
+    batch_ids?: string[];
+  }
+) {
+  return apiRequest<{ resource_id: string; resource: VaultResource; storage_id: string }>(
+    tenantPath(tenantId, "/vault/upload"),
+    { method: "POST", body }
+  );
+}
+
+export function vaultContentUrl(tenantId: string, resourceId: string) {
+  return `${getApiBase()}${tenantPath(tenantId, `/vault/${resourceId}/content`)}`;
 }
 
 export async function createVaultResource(
