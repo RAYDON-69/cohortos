@@ -85,3 +85,8 @@ Frontend still depends on storing `refresh_token` (localStorage / safeStorage) a
 
 ### First-time user
 - Login visual direction captured in evidence/login.png (static). Founder should still open real desk for GlobalSearch and vault file picker feel.
+
+
+## Phase 4
+- npm hang explained (proxy 502). Minimal install works on registry.npmjs.org.
+- Adversarial suite green (10). Live full React e2e still environment-fragile.

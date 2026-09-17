@@ -535,3 +535,36 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 ### Explicitly not done
 - Live Drive OAuth, Twilio SMS, ZKTeco hardware (need founder credentials/hardware).
 - Full React Playwright pass of every screen under Vite/Electron.
+
+
+## Phase 4 — npm hang root cause + adversarial (2026-09-17)
+
+### npm hang — root cause
+- Environment forces `npm_config_registry=http://35.245.43.102/npm/` (internal proxy).
+- Proxy returns intermittent **HTTP 502** on tarball GETs; npm retries ~10–70s per package.
+- Full `frontend/` install (electron + electron-builder + hundreds of deps) exceeds agent wall-clock → looks like a “hang.”
+- **Not** primarily a native rebuild of better-sqlite3 in this tree (runtime deps are react-only; electron is devDep).
+
+### Fix that works
+- Override: `npm_config_registry=https://registry.npmjs.org/` and `--registry=https://registry.npmjs.org/`.
+- Minimal Vite/React set (no electron) installs in **~6–24s** in `/tmp` (verified: `added 74 packages in 6s`).
+- Project `.npmrc` set to official registry + longer fetch retries.
+- Copying/syncing large `node_modules` onto the workspace volume is extremely slow and can itself exceed agent timeouts — prefer install-in-place or symlink from a fast volume.
+
+### Live Vite/GUI verification this session
+- Briefly brought Vite up on `:5173` from `/tmp` install (HTTP 200).
+- API and Playwright sessions did not stay up across sandbox process kills; **no durable live React screenshots** this round.
+- **Not claimed:** full Playwright walk of every real screen / live a11y on rendered CSS.
+
+### Adversarial tests (`tests/test_adversarial_phase4.py`) — **10 passed**
+- Auth: garbage/tampered refresh rejected; refresh replay after rotation fails; concurrent device reuse fails.
+- License seal: hand-edit `locked=false` cannot unlock when config lockout set; seal now **HMAC-SHA256** signed (`COHORTOS_LICENSE_SECRET` or JWT secret).
+- Vault: oversized (>25MB) rejected; path-traversal filename sanitized to basename; 5 concurrent uploads unique IDs.
+- Multi-tenant AI: tenant1 token cannot query tenant2; injection string in other tenant not returned.
+- Automations: double run fee-reminders returns 200 both times (idempotent no-crash).
+- Bangla: batch name `সকালের ব্যাচ` survives list API round-trip.
+
+### Still blocked on founder
+- Google Drive OAuth credentials
+- Twilio SID/token/from + phone
+- Physical ZKTeco device

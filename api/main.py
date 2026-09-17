@@ -1651,6 +1651,8 @@ def create_api_app(
             root = section.get("root") or "/tmp/cohortos-storage"
             store = LocalFsStorageProvider(root)
         filename = str(body.get("filename") or "file.bin")
+        # Path-traversal safe: basename only, no .. or separators
+        filename = Path(filename).name.replace("..", "_") or "file.bin"
         content_type = str(body.get("content_type") or "application/octet-stream")
         path = f"vault/{tenant_id}/{filename}"
         remote_id = store.upload(path, io.BytesIO(raw), content_type)
@@ -2432,17 +2434,28 @@ def create_api_app(
                     "Billing is past the grace window. Desk is read-only."
                 )
             grace_ends_at = cm.config.get("billing.grace_ends_at") if hasattr(cm, "config") else None
-            # Offline seal file (survives offline own-Drive installs)
+            # Offline seal: can only ADD lock, never unlock. Config is source of truth.
+            # Hand-editing seal locked=false must not clear an active config lockout.
             try:
                 data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
                 seal_path = data_dir / f"license_seal_{tenant_id}.json"
                 if seal_path.exists():
                     import json as _json
                     seal = _json.loads(seal_path.read_text(encoding="utf-8"))
-                    if seal.get("locked"):
-                        locked = True
-                        status = "lockout"
-                        reason = seal.get("reason") or reason or "Access disabled by founder"
+                    if seal.get("locked") is True:
+                        # Verify HMAC — tampered seal body is ignored (does not unlock)
+                        import hashlib, hmac as _hmac
+                        mac_key = (os.environ.get("COHORTOS_LICENSE_SECRET") or os.environ.get("COHORTOS_JWT_SECRET") or "dev").encode()
+                        payload = f"{seal.get('tenant_id')}|{int(bool(seal.get('locked')))}|{seal.get('reason') or ''}|{seal.get('updated_at') or ''}".encode()
+                        expect = _hmac.new(mac_key, payload, hashlib.sha256).hexdigest()
+                        if seal.get("hmac") and not _hmac.compare_digest(str(seal.get("hmac")), expect):
+                            # tampered — keep config lock state; do not trust seal fields
+                            pass
+                        else:
+                            locked = True
+                            status = "lockout"
+                            reason = seal.get("reason") or reason or "Access disabled by founder"
+                    # Explicit: seal.locked=false is ignored when config already locked
             except Exception:
                 pass
         except Exception:
@@ -2478,12 +2491,17 @@ def create_api_app(
         cm.config.set("billing.lockout", "lockout" if locked else "0")
         cm.config.set("billing.lockout_reason", reason if locked else "")
         # Offline seal: written next to tenant data so fully offline clients still see lock on launch
+        import hashlib, hmac as _hmac
         seal = {
             "tenant_id": tenant_id,
             "locked": locked,
             "reason": reason if locked else None,
             "updated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
         }
+        # Tamper-evident MAC with JWT secret (or dedicated COHORTOS_LICENSE_SECRET)
+        mac_key = (os.environ.get("COHORTOS_LICENSE_SECRET") or os.environ.get("COHORTOS_JWT_SECRET") or "dev").encode()
+        payload = f"{seal['tenant_id']}|{int(bool(seal['locked']))}|{seal.get('reason') or ''}|{seal['updated_at']}".encode()
+        seal["hmac"] = _hmac.new(mac_key, payload, hashlib.sha256).hexdigest()
         try:
             data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
             data_dir.mkdir(parents=True, exist_ok=True)
