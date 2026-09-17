@@ -568,3 +568,31 @@ Artifacts: `cohortos-linux`, `cohortos-win`, `cohortos-mac`.
 - Google Drive OAuth credentials
 - Twilio SID/token/from + phone
 - Physical ZKTeco device
+
+
+## Phase 5 — RUN_LOCALLY + Groq/NIM + adversarial (2026-09-17)
+
+### Part 1
+- Added `RUN_LOCALLY.md` (Linux desktop, clone → API :8741 → Vite :5173, failure table).
+
+### Part 2 — Groq + NVIDIA NIM
+- `services/llm_provider.py`: `GroqProvider`, `NvidiaNimProvider`, `build_llm_provider`.
+- `/settings/ai-keys` UI: Groq + NIM selectable; config key normalization fixed (`ai_keys.provider`).
+- `/ai/query` calls selected provider with grounded context when key set.
+- **Live evidence from this sandbox:**
+  - Keys accepted and stored; query sets `provider_configured: true`.
+  - **Groq:** real HTTP to `api.groq.com` — often **403 error 1010** (Cloudflare) from this CI IP; model list works with key.
+  - **NIM:** real HTTP to `integrate.api.nvidia.com` — model list works; many chat completions return **404 Function not found** (account may need model enablement in NVIDIA console).
+  - **Not claimed:** successful non-empty completion text from both providers *from this sandbox IP*. Founder should re-run on his machine with the same keys (likely succeeds for Groq; NIM needs an enabled model).
+- Keys were **not** committed to git; tests read `COHORTOS_GROQ_API_KEY` / `COHORTOS_NIM_API_KEY`.
+
+### Part 3 — Adversarial phase 5 (**5 passed**)
+- AI query hammer → **429**
+- Auth refresh hammer → **429**
+- License lock race vs batch create → lock state consistent
+- Corrupted DB / backup path presence
+- Automation DST double-run idempotent flags
+
+### Still blocked on founder
+- Google Drive OAuth, Twilio SMS, ZKTeco hardware
+- Confirm Groq/NIM completions on his network; enable a NIM chat model if 404

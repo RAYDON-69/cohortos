@@ -719,6 +719,7 @@ def create_api_app(
 
     @app.post("/auth/refresh")
     def refresh(
+        request: Request,
         response: Response,
         body: Optional[RefreshRequest] = None,
         cohortos_refresh: Optional[str] = Cookie(None),
@@ -726,6 +727,11 @@ def create_api_app(
         refresh_token = (body.refresh_token if body else None) or cohortos_refresh
         if not refresh_token:
             raise HTTPException(status_code=401, detail="Missing refresh token")
+        # Abuse protection — tight loop refresh must 429, not crash
+        try:
+            registry.limiter.check("auth_refresh", (refresh_token or "")[:24], request.client.host if request.client else "")
+        except RateLimitExceeded as e:
+            raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
         try:
             access, new_refresh, family_id = registry.tokens.rotate_refresh(refresh_token)
         except TokenReuseError:
@@ -1194,12 +1200,19 @@ def create_api_app(
             raise HTTPException(status_code=503, detail=str(e))
 
 
+    def _ai_keys_normalized(section: Dict[str, Any]) -> Dict[str, Any]:
+        """ConfigService stores section keys as 'ai_keys.provider' — normalize to short keys."""
+        out: Dict[str, Any] = {}
+        for k, v in (section or {}).items():
+            short = k.split(".", 1)[-1] if isinstance(k, str) else k
+            out[str(short)] = v
+        return out
+
     @app.get("/t/{tenant_id}/settings/ai-keys")
     def get_ai_keys(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
-        section = registry.get_app(tenant_id).config.get_section("ai_keys") or {}
-        # never return full key
-        key = section.get("api_key") or ""
+        section = _ai_keys_normalized(registry.get_app(tenant_id).config.get_section("ai_keys") or {})
+        key = str(section.get("api_key") or "")
         masked = (("*" * max(0, len(key) - 4)) + key[-4:]) if key else None
         return {"provider": section.get("provider"), "configured": bool(key), "masked_key": masked}
 
@@ -1207,15 +1220,16 @@ def create_api_app(
     def put_ai_keys(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
         cm = registry.get_app(tenant_id)
-        cm.config.set_section("ai_keys", {"provider": body.get("provider") or "openai", "api_key": body.get("api_key") or ""})
-        return {"ok": True, "configured": True, "provider": body.get("provider") or "openai"}
+        prov = body.get("provider") or "groq"
+        cm.config.set_section("ai_keys", {"provider": prov, "api_key": body.get("api_key") or ""})
+        return {"ok": True, "configured": True, "provider": prov}
 
     @app.post("/t/{tenant_id}/ai/query")
     def ai_query(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
         """Minimal agentic answer grounded in centre lists (students/batches/exams)."""
         _require_tenant(claims, tenant_id)
         cm = registry.get_app(tenant_id)
-        keys = cm.config.get_section("ai_keys") or {}
+        keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
         students = cm.admission.list_students(active_only=False) if hasattr(cm, "admission") else []
         batches = cm.batch.list_batches() if hasattr(cm, "batch") else []
         exams = cm.exam.list_exams() if hasattr(cm, "exam") else []
@@ -1273,13 +1287,59 @@ def create_api_app(
             answer += f"Student roster size is {len(st)}."
         else:
             answer += "Ask about batches, student counts, or struggling students for grounded answers."
+        # Rate-limit AI queries per account
+        try:
+            registry.limiter.check(
+                "ai_query",
+                str(claims.get("sub") or claims.get("account_id") or tenant_id),
+                "",
+            )
+        except RateLimitExceeded as e:
+            raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
+
+        used_external = False
+        provider_name = str(keys.get("provider") or "")
+        api_key = str(keys.get("api_key") or "")
+        model_used = None
+        if api_key and provider_name.lower() in ("groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim"):
+            from services.llm_provider import (
+                build_llm_provider,
+                LLMRequest,
+                LLMError,
+                RateLimitError,
+                OfflineError,
+            )
+            llm = build_llm_provider(provider_name, api_key)
+            system = (
+                "You are CohortOS desk assistant. Answer using ONLY the grounded centre data. "
+                "If data is missing, say so. Do not invent students or batches."
+            )
+            prompt = (
+                f"Question: {body.get('question') or ''}\n\n"
+                f"Grounded data JSON: {grounded}\n"
+                f"Local draft answer: {answer}"
+            )
+            try:
+                resp = llm.complete(LLMRequest(prompt=prompt, system=system, max_tokens=512))
+                if resp.text.strip():
+                    answer = resp.text.strip()
+                    used_external = True
+                    model_used = resp.model
+            except RateLimitError as e:
+                raise HTTPException(status_code=429, detail=str(e))
+            except (LLMError, OfflineError) as e:
+                # Fall back to local grounded answer; surface error
+                tool_trace.append({"tool": "external_llm", "error": str(e)})
+
         return {
             "answer": answer,
             "grounded": grounded,
             "tools_used": tool_trace,
-            "provider_configured": bool(keys.get("api_key")),
-            "used_external_llm": False,
-            "needs_for_external_llm": "Set centre AI key via Settings → AI API keys (OpenAI/Anthropic).",
+            "provider": provider_name or None,
+            "provider_configured": bool(api_key),
+            "used_external_llm": used_external,
+            "model": model_used,
+            "needs_for_external_llm": None if api_key else "Set centre AI key via Settings → AI API keys (Groq / NVIDIA NIM).",
         }
 
     @app.post("/t/{tenant_id}/automations/run-fee-reminders")

@@ -16,7 +16,7 @@ export function AiKeysScreen() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const tenantId = loadTokens().tenant_id || "";
-  const [provider, setProvider] = useState("openai");
+  const [provider, setProvider] = useState("groq");
   const [apiKey, setApiKey] = useState("");
   const [configured, setConfigured] = useState(false);
   const [masked, setMasked] = useState<string | null>(null);
@@ -49,11 +49,13 @@ export function AiKeysScreen() {
     <AppShell brand={t("appName")} navItems={nav} crumb="Settings · AI keys">
       <h2 className="view-title">AI API keys</h2>
       <p className="caption muted" style={{ marginBottom: 16 }}>
-        Use your own OpenAI or Claude key for centre AI features. Keys stay on this centre only.
+        Use your own Groq, NVIDIA NIM, OpenAI, or Claude key. Keys stay on this centre only — never committed to git.
       </p>
       <Card>
         <FormField id="prov" label="Provider">
           <SelectInput id="prov" value={provider} onChange={(e) => setProvider(e.target.value)}>
+            <option value="groq">Groq</option>
+            <option value="nim">NVIDIA NIM</option>
             <option value="openai">OpenAI (ChatGPT)</option>
             <option value="anthropic">Anthropic (Claude)</option>
           </SelectInput>

@@ -90,3 +90,9 @@ Frontend still depends on storing `refresh_token` (localStorage / safeStorage) a
 ## Phase 4
 - npm hang explained (proxy 502). Minimal install works on registry.npmjs.org.
 - Adversarial suite green (10). Live full React e2e still environment-fragile.
+
+
+## Phase 5
+- RUN_LOCALLY.md for non-expert Linux start.
+- Groq/NIM wired; live success blocked by sandbox IP / NIM model availability — see BUILD_LOG.
+- Adversarial phase5: rate limit 429, license race, DB safety, automation DST.

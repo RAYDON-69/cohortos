@@ -292,3 +292,152 @@ def parse_classification(text: str) -> Dict[str, str]:
         elif k == "BOARD":
             out["board"] = v
     return out
+
+
+class GroqProvider(LLMProvider):
+    """Groq OpenAI-compatible chat completions API."""
+
+    def __init__(self, api_key: str, model: str = "openai/gpt-oss-20b"):
+        self.api_key = (api_key or "").strip()
+        self.model = model
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("Groq API key not configured")
+        import json
+        import urllib.error
+        import urllib.request
+
+        messages = []
+        if request.system:
+            messages.append({"role": "system", "content": request.system})
+        messages.append({"role": "user", "content": request.prompt})
+        body = json.dumps({
+            "model": self.model,
+            "messages": messages,
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "CohortOS/0.11 (desk-assistant)",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"Groq rate limit: {err}") from e
+            raise LLMError(f"Groq HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"Groq network error: {e}") from e
+        text = (
+            data.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+        )
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text or "",
+            model=str(data.get("model") or self.model),
+            tier=request.tier,
+            tokens_in=int(usage.get("prompt_tokens") or 0),
+            tokens_out=int(usage.get("completion_tokens") or 0),
+            raw=data,
+        )
+
+
+class NvidiaNimProvider(LLMProvider):
+    """NVIDIA NIM / integrate.api.nvidia.com OpenAI-compatible chat API."""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "google/gemma-3-4b-it",
+        base_url: str = "https://integrate.api.nvidia.com/v1",
+    ):
+        self.api_key = (api_key or "").strip()
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("NVIDIA NIM API key not configured")
+        import json
+        import urllib.error
+        import urllib.request
+
+        messages = []
+        if request.system:
+            messages.append({"role": "system", "content": request.system})
+        messages.append({"role": "user", "content": request.prompt})
+        body = json.dumps({
+            "model": self.model,
+            "messages": messages,
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens,
+            "stream": False,
+        }).encode()
+        req = urllib.request.Request(
+            f"{self.base_url}/chat/completions",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "CohortOS/0.11 (desk-assistant)",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"NIM rate limit: {err}") from e
+            raise LLMError(f"NIM HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"NIM network error: {e}") from e
+        text = (
+            data.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+        )
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text or "",
+            model=str(data.get("model") or self.model),
+            tier=request.tier,
+            tokens_in=int(usage.get("prompt_tokens") or 0),
+            tokens_out=int(usage.get("completion_tokens") or 0),
+            raw=data,
+        )
+
+
+def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
+    p = (provider or "").strip().lower()
+    if p in ("groq",):
+        return GroqProvider(api_key, model=kwargs.get("model") or "openai/gpt-oss-20b")
+    if p in ("nim", "nvidia", "nvidia_nim", "nvidia-nim"):
+        return NvidiaNimProvider(
+            api_key,
+            model=kwargs.get("model") or "google/gemma-3-4b-it",
+            base_url=kwargs.get("base_url") or "https://integrate.api.nvidia.com/v1",
+        )
+    if p in ("mock", "", "local"):
+        return MockLLMProvider()
+    # openai/anthropic placeholders — use mock until wired
+    return MockLLMProvider()
