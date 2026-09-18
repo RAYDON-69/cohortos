@@ -134,17 +134,7 @@ export function VaultManagementScreen() {
   }
 
   async function onOpenResource(resourceId: string) {
-    try {
-      const token = await ensureAccessToken();
-      const url = vaultContentUrl(tenantId, resourceId);
-      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      if (!res.ok) throw new Error(await res.text());
-      const blob = await res.blob();
-      const obj = URL.createObjectURL(blob);
-      window.open(obj, "_blank", "noopener,noreferrer");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not open file");
-    }
+    setViewerId(resourceId);
   }
 
   async function onSaveRules() {
@@ -506,6 +496,14 @@ export function VaultManagementScreen() {
           max-width: 200px;
         }
       `}</style>
+    {viewerId && tenantId && (
+        <FileViewer
+          tenantId={tenantId}
+          resourceId={viewerId}
+          title={selected?.title}
+          onClose={() => setViewerId(null)}
+        />
+      )}
     </AppShell>
   );
 }

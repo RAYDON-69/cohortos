@@ -104,8 +104,13 @@ export function getLastSyncedAt(): number | null {
 }
 
 export function loadTokens(): Partial<AuthTokens> {
+  let refresh: string | undefined;
+  if (typeof localStorage !== "undefined") {
+    refresh = localStorage.getItem(STORAGE_KEYS.refresh) || undefined;
+  }
   return {
     access_token: memoryAccessToken,
+    refresh_token: refresh,
     tenant_id: memoryTenantId || (typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEYS.tenant) || undefined : undefined),
     account_id: memoryAccountId || (typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEYS.account) || undefined : undefined),
   };

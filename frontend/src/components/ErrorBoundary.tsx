@@ -1,10 +1,16 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
-type Props = { children: ReactNode; fallback?: ReactNode };
+type Props = {
+  children: ReactNode;
+  fallback?: ReactNode;
+  /** Called when user clicks Try again — parent should re-fetch */
+  onRetry?: () => void;
+};
 type State = { hasError: boolean; message: string };
 
 /**
- * Prevents blank white screens: any render error shows a recoverable panel.
+ * Prevents blank white screens. Try again dispatches cohortos:retry so screens
+ * that listen can reload; Go home navigates to /.
  */
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, message: "" };
@@ -17,12 +23,28 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error("ErrorBoundary", error, info.componentStack);
   }
 
+  handleRetry = () => {
+    this.setState({ hasError: false, message: "" });
+    this.props.onRetry?.();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("cohortos:retry"));
+    }
+  };
+
+  handleHome = () => {
+    this.setState({ hasError: false, message: "" });
+    if (typeof window !== "undefined") {
+      window.location.assign("/");
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
         <div
           role="alert"
+          data-testid="error-boundary"
           style={{
             padding: 24,
             maxWidth: 480,
@@ -32,16 +54,10 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           <h1 style={{ fontSize: 18, marginBottom: 8 }}>This screen hit an error</h1>
           <p style={{ color: "#555", marginBottom: 16 }}>{this.state.message}</p>
-          <button type="button" onClick={() => this.setState({ hasError: false, message: "" })}>
+          <button type="button" onClick={this.handleRetry}>
             Try again
           </button>
-          <button
-            type="button"
-            style={{ marginLeft: 8 }}
-            onClick={() => {
-              window.location.href = "/";
-            }}
-          >
+          <button type="button" style={{ marginLeft: 8 }} onClick={this.handleHome}>
             Go home
           </button>
         </div>

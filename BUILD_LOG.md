@@ -636,3 +636,48 @@ Also fixed follow-on TS errors that surfaced after BiometricDevices syntax fix:
 - `getApiBase` → `getApiBaseUrl`
 - EmptyState `description` → `body`
 - Vault detail string casts for ReactNode
+
+
+## Phase 6 — stress test + fix (2026-09-18)
+
+Governing rule: Fixed only with running-server evidence or UNVERIFIED + manual steps.
+
+### 1. Session persistence
+- **Root cause (code audit):** `loadTokens()` did not surface `refresh_token` from localStorage, so after relaunch `isAuthenticated` could be false until refresh finished — and race with API boot could force OTP. Electron safeStorage only wrote encrypted `.bin` when encryption available; Linux keyring changes after sleep/reboot could make decrypt fail with no fallback.
+- **Fix:** `loadTokens()` returns stored refresh; `useAuth` treats stored refresh as authenticated; Electron **always dual-writes** `.txt` plaintext fallback + encrypted `.bin`.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** — Electron quit/relaunch cannot be proven in this sandbox (no durable GUI). Manual steps 1–2 in `MANUAL_TEST_CHECKLIST.md`.
+- API-level refresh rotation remains covered by earlier adversarial tests (PROVEN in pytest).
+
+### 2. Blank-screen dead-ends
+- **Fix:** ErrorBoundary **Try again** clears error + dispatches `cohortos:retry`; **Go home** navigates to `/`. Student profile listens for retry.
+- **Upstream:** Screens still need stable tenantId from tokens; session fix above reduces auth-blank cases.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** — checklist step 3.
+
+### 3. Exams (KINETICS)
+- **API reproduce (this environment):** create exam name `KINETICS` → **200**, get → **200**, list contains KINETICS. **PROVEN** via TestClient.
+- UI click-through + paper upload / marks: **UNVERIFIED-NEEDS-DEVICE-TEST** (checklist step 4).
+- AI tools extended: `list_exam_detail`, vault titles on relevant queries.
+
+### 4. View File (Vault)
+- Integrated **browser-native** viewer (`FileViewer.tsx`): PDF via iframe, images via `<img>`, A/V via media elements; blob from `GET .../vault/{id}/content`.
+- Library choice: native browser PDF/image first (zero new deps). Recommended upgrade path documented: **pdfjs-dist** (Mozilla, Apache-2.0) for advanced PDF UX — not hand-built renderer.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** (checklist step 5).
+
+### 5. Student Profile + Batch Detail
+- New routes: `/students/:studentId`, `/batches/:batchId`.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** (steps 6–7). Profile still composes from list endpoints (thin payments/attendance until dedicated APIs).
+
+### 6. Settings IA
+- Settings hub regrouped: Account, Centre, Billing/License, Integrations, Notifications, Support/Legal.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** (step 8).
+
+### 7. AI Teacher Copilot
+- Primary surface `/ai` + sidebar **AI Copilot** (not Settings-only). Chat UI + manual fee-reminder automation control.
+- **Evidence:** **UNVERIFIED-NEEDS-DEVICE-TEST** (steps 9–10). Backend `/ai/query` + tools PROVEN in prior pytest; chat UI needs device.
+
+### 8. Vault organization
+- Existing `batch_ids` / topic on resources retained; full Drive live still blocked on OAuth credentials.
+- **Evidence:** Drive live **UNVERIFIED** (credentials).
+
+### Deliverable for Raiyan
+- `MANUAL_TEST_CHECKLIST.md` — ≤15 min, non-technical, covers Batch A+B (+ C smoke).

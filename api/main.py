@@ -1260,6 +1260,43 @@ def create_api_app(
 
         st = tool_list_students()
         bt = tool_list_batches()
+        def tool_exam_detail(name_hint: str = ""):
+            rows = exams or []
+            if name_hint:
+                rows = [e for e in rows if name_hint.lower() in str(e.get("name") or "").lower()]
+            out = []
+            for e in rows[:10]:
+                eid = str(e.get("id") or "")
+                results = []
+                try:
+                    if hasattr(cm.exam, "list_results"):
+                        results = cm.exam.list_results(eid) or []
+                    elif hasattr(cm.exam, "get_results"):
+                        results = cm.exam.get_results(eid) or []
+                except Exception:
+                    results = []
+                out.append({
+                    "id": eid,
+                    "name": e.get("name"),
+                    "exam_date": e.get("exam_date"),
+                    "status": e.get("status"),
+                    "result_count": len(results) if isinstance(results, list) else 0,
+                    "subject": e.get("subject"),
+                    "chapter_or_topic": e.get("chapter_or_topic"),
+                })
+            tool_trace.append({"tool": "list_exam_detail", "count": len(out), "hint": name_hint})
+            return out
+
+        def tool_vault_titles():
+            rows = []
+            try:
+                if hasattr(cm, "content") and hasattr(cm.content, "list_resources"):
+                    rows = cm.content.list_resources() or []
+            except Exception:
+                rows = []
+            tool_trace.append({"tool": "list_vault_titles", "count": len(rows)})
+            return [{"id": r.get("id"), "title": r.get("title"), "topic": r.get("topic")} for r in rows[:30]]
+
         ex = tool_list_exams()
         grounded = {
             "student_count": len(st),
@@ -1267,6 +1304,17 @@ def create_api_app(
             "exam_count": len(ex),
             "student_names": [s.get("name") for s in st[:20]],
         }
+        q_lower = q
+        if "exam" in q_lower or "kinetics" in q_lower or "marks" in q_lower or "paper" in q_lower:
+            # Extract simple name hint: last quoted token or known word
+            hint = ""
+            for token in ("kinetics", "KINETICS"):
+                if token.lower() in q_lower:
+                    hint = "KINETICS"
+                    break
+            grounded["exam_detail"] = tool_exam_detail(hint)
+        if "vault" in q_lower or "document" in q_lower or "file" in q_lower:
+            grounded["vault"] = tool_vault_titles()
         answer = (
             f"Centre snapshot: {grounded['student_count']} students, "
             f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "

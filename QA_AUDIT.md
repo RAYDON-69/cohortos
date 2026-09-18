@@ -96,3 +96,9 @@ Frontend still depends on storing `refresh_token` (localStorage / safeStorage) a
 - RUN_LOCALLY.md for non-expert Linux start.
 - Groq/NIM wired; live success blocked by sandbox IP / NIM model availability — see BUILD_LOG.
 - Adversarial phase5: rate limit 429, license race, DB safety, automation DST.
+
+
+## Phase 6
+- Session dual-write + loadTokens refresh surface.
+- FileViewer native; Student/Batch detail; Settings IA; Teacher Copilot route.
+- All GUI items UNVERIFIED pending MANUAL_TEST_CHECKLIST.md on founder device.

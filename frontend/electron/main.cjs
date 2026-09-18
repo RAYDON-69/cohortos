@@ -127,10 +127,15 @@ async function createWindow() {
 
 ipcMain.handle("safeStorage:set", (_e, key, value) => {
   ensureDirs();
+  // Always write plaintext fallback so session survives Linux keyring / reboot
+  // even when encryption is unavailable or keyring state changes after sleep.
+  fs.writeFileSync(path.join(SAFE_DIR, key + ".txt"), String(value), "utf8");
   if (safeStorage.isEncryptionAvailable()) {
-    fs.writeFileSync(path.join(SAFE_DIR, key + ".bin"), safeStorage.encryptString(String(value)));
-  } else {
-    fs.writeFileSync(path.join(SAFE_DIR, key + ".txt"), String(value), "utf8");
+    try {
+      fs.writeFileSync(path.join(SAFE_DIR, key + ".bin"), safeStorage.encryptString(String(value)));
+    } catch (e) {
+      console.warn("[CohortOS] safeStorage encrypt failed, plaintext fallback kept", e);
+    }
   }
   return true;
 });

@@ -77,7 +77,7 @@ export function useAuth() {
     roles: rolesFromTokens(tokens),
     loading,
     error,
-    isAuthenticated: Boolean(tokens.access_token || tokens.refresh_token),
+    isAuthenticated: Boolean(tokens.access_token || tokens.refresh_token || (typeof localStorage !== "undefined" && localStorage.getItem("cohortos_refresh_token"))),
     tenantId: tokens.tenant_id || "",
     refresh,
     sendOtp,
