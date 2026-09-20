@@ -60,4 +60,29 @@ Check each box only if you saw the result yourself.
 
 ---
 
+## Phase 7 — automations, tutor, providers
+
+11. **Automations screen**  
+    - Settings → Automations → save “Fee overdue reminder” → Run now.  
+    - **Pass:** Action log shows a run; second Run does not crash.
+
+12. **AI Copilot runs automation**  
+    - AI Copilot: ask “run fee reminders”.  
+    - **Pass:** Answer or action log reflects a run (not a blank error).
+
+13. **AI Tutor isolation**  
+    - Open `/student/tutor`, ask a question with an empty batch.  
+    - **Pass:** Message that no vault sources found (not another batch’s content).
+
+14. **BYO keys copy**  
+    - Settings → AI API keys.  
+    - **Pass:** Text says developer console keys, not ChatGPT Plus login; providers include Groq, NIM, OpenAI, Anthropic, Gemini.
+
+15. **View file size guard**  
+    - Vault open on a normal small PDF/image still works.  
+    - **Pass:** Viewer opens or clear error (no app crash).
+
+---
+
 If anything fails, note the step number and a screenshot in your reply to the builder.
+

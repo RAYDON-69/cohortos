@@ -81,6 +81,12 @@ class CohortOSApp:
         # Core cross-cutting
         self.audit = AuditService(self.tenant_context)
         self.config = ConfigService(self.tenant_context, data_service=None)
+        from services.automation_service import AutomationService
+        self.automation = AutomationService(
+            payment_service=None,  # wired below after payment init
+            attendance_service=None,
+            config_service=self.config,
+        )
         # ConfigService can accept a data_service; we keep it simple and let it use its own storage.
 
         self.sync: Optional[SyncEngine] = None
@@ -134,6 +140,10 @@ class CohortOSApp:
             notification_service=self.notifications,
             sync_engine=self.sync,
         )
+        if getattr(self, "automation", None):
+            self.automation.payment = self.payment
+            self.automation.attendance = self.attendance
+
         self.exam = ExamService(
             self.tenant_context,
             data_layer=self.data_layer,

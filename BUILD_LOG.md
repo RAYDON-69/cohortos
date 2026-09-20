@@ -681,3 +681,45 @@ Governing rule: Fixed only with running-server evidence or UNVERIFIED + manual s
 
 ### Deliverable for Raiyan
 - `MANUAL_TEST_CHECKLIST.md` — ≤15 min, non-technical, covers Batch A+B (+ C smoke).
+
+
+## Phase 7 — Full platform (2026-09-20)
+
+PLAN.md committed with candidates + on-paper stress tests for A–F.
+
+### Stage 0
+- No checklist results from device. Phase 6 GUI items remain **ASSUMED-BROKEN-PENDING-CONFIRMATION**.
+
+### A — Automation engine
+- Custom JSON rules on ConfigService (vs durable-rules / business-rules — too heavy).
+- CRUD + enable/disable + run + log APIs; Automations UI.
+- Idempotency keys prevent same-day double action spam.
+- **Tests:** `tests/test_phase7_automations_tutor.py` — **5 passed** (CRUD, double-run, disabled skip).
+- UI **UNVERIFIED-NEEDS-DEVICE-TEST** (checklist 11).
+
+### B — Copilot + automations
+- `/ai/query` tools list/run automations; action log on Copilot screen.
+- **Partial PROVEN** via API test_ai_query_lists_automations; UI **UNVERIFIED** (12).
+
+### C — AI Tutor
+- `POST /tutor/query` + RetrievalService batch filter + citations.
+- Cross-tenant **PROVEN** 401/403; empty vault **PROVEN**.
+- UI **UNVERIFIED** (13). Keyword retrieval (not chromadb) — offline footprint.
+
+### D — BYO providers
+- OpenAI, Anthropic, GeminiAPIProvider official HTTP APIs in `llm_provider.py`.
+- Settings copy: developer console, not consumer login.
+- **UNVERIFIED** live keys (14); wiring **PROVEN** by code + build_llm_provider branches.
+
+### E — Design
+- No new CSS framework (MUI/shadcn rejected for bundle). Shared Card/Button on new screens; tokens path unchanged.
+- **UNVERIFIED** visual consistency on device.
+
+### F — Players
+- FileViewer 25MB guard; pdfjs-dist listed optionalDependencies (Apache-2.0).
+- Full pdf.js page UI **UNVERIFIED** until npm install on device.
+
+### Post-build stress
+- Double rule run: no crash (**PROVEN**).
+- Tutor cross-tenant blocked (**PROVEN**).
+- Missing vault: soft message (**PROVEN**).

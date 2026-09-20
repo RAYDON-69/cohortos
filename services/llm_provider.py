@@ -427,6 +427,171 @@ class NvidiaNimProvider(LLMProvider):
         )
 
 
+
+
+class OpenAIProvider(LLMProvider):
+    """Official OpenAI Platform API (api.openai.com) — requires developer API key."""
+
+    def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
+        self.api_key = (api_key or "").strip()
+        self.model = model
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("OpenAI API key not configured")
+        import json, urllib.request, urllib.error
+        messages = []
+        if request.system:
+            messages.append({"role": "system", "content": request.system})
+        messages.append({"role": "user", "content": request.prompt})
+        body = json.dumps({
+            "model": self.model,
+            "messages": messages,
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            "https://api.openai.com/v1/chat/completions",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "CohortOS/0.12",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"OpenAI rate limit: {err}") from e
+            raise LLMError(f"OpenAI HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"OpenAI network error: {e}") from e
+        text = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text or "",
+            model=str(data.get("model") or self.model),
+            tier=request.tier,
+            tokens_in=int(usage.get("prompt_tokens") or 0),
+            tokens_out=int(usage.get("completion_tokens") or 0),
+            raw=data,
+        )
+
+
+class AnthropicProvider(LLMProvider):
+    """Official Anthropic API (api.anthropic.com) — requires console API key."""
+
+    def __init__(self, api_key: str, model: str = "claude-3-5-haiku-latest"):
+        self.api_key = (api_key or "").strip()
+        self.model = model
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("Anthropic API key not configured")
+        import json, urllib.request, urllib.error
+        body = {
+            "model": self.model,
+            "max_tokens": request.max_tokens,
+            "messages": [{"role": "user", "content": request.prompt}],
+        }
+        if request.system:
+            body["system"] = request.system
+        data_b = json.dumps(body).encode()
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=data_b,
+            headers={
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+                "Content-Type": "application/json",
+                "User-Agent": "CohortOS/0.12",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"Anthropic rate limit: {err}") from e
+            raise LLMError(f"Anthropic HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"Anthropic network error: {e}") from e
+        parts = data.get("content") or []
+        text = "".join(p.get("text", "") for p in parts if isinstance(p, dict))
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text or "",
+            model=str(data.get("model") or self.model),
+            tier=request.tier,
+            tokens_in=int(usage.get("input_tokens") or 0),
+            tokens_out=int(usage.get("output_tokens") or 0),
+            raw=data,
+        )
+
+
+class GeminiAPIProvider(LLMProvider):
+    """Google AI Studio / Gemini API key (generativelanguage.googleapis.com) — not consumer login."""
+
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
+        self.api_key = (api_key or "").strip()
+        self.model = model
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("Gemini API key not configured")
+        import json, urllib.request, urllib.error
+        prompt = request.prompt
+        if request.system:
+            prompt = f"{request.system}\n\n{prompt}"
+        body = json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": request.temperature,
+                "maxOutputTokens": request.max_tokens,
+            },
+        }).encode()
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{self.model}:generateContent?key={self.api_key}"
+        )
+        req = urllib.request.Request(
+            url,
+            data=body,
+            headers={"Content-Type": "application/json", "User-Agent": "CohortOS/0.12"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"Gemini rate limit: {err}") from e
+            raise LLMError(f"Gemini HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"Gemini network error: {e}") from e
+        cands = data.get("candidates") or []
+        text = ""
+        if cands:
+            parts = (cands[0].get("content") or {}).get("parts") or []
+            text = "".join(p.get("text", "") for p in parts if isinstance(p, dict))
+        return LLMResponse(text=text or "", model=self.model, tier=request.tier, raw=data)
+
 def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
     p = (provider or "").strip().lower()
     if p in ("groq",):
@@ -437,7 +602,12 @@ def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
             model=kwargs.get("model") or "google/gemma-3-4b-it",
             base_url=kwargs.get("base_url") or "https://integrate.api.nvidia.com/v1",
         )
+    if p in ("openai", "chatgpt"):
+        return OpenAIProvider(api_key, model=kwargs.get("model") or "gpt-4o-mini")
+    if p in ("anthropic", "claude"):
+        return AnthropicProvider(api_key, model=kwargs.get("model") or "claude-3-5-haiku-latest")
+    if p in ("gemini", "google", "google_gemini"):
+        return GeminiAPIProvider(api_key, model=kwargs.get("model") or "gemini-2.0-flash")
     if p in ("mock", "", "local"):
         return MockLLMProvider()
-    # openai/anthropic placeholders — use mock until wired
     return MockLLMProvider()

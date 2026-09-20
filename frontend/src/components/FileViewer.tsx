@@ -33,7 +33,14 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
           throw new Error(`Could not open file (${res.status})`);
         }
         const ct = (contentType || res.headers.get("content-type") || "").toLowerCase();
+        const len = Number(res.headers.get("content-length") || 0);
+        if (len > 25 * 1024 * 1024) {
+          throw new Error("File is larger than 25MB and cannot be opened in the viewer");
+        }
         const blob = await res.blob();
+        if (blob.size > 25 * 1024 * 1024) {
+          throw new Error("File is larger than 25MB and cannot be opened in the viewer");
+        }
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
         setUrl(objectUrl);
@@ -94,6 +101,7 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
           {error && <p role="alert">{error}</p>}
           {!error && !url && <p className="caption muted">Loading…</p>}
           {url && kind === "pdf" && (
+            /* pdfjs-dist (Apache-2.0) is the upgrade path for page nav/zoom; iframe uses browser PDF for zero-dep. */
             <iframe title={title || "PDF"} src={url} style={{ width: "100%", height: "100%", minHeight: 480, border: 0 }} />
           )}
           {url && kind === "image" && (

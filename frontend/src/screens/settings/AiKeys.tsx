@@ -54,11 +54,16 @@ export function AiKeysScreen() {
       <Card>
         <FormField id="prov" label="Provider">
           <SelectInput id="prov" value={provider} onChange={(e) => setProvider(e.target.value)}>
-            <option value="groq">Groq</option>
-            <option value="nim">NVIDIA NIM</option>
-            <option value="openai">OpenAI (ChatGPT)</option>
-            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="groq">Groq (developer key)</option>
+            <option value="nim">NVIDIA NIM (API key)</option>
+            <option value="openai">OpenAI Platform key</option>
+            <option value="anthropic">Anthropic Console key</option>
+            <option value="gemini">Google AI Studio (Gemini) key</option>
           </SelectInput>
+        <p className="caption muted">
+          Bring your own API key from the provider&apos;s developer console — not a ChatGPT Plus / Claude Pro login.
+          Links: platform.openai.com · console.anthropic.com · aistudio.google.com · console.groq.com
+        </p>
         </FormField>
         <FormField id="key" label="API key">
           <TextInput

@@ -26,6 +26,8 @@ import { StorageProviderScreen } from "./screens/settings/StorageProvider";
 import { SettingsHubScreen } from "./screens/settings/SettingsHub";
 import { AiKeysScreen } from "./screens/settings/AiKeys";
 import { TeacherCopilotScreen } from "./screens/ai/TeacherCopilot";
+import { AutomationsScreen } from "./screens/settings/Automations";
+import { StudentTutorScreen } from "./screens/student/StudentTutor";
 import { StudentProfileScreen } from "./screens/students/StudentProfile";
 import { BatchDetailScreen } from "./screens/batches/BatchDetail";
 import { SupportLegalScreen } from "./screens/support/SupportLegal";
@@ -86,6 +88,8 @@ export default function App() {
       <Route path="/settings/biometric" element={<RequireAuth><BiometricDevicesScreen /></RequireAuth>} />
       <Route path="/settings" element={<RequireAuth><SettingsHubScreen /></RequireAuth>} />
       <Route path="/ai" element={<RequireAuth><TeacherCopilotScreen /></RequireAuth>} />
+      <Route path="/settings/automations" element={<RequireAuth><AutomationsScreen /></RequireAuth>} />
+      <Route path="/student/tutor" element={<RequireAuth><StudentTutorScreen /></RequireAuth>} />
       <Route path="/students/:studentId" element={<RequireAuth><StudentProfileScreen /></RequireAuth>} />
       <Route path="/batches/:batchId" element={<RequireAuth><BatchDetailScreen /></RequireAuth>} />
       <Route path="/settings/ai-keys" element={<RequireAuth><AiKeysScreen /></RequireAuth>} />

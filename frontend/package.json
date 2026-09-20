@@ -130,5 +130,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/RAYDON-69/cohortos.git"
+  },
+  "optionalDependencies": {
+    "pdfjs-dist": "^4.10.38"
   }
 }

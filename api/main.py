@@ -1224,6 +1224,23 @@ def create_api_app(
         cm.config.set_section("ai_keys", {"provider": prov, "api_key": body.get("api_key") or ""})
         return {"ok": True, "configured": True, "provider": prov}
 
+    def _auto(cm):
+        auto = getattr(cm, "automation", None)
+        if auto is None:
+            from services.automation_service import AutomationService
+            auto = AutomationService(
+                payment_service=getattr(cm, "payment", None),
+                attendance_service=getattr(cm, "attendance", None),
+                config_service=getattr(cm, "config", None),
+            )
+            cm.automation = auto
+        else:
+            auto.payment = getattr(cm, "payment", None)
+            auto.attendance = getattr(cm, "attendance", None)
+            auto.config = getattr(cm, "config", None)
+        return auto
+
+
     @app.post("/t/{tenant_id}/ai/query")
     def ai_query(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
         """Minimal agentic answer grounded in centre lists (students/batches/exams)."""
@@ -1315,6 +1332,31 @@ def create_api_app(
             grounded["exam_detail"] = tool_exam_detail(hint)
         if "vault" in q_lower or "document" in q_lower or "file" in q_lower:
             grounded["vault"] = tool_vault_titles()
+        def tool_list_automations():
+            rules = _auto(cm).list_rules() if hasattr(cm, "automation") or True else []
+            try:
+                rules = _auto(cm).list_rules()
+            except Exception:
+                rules = []
+            tool_trace.append({"tool": "list_automations", "count": len(rules)})
+            return [{"id": r.get("id"), "name": r.get("name"), "enabled": r.get("enabled")} for r in rules]
+        def tool_run_automation(name: str):
+            try:
+                result = _auto(cm).run_rule_by_name(name, {"actor_id": str(claims.get("sub") or "copilot")})
+            except Exception as e:
+                result = {"error": str(e)}
+            tool_trace.append({"tool": "run_automation", "name": name, "result_type": result.get("type")})
+            return result
+        if "automation" in q_lower or ("run" in q_lower and ("remind" in q_lower or "fee" in q_lower or "nag" in q_lower)):
+            grounded["automations"] = tool_list_automations()
+            # try run fee-related
+            run_name = "fee"
+            for r in grounded["automations"]:
+                if "fee" in str(r.get("name") or "").lower() or "remind" in str(r.get("name") or "").lower():
+                    run_name = r.get("name")
+                    break
+            if "run" in q_lower:
+                grounded["automation_result"] = tool_run_automation(str(run_name))
         answer = (
             f"Centre snapshot: {grounded['student_count']} students, "
             f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "
@@ -1349,7 +1391,7 @@ def create_api_app(
         provider_name = str(keys.get("provider") or "")
         api_key = str(keys.get("api_key") or "")
         model_used = None
-        if api_key and provider_name.lower() in ("groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim"):
+        if api_key and provider_name.lower() in ("groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim", "openai", "chatgpt", "anthropic", "claude", "gemini", "google", "google_gemini"):
             from services.llm_provider import (
                 build_llm_provider,
                 LLMRequest,
@@ -1390,6 +1432,53 @@ def create_api_app(
             "needs_for_external_llm": None if api_key else "Set centre AI key via Settings → AI API keys (Groq / NVIDIA NIM).",
         }
 
+    
+    @app.get("/t/{tenant_id}/automations/rules")
+    def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        return {"rules": _auto(registry.get_app(tenant_id)).list_rules()}
+
+    @app.post("/t/{tenant_id}/automations/rules")
+    def upsert_automation_rule(
+        tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        _require_tenant(claims, tenant_id)
+        rule = _auto(registry.get_app(tenant_id)).upsert_rule(body)
+        return {"rule": rule}
+
+    @app.post("/t/{tenant_id}/automations/rules/{rule_id}/enable")
+    def enable_automation_rule(
+        tenant_id: str, rule_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        _require_tenant(claims, tenant_id)
+        enabled = True if body.get("enabled") is None else bool(body.get("enabled"))
+        r = _auto(registry.get_app(tenant_id)).set_enabled(rule_id, enabled)
+        if not r:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        return {"rule": r}
+
+    @app.delete("/t/{tenant_id}/automations/rules/{rule_id}")
+    def delete_automation_rule(tenant_id: str, rule_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        ok = _auto(registry.get_app(tenant_id)).delete_rule(rule_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        return {"ok": True}
+
+    @app.post("/t/{tenant_id}/automations/rules/{rule_id}/run")
+    def run_automation_rule(
+        tenant_id: str, rule_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        _require_tenant(claims, tenant_id)
+        ctx = dict(body or {})
+        ctx["actor_id"] = str(claims.get("sub") or "system")
+        return _auto(registry.get_app(tenant_id)).run_rule_by_id(rule_id, ctx)
+
+    @app.get("/t/{tenant_id}/automations/log")
+    def automation_log(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer), limit: int = 50):
+        _require_tenant(claims, tenant_id)
+        return {"log": _auto(registry.get_app(tenant_id)).get_log(limit=min(limit, 200))}
+
     @app.post("/t/{tenant_id}/automations/run-fee-reminders")
     def run_fee_reminders(
         tenant_id: str, claims: Dict[str, Any] = Depends(_bearer), year: int = None, month: int = None
@@ -1400,9 +1489,7 @@ def create_api_app(
         now = datetime.utcnow()
         y = year or now.year
         m = month or now.month
-        from services.automation_service import AutomationService
-        auto = AutomationService(payment_service=getattr(cm, "payment", None))
-        return auto.run_fee_reminder_escalation(y, m, actor_id=str(claims.get("sub") or "system"))
+        return _auto(cm).run_fee_reminder_escalation(y, m, actor_id=str(claims.get("sub") or "system"))
 
     @app.post("/t/{tenant_id}/automations/run-attendance-nag")
     def run_attendance_nag(
@@ -1412,9 +1499,113 @@ def create_api_app(
         _require_tenant(claims, tenant_id)
         cm = registry.get_app(tenant_id)
         d = on_date or date.today().isoformat()
-        from services.automation_service import AutomationService
-        auto = AutomationService(attendance_service=getattr(cm, "attendance", None))
-        return auto.run_attendance_nag_generation(batch_id, d, actor_id=str(claims.get("sub") or "system"))
+        return _auto(cm).run_attendance_nag_generation(batch_id, d, actor_id=str(claims.get("sub") or "system"))
+
+    @app.post("/t/{tenant_id}/tutor/query")
+    def tutor_query(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        """Student AI Tutor — grounded only on this student's batch Vault docs."""
+        _require_tenant(claims, tenant_id)
+        try:
+            registry.limiter.check(
+                "tutor_query",
+                str(claims.get("sub") or claims.get("account_id") or tenant_id),
+                "",
+            )
+        except RateLimitExceeded as e:
+            raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
+        cm = registry.get_app(tenant_id)
+        student_id = str(body.get("student_id") or "")
+        batch_id = str(body.get("batch_id") or "")
+        question = str(body.get("question") or "").strip()
+        if not question:
+            raise HTTPException(status_code=400, detail="question required")
+        # Resolve batch from student if needed
+        if student_id and not batch_id and hasattr(cm, "admission"):
+            try:
+                for s in (cm.admission.list_students() or []):
+                    if str(s.get("id") or s.get("student_id")) == student_id:
+                        batch_id = str(s.get("batch_id") or "")
+                        break
+            except Exception:
+                pass
+        chunks = []
+        if hasattr(cm, "retrieval"):
+            try:
+                chunks = cm.retrieval.retrieve(question, batch_id=batch_id or None, limit=5) or []
+            except Exception as e:
+                chunks = []
+        citations = []
+        for ch in chunks:
+            # RetrievalChunk may be object or dict
+            if hasattr(ch, "resource_id"):
+                citations.append({
+                    "resource_id": getattr(ch, "resource_id", None),
+                    "title": getattr(ch, "title", None) or getattr(ch, "source_title", None),
+                    "excerpt": (getattr(ch, "excerpt", None) or getattr(ch, "text", None) or "")[:300],
+                })
+            elif isinstance(ch, dict):
+                citations.append({
+                    "resource_id": ch.get("resource_id") or ch.get("id"),
+                    "title": ch.get("title"),
+                    "excerpt": (ch.get("excerpt") or ch.get("text") or "")[:300],
+                })
+        if not citations:
+            return {
+                "answer": "No matching documents in your batch vault. Ask your teacher to upload notes or papers for this batch.",
+                "citations": [],
+                "grounded": False,
+                "batch_id": batch_id,
+                "student_id": student_id,
+            }
+        # Build grounded local answer
+        lines = [f"Based on {len(citations)} source(s) from your batch vault:"]
+        for i, c in enumerate(citations, 1):
+            lines.append(f"[{i}] {c.get('title') or c.get('resource_id')}: {(c.get('excerpt') or '')[:160]}")
+        answer = "\n".join(lines)
+        # Optional external LLM with ONLY citation text (no cross-tenant)
+        keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
+        # Route: prefer routes.tutor then provider
+        routes = {}
+        try:
+            raw_routes = keys.get("routes")
+            import json as _json
+            if isinstance(raw_routes, str):
+                routes = _json.loads(raw_routes) if raw_routes else {}
+            elif isinstance(raw_routes, dict):
+                routes = raw_routes
+        except Exception:
+            routes = {}
+        provider_name = str(routes.get("tutor") or keys.get("provider") or "groq")
+        api_key = str(keys.get("api_key") or "")
+        used_external = False
+        if api_key and provider_name:
+            try:
+                from services.llm_provider import build_llm_provider, LLMRequest, LLMError, OfflineError, RateLimitError
+                llm = build_llm_provider(provider_name, api_key)
+                system = (
+                    "You are a tutor for one student. Answer ONLY using the provided source excerpts. "
+                    "Cite sources by [n]. If sources are insufficient, say so. Never invent other centres' content."
+                )
+                prompt = f"Question: {question}\n\nSources:\n" + "\n".join(
+                    f"[{i}] {c.get('title')}: {c.get('excerpt')}" for i, c in enumerate(citations, 1)
+                )
+                resp = llm.complete(LLMRequest(prompt=prompt, system=system, max_tokens=512))
+                if resp.text.strip():
+                    answer = resp.text.strip()
+                    used_external = True
+            except RateLimitError as e:
+                raise HTTPException(status_code=429, detail=str(e))
+            except (LLMError, OfflineError, Exception) as e:
+                pass  # keep local answer
+        return {
+            "answer": answer,
+            "citations": citations,
+            "grounded": True,
+            "batch_id": batch_id,
+            "student_id": student_id,
+            "used_external_llm": used_external,
+            "provider": provider_name if used_external else None,
+        }
 
     @app.get("/t/{tenant_id}/settings/storage")
     def get_storage_settings(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):

@@ -40,7 +40,8 @@ const SECTIONS: Section[] = [
     items: [
       { to: "/settings/storage", title: "File storage", body: "Local or Google Drive backend for vault files." },
       { to: "/settings/messaging", title: "Messaging (SMS)", body: "Twilio and reminder preferences." },
-      { to: "/settings/ai-keys", title: "AI API keys", body: "Groq, NVIDIA NIM, OpenAI, or Claude keys." },
+      { to: "/settings/ai-keys", title: "AI API keys", body: "Groq, NVIDIA NIM, OpenAI, Anthropic, or Gemini developer keys." },
+      { to: "/settings/automations", title: "Automations", body: "Triggers, conditions, and actions for reminders and nags." },
     ],
   },
   {

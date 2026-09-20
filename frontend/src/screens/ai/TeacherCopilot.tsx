@@ -28,6 +28,7 @@ export function TeacherCopilotScreen() {
   ]);
   const [busy, setBusy] = useState(false);
   const [autoStatus, setAutoStatus] = useState<string | null>(null);
+  const [actionLog, setActionLog] = useState<unknown[]>([]);
 
   async function ask() {
     if (!tenantId || !q.trim()) return;
@@ -65,6 +66,10 @@ export function TeacherCopilotScreen() {
         { method: "POST" }
       );
       setAutoStatus(`Fee reminders finished (${r.type || "ok"}).`);
+      try {
+        const lg = await apiRequest<{ log?: unknown[] }>(tenantPath(tenantId, "/automations/log"));
+        setActionLog(lg.log || []);
+      } catch { /* ignore */ }
     } catch (e) {
       setAutoStatus((e as ApiError)?.detail || "Automation failed");
     }
@@ -79,6 +84,15 @@ export function TeacherCopilotScreen() {
         <p className="caption muted">
           Centre-aware assistant. Keys: <Link to="/settings/ai-keys">AI API keys</Link>
         </p>
+        <Card title="Action log" style={{ marginBottom: 16 }}>
+          {actionLog.length === 0 ? (
+            <p className="caption muted">Copilot and automation runs appear here.</p>
+          ) : (
+            <pre className="caption" style={{ maxHeight: 120, overflow: "auto", whiteSpace: "pre-wrap" }}>
+              {JSON.stringify(actionLog.slice(-8).reverse(), null, 2)}
+            </pre>
+          )}
+        </Card>
         <Card title="Automations" style={{ marginBottom: 16 }}>
           <p className="caption muted">Fee reminders can run on a schedule (server cron) or manually here.</p>
           <Button variant="outline" size="sm" onClick={() => void runFeeAutomation()}>
