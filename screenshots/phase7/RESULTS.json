@@ -1,0 +1,87 @@
+{
+  "01_attendance": {
+    "url": "http://127.0.0.1:5173/#/attendance",
+    "bytes": 104379,
+    "text": ""
+  },
+  "05_history": {
+    "url": "http://127.0.0.1:5173/#/attendance/history",
+    "bytes": 104379,
+    "text": ""
+  },
+  "06_staff": {
+    "url": "http://127.0.0.1:5173/#/settings/staff",
+    "bytes": 104379,
+    "text": ""
+  },
+  "07_exams": {
+    "url": "http://127.0.0.1:5173/#/exams",
+    "bytes": 104379,
+    "text": ""
+  },
+  "09_vault": {
+    "url": "http://127.0.0.1:5173/#/vault",
+    "bytes": 104379,
+    "text": ""
+  },
+  "10_student_profile": {
+    "url": "http://127.0.0.1:5173/#/students/4746269c-1376-4786-8e24-215438c9b43c",
+    "bytes": 104379,
+    "text": ""
+  },
+  "11_batch_detail": {
+    "url": "http://127.0.0.1:5173/#/batches/e2ddd163-9e94-4e7f-b317-28ed42aa9088",
+    "bytes": 104379,
+    "text": ""
+  },
+  "12_settings_hub": {
+    "url": "http://127.0.0.1:5173/#/settings",
+    "bytes": 104379,
+    "text": ""
+  },
+  "13_automations": {
+    "url": "http://127.0.0.1:5173/#/settings/automations",
+    "bytes": 104379,
+    "text": ""
+  },
+  "14_ai_copilot": {
+    "url": "http://127.0.0.1:5173/#/ai",
+    "bytes": 104379,
+    "text": ""
+  },
+  "15_ai_tutor": {
+    "url": "http://127.0.0.1:5173/#/student/tutor",
+    "bytes": 104379,
+    "text": ""
+  },
+  "16_ai_keys": {
+    "url": "http://127.0.0.1:5173/#/settings/ai-keys",
+    "bytes": 104379,
+    "text": ""
+  },
+  "ask": "Locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"input\").last\n",
+  "17_copilot": {
+    "url": "http://127.0.0.1:5173/#/ai",
+    "bytes": 104379,
+    "text": ""
+  },
+  "fee": "Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for get_by_text(\"Run fee reminders\").first\n",
+  "18_fee": {
+    "url": "http://127.0.0.1:5173/#/ai",
+    "bytes": 104379,
+    "text": ""
+  },
+  "tutor": "Locator.fill: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"input\").last\n",
+  "19_tutor": {
+    "url": "http://127.0.0.1:5173/#/student/tutor",
+    "bytes": 104379,
+    "text": ""
+  },
+  "auto": "Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"Save automation\")\n",
+  "20_auto_err": {
+    "url": "http://127.0.0.1:5173/#/settings/automations",
+    "bytes": 104379,
+    "text": ""
+  },
+  "servers_end": "both_up"
+}

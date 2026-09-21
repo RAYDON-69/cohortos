@@ -8,6 +8,7 @@ Signatures match the tested service methods exactly.
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 import uuid
 from typing import Any, Dict, List, Optional
@@ -1391,7 +1392,28 @@ def create_api_app(
         provider_name = str(keys.get("provider") or "")
         api_key = str(keys.get("api_key") or "")
         model_used = None
-        if api_key and provider_name.lower() in ("groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim", "openai", "chatgpt", "anthropic", "claude", "gemini", "google", "google_gemini"):
+        llm_error = None
+        # Cost guard: limit external LLM calls per tenant per window (env override for tests)
+        max_llm = int(os.environ.get("COHORTOS_AI_MAX_CALLS_PER_WINDOW") or "60")
+        window_sec = int(os.environ.get("COHORTOS_AI_COST_WINDOW_SEC") or "3600")
+        if not hasattr(registry, "_llm_cost"):
+            registry._llm_cost = {}
+        cost_key = f"llm:{tenant_id}"
+        now_ts = time.time()
+        bucket = registry._llm_cost.get(cost_key) or {"count": 0, "start": now_ts}
+        if now_ts - float(bucket.get("start") or 0) > window_sec:
+            bucket = {"count": 0, "start": now_ts}
+        providers_ok = (
+            "groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim",
+            "openai", "chatgpt", "anthropic", "claude", "gemini", "google", "google_gemini",
+        )
+        if api_key and provider_name.lower() in providers_ok:
+            if int(bucket.get("count") or 0) >= max_llm:
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"AI cost guard: max {max_llm} external LLM calls per window — try later or raise COHORTOS_AI_MAX_CALLS_PER_WINDOW",
+                    headers={"Retry-After": str(window_sec)},
+                )
             from services.llm_provider import (
                 build_llm_provider,
                 LLMRequest,
@@ -1399,27 +1421,33 @@ def create_api_app(
                 RateLimitError,
                 OfflineError,
             )
-            llm = build_llm_provider(provider_name, api_key)
-            system = (
-                "You are CohortOS desk assistant. Answer using ONLY the grounded centre data. "
-                "If data is missing, say so. Do not invent students or batches."
-            )
-            prompt = (
-                f"Question: {body.get('question') or ''}\n\n"
-                f"Grounded data JSON: {grounded}\n"
-                f"Local draft answer: {answer}"
-            )
             try:
+                llm = build_llm_provider(provider_name, api_key)
+                system = (
+                    "You are CohortOS desk assistant. Answer using ONLY the grounded centre data. "
+                    "If data is missing, say so. Do not invent students or batches."
+                )
+                prompt = (
+                    f"Question: {body.get('question') or ''}\n\n"
+                    f"Grounded data JSON: {grounded}\n"
+                    f"Local draft answer: {answer}"
+                )
                 resp = llm.complete(LLMRequest(prompt=prompt, system=system, max_tokens=512))
+                bucket["count"] = int(bucket.get("count") or 0) + 1
+                registry._llm_cost[cost_key] = bucket
                 if resp.text.strip():
                     answer = resp.text.strip()
                     used_external = True
                     model_used = resp.model
             except RateLimitError as e:
-                raise HTTPException(status_code=429, detail=str(e))
+                llm_error = str(e)
+                raise HTTPException(status_code=429, detail=f"Provider rate limit: {e}")
             except (LLMError, OfflineError) as e:
-                # Fall back to local grounded answer; surface error
-                tool_trace.append({"tool": "external_llm", "error": str(e)})
+                llm_error = str(e)
+                tool_trace.append({"tool": "external_llm", "error": llm_error})
+            except Exception as e:
+                llm_error = f"Provider call failed: {e}"
+                tool_trace.append({"tool": "external_llm", "error": llm_error})
 
         return {
             "answer": answer,
@@ -1429,8 +1457,10 @@ def create_api_app(
             "provider_configured": bool(api_key),
             "used_external_llm": used_external,
             "model": model_used,
-            "needs_for_external_llm": None if api_key else "Set centre AI key via Settings → AI API keys (Groq / NVIDIA NIM).",
+            "llm_error": llm_error,
+            "needs_for_external_llm": None if api_key else "Set centre AI key via Settings → AI API keys (developer console key, not a ChatGPT/Claude app login).",
         }
+
 
     
     @app.get("/t/{tenant_id}/automations/rules")
@@ -1578,6 +1608,7 @@ def create_api_app(
         provider_name = str(routes.get("tutor") or keys.get("provider") or "groq")
         api_key = str(keys.get("api_key") or "")
         used_external = False
+        llm_error = None
         if api_key and provider_name:
             try:
                 from services.llm_provider import build_llm_provider, LLMRequest, LLMError, OfflineError, RateLimitError
@@ -1594,9 +1625,12 @@ def create_api_app(
                     answer = resp.text.strip()
                     used_external = True
             except RateLimitError as e:
-                raise HTTPException(status_code=429, detail=str(e))
-            except (LLMError, OfflineError, Exception) as e:
-                pass  # keep local answer
+                llm_error = str(e)
+                raise HTTPException(status_code=429, detail=f"Provider rate limit: {e}")
+            except (LLMError, OfflineError) as e:
+                llm_error = str(e)
+            except Exception as e:
+                llm_error = f"Provider call failed: {e}"
         return {
             "answer": answer,
             "citations": citations,
@@ -1605,7 +1639,9 @@ def create_api_app(
             "student_id": student_id,
             "used_external_llm": used_external,
             "provider": provider_name if used_external else None,
+            "llm_error": llm_error,
         }
+
 
     @app.get("/t/{tenant_id}/settings/storage")
     def get_storage_settings(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
@@ -1977,7 +2013,10 @@ def create_api_app(
         import io
         _require_tenant(claims, tenant_id)
         cm = registry.get_app(tenant_id)
-        resource = cm.content.get_resource(resource_id)
+        try:
+            resource = cm.content.get_resource(resource_id)
+        except (ValueError, TypeError, Exception):
+            resource = None
         if not resource:
             raise HTTPException(status_code=404, detail="Resource not found")
         remote_id = resource.get("file_path") or resource.get("url") or ""
@@ -1985,17 +2024,39 @@ def create_api_app(
             raise HTTPException(status_code=404, detail="No file attached to this resource")
         section = cm.config.get_section("storage") or {}
         from services.storage_service import build_storage_provider, LocalFsStorageProvider
-        store = build_storage_provider(section)
-        if not store.is_configured() or not store.exists(remote_id):
-            store = LocalFsStorageProvider(section.get("root") or "/tmp/cohortos-storage")
-        if not store.exists(remote_id):
-            raise HTTPException(status_code=404, detail="File missing in storage")
-        stream = store.download(remote_id)
-        data = stream.read()
+        try:
+            store = build_storage_provider(section)
+            if not store.is_configured() or not store.exists(remote_id):
+                store = LocalFsStorageProvider(section.get("root") or "/tmp/cohortos-storage")
+            if not store.exists(remote_id):
+                raise HTTPException(status_code=404, detail="File missing in storage")
+            stream = store.download(remote_id)
+            # Cap read so a corrupt/huge object cannot hang or OOM the API
+            max_bytes = 25 * 1024 * 1024
+            data = stream.read(max_bytes + 1)
+            if data is None:
+                data = b""
+            if len(data) > max_bytes:
+                raise HTTPException(
+                    status_code=413,
+                    detail="Stored file exceeds 25MB limit and cannot be served",
+                )
+            if len(data) == 0:
+                raise HTTPException(status_code=422, detail="File is empty or unreadable")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Could not read file (corrupt or storage error): {e}",
+            )
         media = resource.get("mime_type") or "application/octet-stream"
-        return StreamingResponse(io.BytesIO(data), media_type=media, headers={
-            "Content-Disposition": f'inline; filename="{resource.get("title") or "file"}"'
-        })
+        safe_name = str(resource.get("title") or "file").replace('"', "")[:120]
+        return StreamingResponse(
+            io.BytesIO(data),
+            media_type=media,
+            headers={"Content-Disposition": f'inline; filename="{safe_name}"'},
+        )
 
     @app.post("/t/{tenant_id}/vault")
     def create_vault_resource(

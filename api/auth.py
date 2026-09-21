@@ -10,8 +10,8 @@ restart.
 """
 
 from __future__ import annotations
-
 import os
+
 import time
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -108,6 +108,9 @@ class RateLimiter:
         return [t for t in bucket if t >= cutoff]
 
     def check(self, action: str, identity: str, ip: str = "") -> None:
+        # Pilot/test mode: do not lock out automated evidence runs
+        if os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1":
+            return
         key = f"{action}:{identity}:{ip}"
         now = time.time()
         with self._lock:

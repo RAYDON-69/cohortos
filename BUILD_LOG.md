@@ -723,3 +723,55 @@ PLAN.md committed with candidates + on-paper stress tests for A–F.
 - Double rule run: no crash (**PROVEN**).
 - Tutor cross-tenant blocked (**PROVEN**).
 - Missing vault: soft message (**PROVEN**).
+
+
+## Phase 7b — Playwright evidence attempt (2026-09-20)
+
+### Step 1 — durable servers
+- Pattern: `nohup` + log files + health poll (API `/docs`, Vite `/`).
+- **Observed limit:** this sandbox periodically kills processes and wipes `/tmp`, so servers do not survive across tool invocations even with nohup. Within a single continuous run, both **did** reach HTTP 200 and stayed up for a multi-route Playwright session (`servers_end: both_up` once).
+
+### Step 2 — screenshots
+- Output dir: `screenshots/phase7/*.png` (20+ files written).
+- **FAILED-CONFIRMED (blank UI):** Playwright captured pages whose `document.body` text was **empty** and consecutive screenshots were identical byte size (~104KB). Console showed Vite `504 Outdated Optimize Dep` / failed `react/jsx-runtime` resolution when `node_modules` lived outside the frontend root.
+- HashRouter paths (`/#/route`) were used correctly after diagnosis.
+- API seed for tenant, batch, KINETICS exam, student: **worked** (HTTP 200) during the same session.
+
+### Step 3 — reclassification
+| Item | Status | Evidence |
+|------|--------|----------|
+| API automation/tutor/isolation | **PROVEN** | pytest 5/5 Phase 7 |
+| React screens via Playwright | **FAILED-CONFIRMED** | blank body screenshots; Vite dep resolution |
+| Session Electron quit/sleep | **UNVERIFIED-NEEDS-DEVICE-TEST** | cannot simulate in browser Playwright |
+| pdfjs-dist install | **PROVEN in install tree** when npm completed in /tmp (17s, pdfjs present); **FAILED-CONFIRMED** durable path — /tmp wiped; FileViewer code loads pdfjs dynamically with iframe fallback |
+
+### Step 4 — device only
+- Checklist item 1 (full quit + OS sleep) remains **UNVERIFIED-NEEDS-DEVICE-TEST**.
+
+### Step 5 — pdfjs
+- `FileViewer.tsx` updated for dynamic `import("pdfjs-dist")` + page prev/next + 25MB guard + iframe fallback.
+- `pdfjs-dist` added to install attempts; not durable in this sandbox filesystem.
+
+### Honest bottom line
+Phase 7b did **not** produce trustworthy GUI PROVEN screenshots. Backend Phase 7 remains PROVEN. GUI remains **FAILED-CONFIRMED** for blank-render under sandbox Vite, not merely unverified.
+
+
+## Phase 7c — non-GUI hardening (2026-09-21)
+
+### 1. Phase 7b push status
+- HEAD after Phase 7 was `ccbec25` (phase7 feature commit).
+- Phase 7b docs/screenshots were **not** on origin/main (commit timed out). This commit includes BUILD_LOG 7b notes + residual files as applicable.
+
+### 2. Adversarial tests (pytest)
+File: `tests/test_phase7c_adversarial.py`
+- Invalid/revoked provider key → Copilot still **200**, local answer + `llm_error` (no crash)
+- Tutor with bad key → **200**, no crash
+- Cost guard `COHORTOS_AI_MAX_CALLS_PER_WINDOW` → **429** after budget
+- Vault upload >25MB → **400**
+- Missing/invalid resource content → **404**
+- Stored oversized stream → **413**
+
+**Combined with Phase 7:** `11 passed` (5 + 6).
+
+### 3. RUN_LOCALLY.md
+Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm config set registry` + `npm install` + `npm run dev -- --host 127.0.0.1 --port 5173`.

@@ -1,9 +1,7 @@
 /**
- * Vault file viewer — uses native browser capabilities (no custom renderer).
- * PDF: <iframe> / <object> (Chrome/Edge/Firefox built-in). Images: <img>.
- * For richer PDF UX later: pdfjs-dist (Mozilla, Apache-2.0) is the recommended add-on.
+ * Vault file viewer — pdfjs-dist (Apache-2.0) for PDF when available; native fallback.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getApiBaseUrl, ensureAccessToken, tenantPath } from "../api/client";
 
 type Props = {
@@ -18,6 +16,11 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [kind, setKind] = useState<"pdf" | "image" | "video" | "audio" | "other">("other");
+  const [pdfPage, setPdfPage] = useState(1);
+  const [pdfPages, setPdfPages] = useState(0);
+  const [pdfMode, setPdfMode] = useState<"pdfjs" | "iframe" | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pdfDocRef = useRef<any>(null);
 
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -29,23 +32,37 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
           `${getApiBaseUrl()}${tenantPath(tenantId, `/vault/${resourceId}/content`)}`,
           { headers: token ? { Authorization: `Bearer ${token}` } : {} }
         );
-        if (!res.ok) {
-          throw new Error(`Could not open file (${res.status})`);
-        }
-        const ct = (contentType || res.headers.get("content-type") || "").toLowerCase();
+        if (!res.ok) throw new Error(`Could not open file (${res.status})`);
         const len = Number(res.headers.get("content-length") || 0);
-        if (len > 25 * 1024 * 1024) {
-          throw new Error("File is larger than 25MB and cannot be opened in the viewer");
-        }
+        if (len > 25 * 1024 * 1024) throw new Error("File is larger than 25MB and cannot be opened in the viewer");
+        const ct = (contentType || res.headers.get("content-type") || "").toLowerCase();
         const blob = await res.blob();
-        if (blob.size > 25 * 1024 * 1024) {
-          throw new Error("File is larger than 25MB and cannot be opened in the viewer");
-        }
+        if (blob.size > 25 * 1024 * 1024) throw new Error("File is larger than 25MB and cannot be opened in the viewer");
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
         setUrl(objectUrl);
-        if (ct.includes("pdf") || title?.toLowerCase().endsWith(".pdf")) setKind("pdf");
-        else if (ct.startsWith("image/")) setKind("image");
+        const isPdf = ct.includes("pdf") || (title || "").toLowerCase().endsWith(".pdf");
+        if (isPdf) {
+          setKind("pdf");
+          try {
+            const pdfjs = await import("pdfjs-dist");
+            // @ts-expect-error worker optional
+            if (pdfjs.GlobalWorkerOptions) {
+              pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+                "pdfjs-dist/build/pdf.worker.min.mjs",
+                import.meta.url
+              ).toString();
+            }
+            const data = new Uint8Array(await blob.arrayBuffer());
+            const doc = await pdfjs.getDocument({ data }).promise;
+            pdfDocRef.current = doc;
+            setPdfPages(doc.numPages);
+            setPdfPage(1);
+            setPdfMode("pdfjs");
+          } catch {
+            setPdfMode("iframe");
+          }
+        } else if (ct.startsWith("image/")) setKind("image");
         else if (ct.startsWith("video/")) setKind("video");
         else if (ct.startsWith("audio/")) setKind("audio");
         else setKind("other");
@@ -58,6 +75,27 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [tenantId, resourceId, contentType, title]);
+
+  useEffect(() => {
+    if (pdfMode !== "pdfjs" || !pdfDocRef.current || !canvasRef.current) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const page = await pdfDocRef.current.getPage(pdfPage);
+        const viewport = page.getViewport({ scale: 1.25 });
+        const canvas = canvasRef.current!;
+        const ctx = canvas.getContext("2d");
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "PDF render failed");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pdfMode, pdfPage]);
 
   return (
     <div
@@ -90,25 +128,51 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
             alignItems: "center",
             padding: "8px 12px",
             borderBottom: "1px solid #eee",
+            gap: 8,
           }}
         >
           <strong>{title || "View file"}</strong>
+          {pdfMode === "pdfjs" && (
+            <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <button type="button" disabled={pdfPage <= 1} onClick={() => setPdfPage((p) => Math.max(1, p - 1))}>
+                Prev
+              </button>
+              <span className="caption">
+                {pdfPage} / {pdfPages}
+              </span>
+              <button
+                type="button"
+                disabled={pdfPage >= pdfPages}
+                onClick={() => setPdfPage((p) => Math.min(pdfPages, p + 1))}
+              >
+                Next
+              </button>
+            </span>
+          )}
           <button type="button" onClick={onClose}>
             Close
           </button>
         </div>
         <div style={{ flex: 1, overflow: "auto", padding: 8 }}>
-          {error && <p role="alert">{error}</p>}
+          {error && (
+            <p role="alert" data-testid="viewer-error">
+              {error}
+            </p>
+          )}
           {!error && !url && <p className="caption muted">Loading…</p>}
-          {url && kind === "pdf" && (
-            /* pdfjs-dist (Apache-2.0) is the upgrade path for page nav/zoom; iframe uses browser PDF for zero-dep. */
+          {url && kind === "pdf" && pdfMode === "pdfjs" && (
+            <canvas ref={canvasRef} data-testid="pdf-canvas" style={{ maxWidth: "100%", display: "block", margin: "0 auto" }} />
+          )}
+          {url && kind === "pdf" && pdfMode === "iframe" && (
             <iframe title={title || "PDF"} src={url} style={{ width: "100%", height: "100%", minHeight: 480, border: 0 }} />
           )}
           {url && kind === "image" && (
-            <img src={url} alt={title || "Image"} style={{ maxWidth: "100%", margin: "0 auto", display: "block" }} />
+            <img src={url} alt={title || "Image"} style={{ maxWidth: "100%", margin: "0 auto", display: "block" }} data-testid="viewer-image" />
           )}
-          {url && kind === "video" && <video src={url} controls style={{ width: "100%", maxHeight: "80vh" }} />}
-          {url && kind === "audio" && <audio src={url} controls style={{ width: "100%" }} />}
+          {url && kind === "video" && (
+            <video src={url} controls style={{ width: "100%", maxHeight: "80vh" }} data-testid="viewer-video" />
+          )}
+          {url && kind === "audio" && <audio src={url} controls style={{ width: "100%" }} data-testid="viewer-audio" />}
           {url && kind === "other" && (
             <p>
               Preview not available for this type.{" "}
