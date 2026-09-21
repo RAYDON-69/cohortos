@@ -1,6 +1,6 @@
 .empty-state {
   text-align: center;
-  padding: 40px 16px;
+  padding: var(--space-12) var(--space-4);
   color: var(--slate-700);
   border: 1px dashed var(--border);
   border-radius: var(--radius-card);

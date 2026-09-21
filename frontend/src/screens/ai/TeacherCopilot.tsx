@@ -102,7 +102,7 @@ export function TeacherCopilotScreen() {
         </Card>
         <div
           style={{
-            border: "1px solid #e5e5e5",
+            border: "1px solid var(--border)",
             borderRadius: 8,
             minHeight: 280,
             padding: 12,
@@ -116,7 +116,7 @@ export function TeacherCopilotScreen() {
             <div key={i} style={{ alignSelf: m.role === "user" ? "flex-end" : "flex-start", maxWidth: "90%" }}>
               <div
                 style={{
-                  background: m.role === "user" ? "#e8f0fe" : "#f6f6f6",
+                  background: m.role === "user" ? "var(--peri-bg)" : "var(--surface-2)",
                   padding: "8px 12px",
                   borderRadius: 8,
                 }}

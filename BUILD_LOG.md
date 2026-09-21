@@ -775,3 +775,19 @@ File: `tests/test_phase7c_adversarial.py`
 
 ### 3. RUN_LOCALLY.md
 Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm config set registry` + `npm install` + `npm run dev -- --host 127.0.0.1 --port 5173`.
+
+
+## Phase 7d — global design pass (Workstream E)
+
+### Pick
+**CohortOS design-system tokens** (existing SPEC palette), not Open Props / Pico / shadcn — zero new deps, `audit:tokens` already gates hex, matches design-system.html cream/sage/peri.
+
+### Applied globally
+- Expanded `frontend/src/tokens.css`: `.view`, stacks/rows, panels, table/form defaults, chat bubbles, sticky headers, mobile density.
+- Shared components: Card radius/padding tokens; FormField stronger border; EmptyState spacing tokens.
+- Hex scrub: GlobalSearch, ErrorBoundary, FileViewer, TeacherCopilot → tokens only.
+- **Screens covered:** all **42** production screens under `src/screens/**` (global `.view` + shared components + AppShell), plus shell, StaffLogin path, FileViewer/ErrorBoundary.
+
+### Verification
+- `npm run audit:tokens` equivalent: **token audit clean** (this session).
+- GUI visual proof: device `RUN_LOCALLY.md` (no sandbox screenshots).

@@ -104,7 +104,7 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.55)",
+        background: "rgba(46, 58, 36, 0.55)",
         zIndex: 1000,
         display: "flex",
         flexDirection: "column",
@@ -113,7 +113,7 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--white)",
           borderRadius: 8,
           flex: 1,
           display: "flex",
@@ -127,7 +127,7 @@ export function FileViewer({ tenantId, resourceId, title, contentType, onClose }
             justifyContent: "space-between",
             alignItems: "center",
             padding: "8px 12px",
-            borderBottom: "1px solid #eee",
+            borderBottom: "1px solid var(--border)",
             gap: 8,
           }}
         >

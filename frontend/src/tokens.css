@@ -171,3 +171,207 @@ body {
   --leading-tight: 1.25;
   --leading-normal: 1.5;
 }
+
+/* ── Phase 7d — global layout / type utilities (CohortOS design system) ── */
+
+:root {
+  /* Density */
+  --control-height: 44px;
+  --control-height-sm: 40px;
+  --sidebar-width: 232px;
+  --content-max: 1100px;
+}
+
+/* Page shell inside AppShell main */
+.view {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.view-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.view-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.view-subtitle,
+.view .caption.muted {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+/* Stacks & rows */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.stack-sm { gap: var(--space-2); }
+.stack-lg { gap: var(--space-5); }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.row-between {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Surfaces */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  box-shadow: var(--shadow);
+}
+.panel-soft {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+}
+
+/* Tables densify consistently */
+.view table,
+.data-table-wrap {
+  width: 100%;
+}
+.view table {
+  border-collapse: collapse;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.view th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sage-700);
+  background: var(--sage-100);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.view td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-md);
+  color: var(--text-primary);
+}
+.view tr:last-child td {
+  border-bottom: none;
+}
+
+/* Forms inside views */
+.view label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+.view input.form-input,
+.view select.form-input,
+.view textarea.form-input,
+.view input:not([type="checkbox"]):not([type="radio"]),
+.view select,
+.view textarea {
+  font-family: var(--body);
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  background: var(--surface-0);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  min-height: var(--control-height);
+  padding: 11px 13px;
+}
+.view textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Status text */
+.error-text {
+  color: var(--error);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+.success-text {
+  color: var(--sage-700);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+/* Chat bubbles (Copilot / Tutor) */
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 420px;
+  overflow: auto;
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+.chat-bubble {
+  max-width: 85%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+}
+.chat-bubble-user {
+  align-self: flex-end;
+  background: var(--peri-bg);
+  color: var(--peri-text);
+}
+.chat-bubble-assistant {
+  align-self: flex-start;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+/* Sticky table header helper */
+.table-sticky thead th,
+.data-table-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+@media (max-width: 760px) {
+  .view {
+    padding: var(--space-4) var(--space-3) var(--space-8);
+  }
+  .view-title {
+    font-size: var(--text-xl);
+  }
+}

@@ -114,21 +114,21 @@ Browser session / consumer ChatGPT Plus login as API backend (ToS + fragile).
 
 ---
 
-## Workstream E — Design pass
+## Workstream E — Design pass (Phase 7d completion)
 
-### Candidates
-| System | License | Fit |
-|--------|---------|-----|
-| **MUI / Ant Design** | MIT | Huge bundle, fights offline desk |
-| **shadcn/ui + Tailwind** | MIT | Needs Tailwind pipeline change |
-| **Existing tokens.css + component polish** | Owned | audit:tokens already gates hex |
+### Candidates considered
+| System | License | Maturity | Fit for CohortOS desk |
+|--------|---------|----------|------------------------|
+| **Open Props** (open-props.style) | MIT | Active | Token-first utilities; would duplicate SPEC design-system.html cream/sage palette |
+| **Pico CSS** | MIT | Active | Classless polish; fights AppShell/sidebar density and custom status badges |
+| **Radix Themes / shadcn** | MIT | Active | Needs Tailwind + large dependency surface for offline Electron |
+| **CohortOS design-system tokens** (existing `tokens.css` from design-system.html §2) | Project | Spec-aligned | Already gates hex via `npm run audit:tokens`; cream/sage/peri palette; offline-friendly zero new deps |
 
-**Pick: deepen existing design tokens** (no new CSS framework) — spacing/type scale applied via shared classes; Settings/Copilot/Tutor/Automations use Card/Button/FormField only. Keeps `npm run audit:tokens` clean.
+**Pick: CohortOS design-system tokens (deepened)** — not a third-party kit. Open Props / Pico were rejected to avoid palette drift from SPEC and extra CSS payload. Phase 7d applies the system **globally**: expanded layout/type utilities on `:root`, unified `.view` / tables / forms / chat, Card radius→token, FormField border→`--border-strong`, fixed residual hex in GlobalSearch, ErrorBoundary, FileViewer, TeacherCopilot.
 
 ### Stress-test on paper
-- Token audit fails if any hex sneaks in → CI frontend-ci catches it.
-
----
+- Token audit fails if any hex sneaks in → `npm run audit:tokens` / frontend-ci.
+- Mobile ≤760px: `.view` padding and title scale down without breaking AppShell strip.
 
 ## Workstream F — Players
 

@@ -53,7 +53,7 @@ export class ErrorBoundary extends Component<Props, State> {
           }}
         >
           <h1 style={{ fontSize: 18, marginBottom: 8 }}>This screen hit an error</h1>
-          <p style={{ color: "#555", marginBottom: 16 }}>{this.state.message}</p>
+          <p style={{ color: "var(--slate-700)", marginBottom: 16 }}>{this.state.message}</p>
           <button type="button" onClick={this.handleRetry}>
             Try again
           </button>
