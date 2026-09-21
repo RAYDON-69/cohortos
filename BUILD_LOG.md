@@ -791,3 +791,47 @@ Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm conf
 ### Verification
 - `npm run audit:tokens` equivalent: **token audit clean** (this session).
 - GUI visual proof: device `RUN_LOCALLY.md` (no sandbox screenshots).
+
+
+## Phase 8 — design override, viewers, RAG (2026-09-21)
+
+### A — Design
+- **Reopened 7d decision.** Tailwind is build-time CSS (no Electron runtime weight). Adopted **shadcn-style primitives** (`Button`/`Card`/`Input` via CVA + Radix Slot) + **Tailwind 3** + **Framer Motion** on login.
+- Login rebuilt: gradient, hierarchy, motion on enter/error/OTP step.
+- Package.json deps added; founder must `npm install` in `frontend/` once.
+- **PROVEN:** code landed. **UNVERIFIED-NEEDS-DEVICE-TEST:** visual feel (checklist 16).
+
+### B — Viewers
+- `FileViewer` tree: load blob → kind detect → **pdfjs** (page/zoom/search) | **image lightbox zoom** | **Plyr** video/audio | other download.
+- **UNVERIFIED-NEEDS-DEVICE-TEST** checklist 17–18.
+
+### C — RAG + DeepSeek
+- Candidates: Chroma (heavy), LanceDB (embeds), sqlite-vec (native), **chunked BM25 pure Python (picked)**.
+- Multi-doc pytest: 5 long synthetic books, kinetics query cites Kinetics title — **3/3 PROVEN**.
+- DeepSeek OpenAI-compatible provider + AiKeys option; cheap default tier with Groq.
+
+### D — Self-audit punch list
+
+**CEO (first 5 minutes bounce risks)**
+- Login may still feel empty until npm install pulls Tailwind/Motion (blank if deps missing).
+- No guided empty-state tour for new centres after trial.
+- SMS still pilot OTP codes — parents/teachers may not trust “real product.”
+
+**CTO (architecture)**
+- BM25 has no semantic embeddings — synonym miss until sqlite-vec/embed path.
+- Single-process SQLite fine for one centre; multi-centre cloud sync still thin.
+- HashRouter + dual CSS (tokens + Tailwind) needs cleanup to one source of truth.
+
+**CFO (cost runaway)**
+- Cost guard on `/ai/query` and `/tutor/query` (env `COHORTOS_AI_MAX_CALLS_PER_WINDOW`).
+- Other AI paths (`solve`, `teach` if enabled) — **verify next round** still call limiter.
+- DeepSeek cheap default reduces Groq burn if routed correctly in Settings.
+
+**Head of Engineering**
+- Frontend deps not installed in CI lockfile yet — `npm install` required; add lockfile in CI.
+- Thin vitest for new `ui/` components and FileViewer.
+- RUN_LOCALLY should mention `npm install` after Phase 8 package.json change (already does).
+- Cold-start engineer: read PLAN.md Phase 8 + RUN_LOCALLY.md first.
+
+### Fixed this round
+- Design stack adoption, login motion, FileViewer capabilities, BM25 multi-doc, DeepSeek, tests green.

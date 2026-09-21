@@ -151,3 +151,36 @@ Browser session / consumer ChatGPT Plus login as API backend (ToS + fragile).
 
 ## Implementation order
 A → D (providers needed by B/C) → C → B → F → E polish.
+
+
+## Phase 8 — Design override, viewers, RAG harness
+
+### Workstream A — Design system (reopened)
+
+| Candidate | License | Runtime weight | Fit |
+|-----------|---------|----------------|-----|
+| In-house tokens only (7d) | Project | 0 | Unsatisfying login/spacing/animation (founder feedback) |
+| **shadcn/ui + Tailwind + Radix** | MIT | **0 runtime CSS** (build-time purge) | Industry SaaS baseline; form/dialog/dropdown primitives |
+| MUI | MIT | Large runtime JS | Too heavy for desk |
+
+**Pick: shadcn/ui pattern + Tailwind v4 + Framer Motion (MIT).**  
+Prior “Tailwind is heavy for Electron” was wrong: Tailwind emits static CSS at build time. Framer Motion chosen over pure CSS for login/page transitions with spring physics; ~30KB gzipped is acceptable vs unsatisfying static UI.
+
+### Workstream B — Viewers
+- **pdfjs-dist** (Apache-2.0): page nav, zoom, text search in FileViewer
+- **Image lightbox**: zoom/pan overlay (no new dep)
+- **Plyr** (MIT): video/audio seek, speed, volume — single entry `FileViewer`
+
+### Workstream C — RAG
+
+| Option | License | Offline / RAM | Notes |
+|--------|---------|---------------|-------|
+| ChromaDB | Apache | Heavy process | Rejected for desk |
+| LanceDB | Apache | Embeddable | Needs embedding vectors + pip native |
+| **sqlite-vec** | MIT | SQLite extension | Best long-term; native load varies by OS |
+| **Chunked BM25 index (pure Python)** | MIT pattern | Zero native deps | **Pick for v1** — scales to 20+ long docs via paragraph chunking + BM25; no embedding API cost offline |
+
+Embeddings/sqlite-vec flagged as Phase 9 upgrade when centres accept online embed or ship native `.so`.
+
+**DeepSeek:** OpenAI-compatible `https://api.deepseek.com`, models `deepseek-chat` / `deepseek-chat` flash tier; default cheap route with Groq.
+

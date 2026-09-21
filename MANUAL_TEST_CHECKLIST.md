@@ -84,5 +84,26 @@ Check each box only if you saw the result yourself.
 
 ---
 
+## Phase 8 — design, viewers, RAG
+
+16. **Login feel**  
+    - Open sign-in cold.  
+    - **Pass:** Clear hierarchy, smooth enter animation, error banner animates in/out; not a flat clinical form.
+
+17. **PDF viewer**  
+    - Vault → open a PDF → Prev/Next, zoom, search a word that exists.  
+    - **Pass:** Page changes; zoom works; find jumps page.
+
+18. **Image / media**  
+    - Open an image (zoom) and a short audio/video if available.  
+    - **Pass:** Zoom buttons work; media has seek/speed (Plyr) or clear native controls.
+
+19. **Tutor multi-doc**  
+    - Upload several notes to one batch, ask a question only one note answers.  
+    - **Pass:** Answer cites that note’s title, not a random other batch file.
+
+---
+
 If anything fails, note the step number and a screenshot in your reply to the builder.
+
 

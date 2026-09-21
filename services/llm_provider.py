@@ -592,6 +592,63 @@ class GeminiAPIProvider(LLMProvider):
             text = "".join(p.get("text", "") for p in parts if isinstance(p, dict))
         return LLMResponse(text=text or "", model=self.model, tier=request.tier, raw=data)
 
+
+class DeepSeekProvider(LLMProvider):
+    """DeepSeek OpenAI-compatible API (api.deepseek.com) — cheap long-context BYO key."""
+
+    def __init__(self, api_key: str, model: str = "deepseek-chat", base_url: str = "https://api.deepseek.com"):
+        self.api_key = (api_key or "").strip()
+        self.model = model or "deepseek-chat"
+        self.base_url = (base_url or "https://api.deepseek.com").rstrip("/")
+
+    def is_available(self) -> bool:
+        return bool(self.api_key)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        if not self.api_key:
+            raise OfflineError("DeepSeek API key not configured")
+        import json, urllib.request, urllib.error
+        messages = []
+        if request.system:
+            messages.append({"role": "system", "content": request.system})
+        messages.append({"role": "user", "content": request.prompt})
+        body = json.dumps({
+            "model": self.model,
+            "messages": messages,
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens,
+        }).encode()
+        req = urllib.request.Request(
+            f"{self.base_url}/v1/chat/completions",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "CohortOS/0.13",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            err = e.read().decode(errors="replace")[:400]
+            if e.code == 429:
+                raise RateLimitError(f"DeepSeek rate limit: {err}") from e
+            raise LLMError(f"DeepSeek HTTP {e.code}: {err}") from e
+        except OSError as e:
+            raise OfflineError(f"DeepSeek network error: {e}") from e
+        text = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text or "",
+            model=str(data.get("model") or self.model),
+            tier=request.tier,
+            tokens_in=int(usage.get("prompt_tokens") or 0),
+            tokens_out=int(usage.get("completion_tokens") or 0),
+            raw=data,
+        )
+
 def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
     p = (provider or "").strip().lower()
     if p in ("groq",):
@@ -602,6 +659,11 @@ def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
             model=kwargs.get("model") or "google/gemma-3-4b-it",
             base_url=kwargs.get("base_url") or "https://integrate.api.nvidia.com/v1",
         )
+    if p in ("deepseek", "deepseek-chat", "deepseek_v3", "deepseek-v4-flash"):
+        model = kwargs.get("model")
+        if not model:
+            model = "deepseek-chat" if "flash" not in p else "deepseek-chat"
+        return DeepSeekProvider(api_key, model=model, base_url=kwargs.get("base_url") or "https://api.deepseek.com")
     if p in ("openai", "chatgpt"):
         return OpenAIProvider(api_key, model=kwargs.get("model") or "gpt-4o-mini")
     if p in ("anthropic", "claude"):

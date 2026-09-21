@@ -59,10 +59,11 @@ export function AiKeysScreen() {
             <option value="openai">OpenAI Platform key</option>
             <option value="anthropic">Anthropic Console key</option>
             <option value="gemini">Google AI Studio (Gemini) key</option>
+            <option value="deepseek">DeepSeek (api.deepseek.com) — default cheap tier</option>
           </SelectInput>
         <p className="caption muted">
           Bring your own API key from the provider&apos;s developer console — not a ChatGPT Plus / Claude Pro login.
-          Links: platform.openai.com · console.anthropic.com · aistudio.google.com · console.groq.com
+          Links: platform.openai.com · console.anthropic.com · aistudio.google.com · console.groq.com · platform.deepseek.com
         </p>
         </FormField>
         <FormField id="key" label="API key">

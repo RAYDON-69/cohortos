@@ -1406,6 +1406,7 @@ def create_api_app(
         providers_ok = (
             "groq", "nim", "nvidia", "nvidia_nim", "nvidia-nim",
             "openai", "chatgpt", "anthropic", "claude", "gemini", "google", "google_gemini",
+            "deepseek", "deepseek-chat", "deepseek_v3", "deepseek-v4-flash",
         )
         if api_key and provider_name.lower() in providers_ok:
             if int(bucket.get("count") or 0) >= max_llm:
