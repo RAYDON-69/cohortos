@@ -12,7 +12,6 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getBatchPayments, markPaid, lockPayment, unlockPayment, loadTokens } from "../../api/client"
 import type { PaymentRow, BatchRow, ApiError } from "../../api/client"
 import "../../components/DataTable.css";
-import "../../components/Button.css";
 import "../../components/Badge.css";
 import "../../components/Confirm.css";
 import "../../components/FormField.css";

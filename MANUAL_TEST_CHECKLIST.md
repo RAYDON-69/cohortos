@@ -104,6 +104,17 @@ Check each box only if you saw the result yourself.
 
 ---
 
+## Phase 9
+
+20. **Page transition** — navigate Attendance → Exams → Settings; soft fade/rise, not hard cut.
+21. **PDF toolbar** — thumbnails, outline (if any), continuous mode, rotate, theme, print, search next hit.
+22. **Image pan** — drag to pan, wheel zoom, rotate, fit/actual.
+23. **Video** — speed menu, space to play (focus player), fullscreen.
+24. **Missing deps message** — temporarily rename node_modules and open UI; should show `cd frontend && npm install` instructions (then restore).
+
+---
+
 If anything fails, note the step number and a screenshot in your reply to the builder.
+
 
 

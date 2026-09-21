@@ -3,7 +3,6 @@ import { AppShell } from "../../shell/AppShell";
 import { buildDeskNav } from "../../nav/deskNav";
 import { Card } from "../../components/Card";
 import { useLocale } from "../../i18n/LocaleContext";
-import "../../components/Card.css";
 import "../../shell/AppShell.css";
 
 export function SupportLegalScreen() {

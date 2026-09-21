@@ -7,8 +7,6 @@ import { FormField, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { ocrAssist, loadTokens } from "../../api/client"
 import type { ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";
 

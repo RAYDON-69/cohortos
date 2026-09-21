@@ -184,3 +184,22 @@ Embeddings/sqlite-vec flagged as Phase 9 upgrade when centres accept online embe
 
 **DeepSeek:** OpenAI-compatible `https://api.deepseek.com`, models `deepseek-chat` / `deepseek-chat` flash tier; default cheap route with Groq.
 
+
+
+## Phase 9 — Ultimate enforcement
+
+### Design references (feel targets)
+1. **Linear** — dense desk, fast motion, muted borders
+2. **Notion** — calm surfaces, soft page enter
+3. **Claude.ai** — inviting auth, clear hierarchy on login
+
+### Embedding decision
+| Approach | Verdict |
+|----------|---------|
+| Chroma / LanceDB server | Rejected — process/weight |
+| sqlite-vec native | Rejected this round — OS-specific `.so` shipping |
+| onnx MiniLM download | Attractive; **NOT-DONE** without reliable model cache in pilot offline path |
+| **Hashing word+char-trigram vectors + numpy cosine + synonym expand + BM25 hybrid** | **DONE this round** — no GPU, no native ext; proven with paraphrase query |
+
+Honest limit: not full neural semantic parity with BGE/MiniLM. Neural local model remains **NOT-DONE** (blocker: offline model download + size for desk installers). Hybrid still required to pass paraphrase test without keyword overlap.
+

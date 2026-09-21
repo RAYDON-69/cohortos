@@ -9,8 +9,6 @@ import { FormField, SelectInput, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getDelayedCandidates, setNotifyFlag, loadTokens } from "../../api/client"
 import type { PaymentRow, BatchRow, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/Badge.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";

@@ -8,8 +8,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getBatchDetail, setLateThreshold, addExtraSession, loadTokens, createBatch } from "../../api/client"
 import type { BatchRow, ExtraSession, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";
 

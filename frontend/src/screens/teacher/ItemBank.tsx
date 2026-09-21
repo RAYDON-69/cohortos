@@ -9,8 +9,6 @@ import { FormField, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listItemBank, getItemHistory, pushItemToBank, loadTokens } from "../../api/client"
 import type { ItemBankRow, ItemHistoryEntry, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/DataTable.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";

@@ -8,8 +8,6 @@ import { ModalConfirm } from "../../components/Confirm";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listVault, createVaultResource, uploadVaultResource, vaultContentUrl, setVaultAccessRules, relaxVaultProtection, restoreVaultProtection, listBatches, loadTokens, ensureAccessToken } from "../../api/client"
 import type { VaultResource, AccessRuleRow, BatchRow, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../components/Confirm.css";
 import "../../shell/AppShell.css";

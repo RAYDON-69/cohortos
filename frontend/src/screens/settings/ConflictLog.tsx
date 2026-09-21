@@ -20,7 +20,6 @@ import {
 } from "../../api/client";
 import "../../components/DataTable.css";
 import "../../components/Badge.css";
-import "../../components/Button.css";
 import "../../shell/AppShell.css";
 
 export function ConflictLogScreen() {

@@ -13,8 +13,6 @@ import { listStudentsApi, listBatches, listTemplates, checkDuplicates, previewRo
 import type { StudentRow, BatchRow, TemplateRow, DuplicateMatch, MigrationResult, ApiError } from "../../api/client"
 import "../../components/DataTable.css";
 import "../../components/FormField.css";
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/Confirm.css";
 import "../../shell/AppShell.css";
 

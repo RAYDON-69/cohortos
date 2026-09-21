@@ -131,5 +131,82 @@ class TestPhase8Rag(unittest.TestCase):
         self.assertFalse(r.json().get("grounded"))
 
 
+    def test_semantic_paraphrase_without_keyword_overlap(self):
+        """Query must not use kinetics/Arrhenius words; still rank kinetics doc via embeddings."""
+        tid, h = self._login()
+        batch = self.client.post(
+            f"/t/{tid}/batches",
+            headers=h,
+            json={"days": ["sat"], "hour": 10, "name": "Phys B"},
+        ).json()
+        bid = batch["batch_id"]
+        books = [
+            (
+                "Organic Chemistry Vol 1",
+                "alkanes alkenes aromatic rings substitution benzene. " * 50,
+            ),
+            (
+                "Kinetics and Rate Laws",
+                "chemical kinetics rate constant activation energy collision theory. " * 40
+                + "first order second order half life Arrhenius equation temperature dependence. " * 30,
+            ),
+            (
+                "Electromagnetism Notes",
+                "Faraday induction magnetic flux Gauss law ampere. " * 50,
+            ),
+            (
+                "Bangla Literature Anthology",
+                "রবীন্দ্রনাথ ঠাকুর নজরুল ইসলাম কবিতা গল্প. " * 40,
+            ),
+            (
+                "Algebra Problem Set",
+                "quadratic equations matrices determinants linear. " * 50,
+            ),
+        ]
+        for title, body in books:
+            r = self.client.post(
+                f"/t/{tid}/vault",
+                headers=h,
+                json={
+                    "title": title,
+                    "resource_type": "pdf",
+                    "topic": "study",
+                    "description": body,
+                    "batch_ids": [bid],
+                    "protection_level": "owner_only",
+                },
+            )
+            self.assertEqual(r.status_code, 200, r.text)
+
+        # Paraphrase: no 'kinetics', 'Arrhenius', 'rate constant' in query
+        query = "How fast does a reaction proceed when temperature rises?"
+        for banned in ("kinetics", "arrhenius", "rate constant", "activation"):
+            self.assertNotIn(banned, query.lower())
+
+        r = self.client.post(
+            f"/t/{tid}/tutor/query",
+            headers=h,
+            json={"question": query, "batch_id": bid},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertTrue(body.get("grounded"), body)
+        titles = " ".join(str(c.get("title") or "") for c in (body.get("citations") or [])).lower()
+        self.assertIn("kinetic", titles, f"expected kinetics doc, got {titles!r} body={body}")
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEmbeddingUnit(unittest.TestCase):
+    def test_cosine_prefers_kinetics_for_paraphrase(self):
+        from services.embedding_service import embed_text, cosine
+        q = embed_text("How fast does a reaction proceed when temperature rises?")
+        k = embed_text(
+            "Kinetics and Rate Laws chemical kinetics rate constant activation energy Arrhenius"
+        )
+        o = embed_text("Organic Chemistry alkanes alkenes aromatic benzene rings")
+        e = embed_text("Electromagnetism Faraday induction magnetic flux Gauss")
+        self.assertGreater(cosine(q, k), cosine(q, o))
+        self.assertGreater(cosine(q, k), cosine(q, e))

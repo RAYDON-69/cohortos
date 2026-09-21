@@ -7,8 +7,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getTopicHeatmap, getStruggleList, generateRecapDraft, loadTokens } from "../../api/client"
 import type { BatchRow, HeatmapTopic, StruggleRow, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";
 

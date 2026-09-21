@@ -13,8 +13,6 @@ import {
   saveStudentSession,
   plainAccessReason,
 } from "./studentContext";
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../components/LanguageToggle.css";
 import "../../shell/MobileShell.css";

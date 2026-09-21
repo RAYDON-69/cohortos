@@ -8,7 +8,6 @@ import { buildDeskNav } from "../../nav/deskNav";
 import { Card } from "../../components/Card";
 import { useTenant } from "../../hooks/useTenant";
 import { apiRequest, tenantPath, type ApiError } from "../../api/client";
-import "../../components/Card.css";
 import "../../shell/AppShell.css";
 
 export function BatchDetailScreen() {

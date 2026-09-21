@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PageTransition } from "./components/PageTransition";
 import { Routes, Route, Navigate } from "react-router-dom";
 import {
   startConnectivityPoll,
@@ -48,13 +49,11 @@ import { TenantDetailScreen } from "./screens/founder/TenantDetail";
 import { ProvisionScreen } from "./screens/founder/Provision";
 import { PricingScreen } from "./screens/founder/Pricing";
 import "./App.css";
-import "./components/Button.css";
 import "./components/Badge.css";
 import "./components/SyncPill.css";
 import "./components/LanguageToggle.css";
 import "./components/EmptyState.css";
 import "./components/DataTable.css";
-import "./components/Card.css";
 import "./components/FormField.css";
 import "./components/Confirm.css";
 import "./shell/AppShell.css";
@@ -68,6 +67,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+    <PageTransition>
     <Routes>
       <Route path="/login" element={<StaffLogin />} />
       <Route path="/setup" element={<RequireAuth><CentreSetupWizardScreen /></RequireAuth>} />
@@ -114,6 +114,7 @@ export default function App() {
       <Route path="/" element={<Navigate to="/attendance" replace />} />
       <Route path="*" element={<Navigate to="/attendance" replace />} />
     </Routes>
+    </PageTransition>
     </ErrorBoundary>
   );
 }

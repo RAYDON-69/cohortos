@@ -10,8 +10,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listStaff, createStaff, assignStaffRole, loadTokens } from "../../api/client"
 import type { StaffRow, RoleRow, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/DataTable.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";

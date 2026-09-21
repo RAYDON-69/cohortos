@@ -531,6 +531,27 @@ def create_api_app(
     # ── Auth ──────────────────────────────────────────────────────────
 
 
+
+    def _llm_cost_guard(tenant_id: str) -> None:
+        """Shared AI cost guard for every external LLM path."""
+        max_llm = int(os.environ.get("COHORTOS_AI_MAX_CALLS_PER_WINDOW") or "60")
+        window_sec = int(os.environ.get("COHORTOS_AI_COST_WINDOW_SEC") or "3600")
+        if not hasattr(registry, "_llm_cost"):
+            registry._llm_cost = {}
+        cost_key = f"llm:{tenant_id}"
+        now_ts = time.time()
+        bucket = registry._llm_cost.get(cost_key) or {"count": 0, "start": now_ts}
+        if now_ts - float(bucket.get("start") or 0) > window_sec:
+            bucket = {"count": 0, "start": now_ts}
+        if int(bucket.get("count") or 0) >= max_llm:
+            raise HTTPException(
+                status_code=429,
+                detail=f"AI cost guard: max {max_llm} external LLM calls per window",
+                headers={"Retry-After": str(window_sec)},
+            )
+        bucket["count"] = int(bucket.get("count") or 0) + 1
+        registry._llm_cost[cost_key] = bucket
+
     @app.post("/auth/centre-trial")
     def centre_trial(body: CentreTrialBody, request: Request):
         """
@@ -2172,6 +2193,7 @@ def create_api_app(
     @app.post("/t/{tenant_id}/solve/ask")
     def solve_ask(tenant_id: str, body: SolveAskBody, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
+        _llm_cost_guard(tenant_id)
         cm = registry.get_app(tenant_id)
         result = cm.solve.ask(
             student_id=body.student_id or str(claims.get("sub") or "student"),
@@ -2376,6 +2398,7 @@ def create_api_app(
         cm = registry.get_app(tenant_id)
         body = body or OcrBody()
         try:
+            _llm_cost_guard(tenant_id)
             result = cm.teach.ocr_grade_handwriting(
                 image_ref=body.image_b64 or body.text or "inline",
                 rubric={"text": body.rubric} if body.rubric else None,
@@ -2400,6 +2423,7 @@ def create_api_app(
         body = body or RecapDraftBody()
         try:
             topic = body.topic or body.misconception or "general"
+            _llm_cost_guard(tenant_id)
             result = cm.teach.generate_analytics_suggestion(
                 subject=body.subject or "physics",
                 topic=topic,

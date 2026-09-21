@@ -24,8 +24,6 @@ import {
   type BiometricDeviceRow,
   type ApiError,
 } from "../../api/client";
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../shell/AppShell.css";
 

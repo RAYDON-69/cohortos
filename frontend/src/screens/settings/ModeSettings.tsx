@@ -8,8 +8,6 @@ import { Card } from "../../components/Card";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getCentreMode, setCentreMode } from "../../api/client"
 import type { ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../shell/AppShell.css";
 
 /**

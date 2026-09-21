@@ -10,8 +10,6 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { solveAsk, loadTokens } from "../../api/client"
 import type { SolveResponse, ApiError } from "../../api/client"
 import { loadStudentSession } from "./studentContext";
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../components/Badge.css";
 import "../../components/LanguageToggle.css";

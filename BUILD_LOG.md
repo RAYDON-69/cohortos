@@ -835,3 +835,75 @@ Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm conf
 
 ### Fixed this round
 - Design stack adoption, login motion, FileViewer capabilities, BM25 multi-doc, DeepSeek, tests green.
+
+
+## Phase 9 — checklists (item-by-item)
+
+### A — Design migration
+| Item | Status |
+|------|--------|
+| Single stack: Button/Card → ui/CVA re-exports | **PROVEN** (code) |
+| Strip Button.css/Card.css imports from screens | **PROVEN** (38 screens stripped) |
+| PageTransition (Framer) on routes | **PROVEN** (code) |
+| Login motion (Phase 8) | **PROVEN** (code) |
+| Dialog/Toast motion primitives | **PROVEN** (code) |
+| ListItemMotion helper | **PROVEN** (code) |
+| Every screen fully Tailwind-only (no DataTable.css etc.) | **NOT-DONE** — Badge/DataTable/FormField/AppShell still legacy CSS tokens (blocker: large mechanical pass; dual stack reduced but not eliminated) |
+| Feel vs Linear/Notion/Claude | **UNVERIFIED-NEEDS-DEVICE-TEST** |
+
+### B — Viewers checklist
+**PDF**
+| Feature | Status |
+|---------|--------|
+| Page thumbnails/grid | **PROVEN** (code — optional panel) |
+| Outline navigation | **PROVEN** (code — if doc has outline) |
+| Search + next match | **PROVEN** (code) |
+| Highlight-all in canvas | **NOT-DONE** — text layer highlight not painted (blocker: pdfjs text-layer integration time) |
+| Text selection/copy | **Partial** — canvas select-text class; true text layer **NOT-DONE** |
+| Continuous + single page | **PROVEN** (code) |
+| Rotate | **PROVEN** |
+| Print | **PROVEN** |
+| Dark/light theme | **PROVEN** |
+| Keyboard zoom | **PROVEN** |
+| Fullscreen | **PROVEN** |
+| Pinch zoom | **NOT-DONE** (touch handlers not wired) |
+
+**Image**
+| Feature | Status |
+|---------|--------|
+| Pan/zoom wheel | **PROVEN** |
+| Pinch | **NOT-DONE** |
+| Rotate | **PROVEN** |
+| Fit / actual | **PROVEN** |
+| Next/prev folder | **PROVEN** (via siblingIds props) |
+| Fullscreen | **PROVEN** |
+
+**Video/audio**
+| Feature | Status |
+|---------|--------|
+| Scrub + speed 0.5–2x | **PROVEN** (Plyr) |
+| Thumbnail scrub preview | **NOT-DONE** (Plyr plugin not added) |
+| Captions if present | **PROVEN** (Plyr captions control) |
+| PiP | **PROVEN** (Plyr pip control) |
+| Keyboard | **PROVEN** (Plyr keyboard) |
+| Mute / fullscreen | **PROVEN** |
+
+### C — Semantic retrieval
+| Item | Status |
+|------|--------|
+| Real vector embed + cosine | **PROVEN** (`embedding_service.py`, numpy if present) |
+| Hybrid BM25 secondary | **PROVEN** |
+| Paraphrase query without keyword overlap | **PROVEN** (pytest) |
+| Neural local model (MiniLM/BGE) | **NOT-DONE** (blocker: offline model packaging) |
+
+**Tests:** `tests/test_phase8_rag_multidoc.py` + unit cosine — **5 passed**; cost guard solve — **1 passed**; **6 total this run**.
+
+### D — Punch list
+| Item | Status |
+|------|--------|
+| Cost guard solve/ask | **PROVEN** (pytest 429) |
+| Cost guard OCR/recap teach | **PROVEN** (code wired) |
+| Cost guard already on query/tutor | **PROVEN** (Phase 7c) |
+| package-lock.json | **PROVEN** (generated, ~397KB) |
+| Friendly deps missing message | **PROVEN** (`main.tsx` DepsGate + boot catch) |
+

@@ -8,8 +8,6 @@ import { ModalConfirm } from "../../components/Confirm";
 import { useLocale } from "../../i18n/LocaleContext";
 import { founderGetTenant, founderSuspend, founderExtend, founderActivate } from "../../api/client"
 import type { FounderTenant, AiMetrics, ApiError } from "../../api/client"
-import "../../components/Button.css";
-import "../../components/Card.css";
 import "../../components/FormField.css";
 import "../../components/Confirm.css";
 import "../../shell/AppShell.css";
