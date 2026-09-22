@@ -18,8 +18,6 @@ import {
   testStorageProvider,
   type ApiError,
 } from "../../api/client";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 export function StorageProviderScreen() {
   const navigate = useNavigate();

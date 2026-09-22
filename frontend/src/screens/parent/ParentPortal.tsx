@@ -8,9 +8,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getParentPortal, getParentStudentSummary, getParentNotifications, getParentPreferences, setParentPreference, createStudentAccount, loadTokens } from "../../api/client"
 import type { ParentChild, ParentNotification, NotifPref, ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../components/LanguageToggle.css";
-import "../../shell/MobileShell.css";
 
 /**
  * Parent portal — Portion 22

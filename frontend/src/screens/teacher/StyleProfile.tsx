@@ -7,8 +7,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listStyleProfiles, upsertStyleProfile, loadTokens } from "../../api/client"
 import type { StyleProfile, ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Style-lock / few-shot profile — Portion 20

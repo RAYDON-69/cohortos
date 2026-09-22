@@ -24,8 +24,6 @@ import {
   type BiometricDeviceRow,
   type ApiError,
 } from "../../api/client";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 async function safePull(tenantId: string, deviceId: string) {
   return apiRequest<{ pulled?: number; accepted?: number }>(

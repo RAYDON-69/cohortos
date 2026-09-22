@@ -7,8 +7,6 @@ import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { founderPricingTiers, founderQuote } from "../../api/client"
 import type { ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Pricing / tier management — Portion 23

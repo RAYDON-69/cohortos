@@ -9,9 +9,6 @@ import { FormField, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getAbsentees, listBatches, loadTokens } from "../../api/client"
 import type { AbsenteeDay, BatchRow, ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../components/Badge.css";
-import "../../shell/AppShell.css";
 
 /**
  * Attendance history multi-day — Portion 12

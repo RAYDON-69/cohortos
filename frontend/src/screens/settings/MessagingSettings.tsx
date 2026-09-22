@@ -8,8 +8,6 @@ import { FormField, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getMessagingSettings, putMessagingSettings, loadTokens } from "../../api/client"
 import type { ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Messaging settings — Portion 18

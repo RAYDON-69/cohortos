@@ -8,9 +8,6 @@ import { FormField, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listFlaggedThreads, getThreadMessages, takeOverThread, loadTokens } from "../../api/client"
 import type { FlaggedThread, ThreadMessage, ApiError } from "../../api/client"
-import "../../components/Badge.css";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Flagged threads + take-over — Portion 19

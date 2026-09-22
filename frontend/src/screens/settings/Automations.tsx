@@ -10,8 +10,6 @@ import { Card } from "../../components/Card";
 import { FormField, TextInput } from "../../components/FormField";
 import { useTenant } from "../../hooks/useTenant";
 import { apiRequest, tenantPath, type ApiError } from "../../api/client";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 type Rule = {
   id?: string;

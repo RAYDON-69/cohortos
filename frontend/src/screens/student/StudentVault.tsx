@@ -7,8 +7,6 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { listStudentVault, loadTokens } from "../../api/client"
 import type { VaultResource, ApiError } from "../../api/client"
 import { loadStudentSession, plainAccessReason } from "./studentContext";
-import "../../components/LanguageToggle.css";
-import "../../shell/MobileShell.css";
 
 /**
  * Student Vault — Portion 21

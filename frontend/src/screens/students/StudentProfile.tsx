@@ -9,7 +9,6 @@ import { buildDeskNav } from "../../nav/deskNav";
 import { Card } from "../../components/Card";
 import { useTenant } from "../../hooks/useTenant";
 import { apiRequest, tenantPath, type ApiError } from "../../api/client";
-import "../../shell/AppShell.css";
 
 type Profile = {
   student?: Record<string, unknown>;

@@ -8,9 +8,6 @@ import { ModalConfirm } from "../../components/Confirm";
 import { useLocale } from "../../i18n/LocaleContext";
 import { founderGetTenant, founderSuspend, founderExtend, founderActivate } from "../../api/client"
 import type { FounderTenant, AiMetrics, ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../components/Confirm.css";
-import "../../shell/AppShell.css";
 
 /**
  * Tenant detail / suspend-extend — Portion 23

@@ -8,8 +8,6 @@ import { FormField, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getTopicHeatmap, getStruggleList, listExams, getExamSummary, loadTokens } from "../../api/client"
 import type { BatchRow, HeatmapTopic, StruggleRow, ExamRow, ExamSummary, ApiError } from "../../api/client"
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Exam / batch analytics — Portion 16

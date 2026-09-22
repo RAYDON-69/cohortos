@@ -18,9 +18,6 @@ import {
   type SyncConflictRow,
   type ApiError,
 } from "../../api/client";
-import "../../components/DataTable.css";
-import "../../components/Badge.css";
-import "../../shell/AppShell.css";
 
 export function ConflictLogScreen() {
   const navigate = useNavigate();

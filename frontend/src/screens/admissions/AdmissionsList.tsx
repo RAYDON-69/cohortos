@@ -11,10 +11,6 @@ import { ModalConfirm } from "../../components/Confirm";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listStudentsApi, listBatches, listTemplates, checkDuplicates, previewRoll, admitStudent, migrateStudent, loadTokens } from "../../api/client"
 import type { StudentRow, BatchRow, TemplateRow, DuplicateMatch, MigrationResult, ApiError } from "../../api/client"
-import "../../components/DataTable.css";
-import "../../components/FormField.css";
-import "../../components/Confirm.css";
-import "../../shell/AppShell.css";
 
 /**
  * Admissions list & add + migrate — Portion 13

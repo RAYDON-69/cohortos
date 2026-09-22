@@ -8,7 +8,6 @@ import { Card } from "../../components/Card";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getCentreMode, setCentreMode } from "../../api/client"
 import type { ApiError } from "../../api/client"
-import "../../shell/AppShell.css";
 
 /**
  * Mode toggle — Portion 18

@@ -13,9 +13,6 @@ import {
   saveStudentSession,
   plainAccessReason,
 } from "./studentContext";
-import "../../components/FormField.css";
-import "../../components/LanguageToggle.css";
-import "../../shell/MobileShell.css";
 
 /**
  * Student Home — Portion 21

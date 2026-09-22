@@ -7,8 +7,6 @@ import { AiBadge } from "../../components/Badge";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listAiReviewQueue, approveAiItem, rejectAiItem, loadTokens } from "../../api/client"
 import type { AiReviewItem, ApiError } from "../../api/client"
-import "../../components/Badge.css";
-import "../../shell/AppShell.css";
 
 /**
  * Teacher AI review queue — Portion 19

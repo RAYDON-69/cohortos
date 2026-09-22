@@ -8,9 +8,6 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { getStudentResultsHistory, loadTokens } from "../../api/client"
 import type { ExamResultRow, ApiError } from "../../api/client"
 import { loadStudentSession } from "./studentContext";
-import "../../components/DataTable.css";
-import "../../components/LanguageToggle.css";
-import "../../shell/MobileShell.css";
 
 /**
  * Results history — Portion 21

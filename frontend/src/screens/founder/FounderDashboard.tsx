@@ -8,8 +8,6 @@ import type { Column } from "../../components/DataTable"
 import { useLocale } from "../../i18n/LocaleContext";
 import { founderDashboard } from "../../api/client"
 import type { FounderTenantSummary, ApiError } from "../../api/client"
-import "../../components/DataTable.css";
-import "../../shell/AppShell.css";
 
 /**
  * Founder dashboard — Portion 23

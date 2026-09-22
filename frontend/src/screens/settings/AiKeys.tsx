@@ -7,8 +7,6 @@ import { Card } from "../../components/Card";
 import { FormField, TextInput, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { apiRequest, loadTokens, tenantPath } from "../../api/client";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 export function AiKeysScreen() {
   const { t } = useLocale();

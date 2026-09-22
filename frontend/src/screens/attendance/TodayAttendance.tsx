@@ -11,10 +11,6 @@ import { FormField, SelectInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { getBatchAttendance, listBatches, listAttendanceReviews, markManualAttendance, resolveAttendanceReview, loadTokens } from "../../api/client"
 import type { AttendanceRow, BatchRow, ReviewFlag, ApiError } from "../../api/client"
-import "../../components/DataTable.css";
-import "../../components/FormField.css";
-import "../../components/Badge.css";
-import "../../shell/AppShell.css";
 
 /**
  * Today's Attendance — Portion 12

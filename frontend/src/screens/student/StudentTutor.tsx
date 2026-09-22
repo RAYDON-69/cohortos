@@ -8,7 +8,6 @@ import { buildDeskNav } from "../../nav/deskNav";
 import { Button } from "../../components/Button";
 import { useTenant } from "../../hooks/useTenant";
 import { apiRequest, tenantPath, type ApiError } from "../../api/client";
-import "../../shell/AppShell.css";
 
 type Cite = { resource_id?: string; title?: string; excerpt?: string };
 

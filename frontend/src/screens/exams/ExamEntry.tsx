@@ -11,9 +11,6 @@ import { useLocale } from "../../i18n/LocaleContext";
 import { ExamEntryErrorBanner, ExamEntryEmptyExams } from "./ExamEntryStatus";
 import { listBatches, listExamTemplates, listExams, createExam, getExam, enterResult, getExamResults, completeExam, listStudentsApi, loadTokens } from "../../api/client"
 import type { BatchRow, ExamTemplateRow, ExamRow, ExamResultRow, StudentRow, ApiError } from "../../api/client"
-import "../../components/DataTable.css";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Exam entry — Portion 16

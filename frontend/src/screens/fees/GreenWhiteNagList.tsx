@@ -9,9 +9,6 @@ import { FormField, SelectInput, TextInput } from "../../components/FormField";
 import { useLocale } from "../../i18n/LocaleContext";
 import { listBatches, getDelayedCandidates, setNotifyFlag, loadTokens } from "../../api/client"
 import type { PaymentRow, BatchRow, ApiError } from "../../api/client"
-import "../../components/Badge.css";
-import "../../components/FormField.css";
-import "../../shell/AppShell.css";
 
 /**
  * Green/white nag list — Portion 15
