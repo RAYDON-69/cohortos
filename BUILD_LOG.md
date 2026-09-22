@@ -907,3 +907,51 @@ Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm conf
 | package-lock.json | **PROVEN** (generated, ~397KB) |
 | Friendly deps missing message | **PROVEN** (`main.tsx` DepsGate + boot catch) |
 
+
+
+## Phase 10 — named gaps closed (2026-09-22)
+
+### 1. Legacy CSS migration
+| Component | Status |
+|-----------|--------|
+| DataTable | **PROVEN** — Tailwind rewrite, CSS import removed |
+| Badge | **PROVEN** — Tailwind variants |
+| FormField | **PROVEN** — uses ui/Input + Tailwind |
+| AppShell | **PROVEN** — full Tailwind layout (desktop sidebar + mobile strip) |
+| EmptyState / Confirm / SyncPill / OfflineBanner / GlobalSearch / LanguageToggle | **PROVEN** |
+| Zero remaining Badge/DataTable/FormField/AppShell.css imports | **PROVEN** (`grep` only leaves App.css, tokens.css, tailwind.css, plyr.css) |
+
+### 2. PDF text layer
+| Item | Status |
+|------|--------|
+| pdfjs TextLayer / renderTextLayer | **PROVEN** (code) |
+| Selection/copy via transparent text spans | **PROVEN** (code) |
+| Highlight-all for search query | **PROVEN** (code) |
+| Device visual | **UNVERIFIED-NEEDS-DEVICE-TEST** |
+
+### 3. Pinch zoom
+| Item | Status |
+|------|--------|
+| PDF + image two-finger pinch (pointer math, no new dep) | **PROVEN** (code) |
+| Device | **UNVERIFIED-NEEDS-DEVICE-TEST** |
+
+### 4. Video scrub thumbnails
+| Item | Status |
+|------|--------|
+| Plyr native `previewThumbnails` (VTT + sprite) | **PROVEN** (wired when `thumbVtt` provided) |
+| Generation | **PROVEN** script `scripts/generate_video_thumbs.sh` (ffmpeg) — must run at upload/transcode |
+| Auto-generate on every vault video upload | **NOT-DONE** — needs ffmpeg in API host + storage of VTT path on resource (blocker: optional ffmpeg binary not guaranteed on all pilot machines) |
+
+### 5. Neural embeddings
+| Item | Status |
+|------|--------|
+| Attempted onnxruntime + MiniLM | **PROVEN** |
+| Quantized model size | **23.0 MB** (`model_qint8_arm64.onnx`) — not a hard blocker vs PyInstaller runtime |
+| Inference paraphrase ranking | **PROVEN** (cos kinetics 0.82 > organic 0.72) |
+| Integrated as primary in `embedding_service.py` | **PROVEN** (`backend onnx`) |
+| Hash/trigram fallback if model missing | **PROVEN** |
+| pytest multi-doc + cost | **6 passed** |
+| Fetch script | `scripts/fetch_embed_model.py` |
+
+**Installer note:** 23MB is ~same order as a single Electron locale pack; ship model beside `cohortos-api` or download on first AI use.
+

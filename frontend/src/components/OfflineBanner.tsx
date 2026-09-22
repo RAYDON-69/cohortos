@@ -1,28 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { getSyncState, setSyncStateListener } from "../api/client"
-import type { SyncState } from "../api/client"
-import { useLocale } from "../i18n/LocaleContext";
-import "./OfflineBanner.css";
+import { useConnectivity } from "../hooks/useConnectivity";
 
-/**
- * Offline banner — Portion 24
- * Surfaces connectivity pill's Offline state as a non-blocking banner so
- * mid-flow network loss never looks like a broken/loading screen (§0).
- */
 export function OfflineBanner() {
-  const { t } = useLocale();
-  const [state, setState] = useState<SyncState>(() => getSyncState());
-
-  useEffect(() => {
-    return setSyncStateListener(setState);
-  }, []);
-
+  const { state } = useConnectivity();
   if (state !== "offline") return null;
-
   return (
-    <div className="offline-banner" role="status" aria-live="polite">
-      <strong>{t("syncOffline")}</strong>
-      <span className="caption">{t("offlineBannerBody")}</span>
+    <div
+      className="mb-3 rounded-md border border-border-strong bg-sage-100 px-3 py-2 text-sm text-sage-900"
+      role="status"
+    >
+      You are offline. Changes are saved on this device and will sync when you reconnect.
     </div>
   );
 }

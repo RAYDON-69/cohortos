@@ -4,7 +4,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { listStudentsApi, loadTokens } from "../api/client";
-import "./GlobalSearch.css";
 
 type Hit = { kind: "tab" | "feature" | "student"; label: string; path: string; sub?: string };
 
@@ -81,13 +80,13 @@ export function GlobalSearch() {
   }, [q, students]);
 
   return (
-    <div className="global-search" ref={ref} data-testid="global-search">
+    <div className="relative w-full max-w-md" ref={ref} data-testid="global-search">
       <label className="sr-only" htmlFor="global-search-input">
         Search tabs, features, students
       </label>
       <input
         id="global-search-input"
-        className="global-search-input"
+        className="h-10 w-full rounded-md border border-border-strong bg-cream px-3 text-sm text-ink placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peri-300"
         type="search"
         placeholder="Search tabs, features, students…"
         value={q}
@@ -99,24 +98,27 @@ export function GlobalSearch() {
         autoComplete="off"
       />
       {open && q.trim() && (
-        <ul className="global-search-results" role="listbox">
+        <ul
+          className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-card border border-border bg-white py-1 shadow-soft"
+          role="listbox"
+        >
           {hits.length === 0 && (
-            <li className="global-search-empty caption muted">No matches</li>
+            <li className="px-3 py-2 text-xs text-slate-500">No matches</li>
           )}
           {hits.map((h, i) => (
             <li key={h.kind + h.path + i} role="option">
               <button
                 type="button"
-                className="global-search-hit"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-sage-100"
                 onClick={() => {
                   navigate(h.path);
                   setQ("");
                   setOpen(false);
                 }}
               >
-                <span className="global-search-kind">{h.kind}</span>
-                <span className="global-search-label">{h.label}</span>
-                {h.sub && <span className="caption muted">{h.sub}</span>}
+                <span className="text-[10px] font-semibold uppercase text-slate-500">{h.kind}</span>
+                <span className="font-medium text-ink">{h.label}</span>
+                {h.sub && <span className="text-xs text-slate-500">{h.sub}</span>}
               </button>
             </li>
           ))}

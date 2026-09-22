@@ -2,7 +2,6 @@ import React from "react";
 import { SyncPill } from "../components/SyncPill";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { useLocale } from "../i18n/LocaleContext";
-import "./MobileShell.css";
 
 /**
  * MobileShell — Student/Parent (§3.2)

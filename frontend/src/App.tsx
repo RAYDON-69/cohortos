@@ -49,15 +49,6 @@ import { TenantDetailScreen } from "./screens/founder/TenantDetail";
 import { ProvisionScreen } from "./screens/founder/Provision";
 import { PricingScreen } from "./screens/founder/Pricing";
 import "./App.css";
-import "./components/Badge.css";
-import "./components/SyncPill.css";
-import "./components/LanguageToggle.css";
-import "./components/EmptyState.css";
-import "./components/DataTable.css";
-import "./components/FormField.css";
-import "./components/Confirm.css";
-import "./shell/AppShell.css";
-import "./shell/MobileShell.css";
 
 export default function App() {
   useEffect(() => {

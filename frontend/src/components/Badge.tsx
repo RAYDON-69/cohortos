@@ -1,88 +1,44 @@
-import "./Badge.css";
+import { cn } from "../lib/utils";
 
-/**
- * Status badges — three independent vocabularies (status-vocabulary-integrity).
- * Never color-only: always label (+ optional icon).
- * §4.2
- */
-
-export type AttendanceStatus = "present" | "late" | "absent";
-export type PaymentStatus = "locked" | "unpaid" | "due" | "paid";
-export type AiStatus = "grounded" | "ungrounded" | "confidence-low" | "confidence-medium" | "confidence-high";
-export type SourceAnnotation = "biometric" | "manual" | "cross-batch" | "manual-override";
-export type NeutralBadge = "neutral" | "info";
-
-export type BadgeKind =
-  | { vocab: "attendance"; status: AttendanceStatus }
-  | { vocab: "payment"; status: PaymentStatus }
-  | { vocab: "ai"; status: AiStatus }
-  | { vocab: "source"; status: SourceAnnotation }
-  | { vocab: "neutral"; status: NeutralBadge };
-
-const LABEL: Record<string, string> = {
-  present: "Present",
-  late: "Late",
-  absent: "Absent",
-  locked: "Locked",
-  unpaid: "Unpaid",
-  due: "Due",
-  paid: "Paid",
-  grounded: "Grounded",
-  ungrounded: "Ungrounded",
-  "confidence-low": "Low confidence",
-  "confidence-medium": "Medium",
-  "confidence-high": "High",
-  biometric: "Biometric",
-  manual: "Manual",
-  "cross-batch": "Cross-batch",
-  "manual-override": "Manual override",
-  neutral: "",
-  info: "Info",
+type Props = {
+  children: React.ReactNode;
+  variant?:
+    | "attendance-present"
+    | "attendance-late"
+    | "attendance-absent"
+    | "payment-paid"
+    | "payment-due"
+    | "payment-overdue"
+    | "ai-high"
+    | "ai-medium"
+    | "ai-low"
+    | "default";
+  className?: string;
 };
 
-export interface BadgeProps {
-  kind: BadgeKind;
-  /** Override label (e.g. i18n) */
-  label?: string;
-  className?: string;
-  /** Show status dot (gold-500 for late only, etc.) */
-  showDot?: boolean;
-}
+const variants: Record<string, string> = {
+  "attendance-present": "bg-sage-100 text-sage-700",
+  "attendance-late": "bg-gold-bg text-gold-700",
+  "attendance-absent": "bg-error-bg text-error",
+  "payment-paid": "bg-sage-100 text-sage-700",
+  "payment-due": "bg-gold-bg text-gold-700",
+  "payment-overdue": "bg-error-bg text-error",
+  "ai-high": "bg-peri-bg text-peri-text",
+  "ai-medium": "bg-sage-100 text-sage-700",
+  "ai-low": "bg-cream-100 text-slate-700",
+  default: "bg-sage-100 text-sage-700",
+};
 
-export function Badge({ kind, label, className = "", showDot = false }: BadgeProps) {
-  const status = kind.status;
-  const baseLabel = label ?? LABEL[status] ?? status;
-  const classes = ["badge", `badge-${kind.vocab}-${status}`, className].filter(Boolean).join(" ");
-
+export function Badge({ children, variant = "default", className }: Props) {
   return (
-    <span className={classes} role="status">
-      {showDot && <span className={`badge-dot badge-dot-${status}`} aria-hidden="true" />}
-      {baseLabel}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight whitespace-nowrap",
+        variants[variant] || variants.default,
+        className
+      )}
+    >
+      {children}
     </span>
   );
-}
-
-/** Convenience helpers that keep vocabularies distinct */
-export function AttendanceBadge({
-  status,
-  label,
-  showDot = true,
-}: {
-  status: AttendanceStatus;
-  label?: string;
-  showDot?: boolean;
-}) {
-  return <Badge kind={{ vocab: "attendance", status }} label={label} showDot={showDot} />;
-}
-
-export function PaymentBadge({ status, label, showDot = true }: { status: PaymentStatus; label?: string; showDot?: boolean }) {
-  return <Badge kind={{ vocab: "payment", status }} label={label} showDot={showDot} />;
-}
-
-export function AiBadge({ status, label }: { status: AiStatus; label?: string }) {
-  return <Badge kind={{ vocab: "ai", status }} label={label} />;
-}
-
-export function SourceBadge({ status, label }: { status: SourceAnnotation; label?: string }) {
-  return <Badge kind={{ vocab: "source", status }} label={label} />;
 }

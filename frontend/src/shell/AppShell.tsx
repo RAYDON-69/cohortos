@@ -4,12 +4,7 @@ import { OfflineBanner } from "../components/OfflineBanner";
 import { useNavigate } from "react-router-dom";
 import { useLocale } from "../i18n/LocaleContext";
 import { GlobalSearch } from "../components/GlobalSearch";
-import "./AppShell.css";
-
-/**
- * AppShell — Owner/Desk, Teacher, Founder (§3.1)
- * Sidebar 232px + topbar. Collapses to horizontal scroll strip at ≤760px (not hamburger).
- */
+import { cn } from "../lib/utils";
 
 export interface NavItem {
   id: string;
@@ -28,7 +23,6 @@ export interface AppShellProps {
   children: React.ReactNode;
   profileSlot?: React.ReactNode;
   onConflictClick?: () => void;
-  /** Language toggle lives in Settings for desk personas; optional topbar slot */
   topbarExtra?: React.ReactNode;
 }
 
@@ -45,40 +39,76 @@ export function AppShell({
   const navigate = useNavigate();
 
   return (
-    <div className="app-shell">
-      <aside className="app-sidebar" aria-label="Main navigation">
-        <button type="button" className="app-brand" style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left", width: "100%" }} onClick={() => navigate("/attendance")} title="Back to desk">{brand}</button>
-        <nav className="app-nav">
+    <div className="flex min-h-screen bg-cream">
+      <aside
+        className="hidden w-[232px] shrink-0 flex-col border-r border-border bg-white px-3 py-5 md:flex"
+        aria-label="Main navigation"
+      >
+        <button
+          type="button"
+          className="mb-5 w-full px-2 text-left font-display text-lg font-semibold text-ink"
+          onClick={() => navigate("/attendance")}
+          title="Back to desk"
+        >
+          {brand}
+        </button>
+        <nav className="flex flex-1 flex-col gap-0.5">
           {navItems.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={`app-nav-item ${item.active ? "active" : ""} ${item.disabled ? "disabled" : ""}`}
+              className={cn(
+                "flex min-h-10 w-full flex-col items-start rounded-md px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                item.active && "bg-sage-700 text-white",
+                !item.active && !item.disabled && "text-ink hover:bg-sage-100",
+                item.disabled && "cursor-not-allowed text-slate-500"
+              )}
               onClick={item.disabled ? undefined : item.onClick}
               disabled={item.disabled}
               title={item.disabled ? item.disabledReason || t("notAvailableForRole") : undefined}
               aria-current={item.active ? "page" : undefined}
             >
-              <span className="app-nav-label">{item.label}</span>
+              <span>{item.label}</span>
               {item.disabled && (
-                <span className="app-nav-locked caption">{t("notAvailableForRole")}</span>
+                <span className="text-[11px] opacity-80">{t("notAvailableForRole")}</span>
               )}
             </button>
           ))}
         </nav>
-        {profileSlot && <div className="app-profile">{profileSlot}</div>}
+        {profileSlot && <div className="mt-auto border-t border-border pt-3">{profileSlot}</div>}
       </aside>
 
-      <div className="app-main">
-        <header className="app-topbar">
-          <div className="app-crumb mono-data muted">{crumb || ""}</div>
-          <GlobalSearch />
-          <div className="app-topbar-right">
+      {/* Mobile horizontal nav strip ≤760px */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex gap-1 overflow-x-auto border-b border-border bg-white px-2 py-2 md:hidden">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={cn(
+                "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap",
+                item.active ? "bg-sage-700 text-white" : "bg-sage-100 text-sage-900",
+                item.disabled && "opacity-40"
+              )}
+              onClick={item.disabled ? undefined : item.onClick}
+              disabled={item.disabled}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <header className="flex flex-wrap items-center gap-3 border-b border-border bg-white px-4 py-2">
+          <div className="font-mono text-xs text-slate-500">{crumb || ""}</div>
+          <div className="min-w-0 flex-1">
+            <GlobalSearch />
+          </div>
+          <div className="flex items-center gap-2">
             {topbarExtra}
             <SyncPill onConflictClick={onConflictClick} />
           </div>
         </header>
-        <main className="app-content">
+        <main className="min-h-0 flex-1 overflow-auto p-4 md:p-6">
           <OfflineBanner />
           {children}
         </main>

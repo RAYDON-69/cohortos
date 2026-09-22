@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from "react";
-import "./DataTable.css";
+import { cn } from "../lib/utils";
 
 export interface Column<T> {
   key: string;
   header: string;
   sortable?: boolean;
-  /** Mobile: keep this column when ≤760px */
   essential?: boolean;
   render?: (row: T) => React.ReactNode;
   width?: string;
@@ -25,10 +24,6 @@ export interface DataTableProps<T> {
   className?: string;
 }
 
-/**
- * Data table §4.3 — sortable, skeleton loading, empty state, 25/50/100 pagination.
- * Headers stay visible while skeleton rows load.
- */
 export function DataTable<T>({
   columns,
   rows,
@@ -49,8 +44,6 @@ export function DataTable<T>({
 
   const sorted = useMemo(() => {
     if (!sortKey) return rows;
-    const col = columns.find((c) => c.key === sortKey);
-    if (!col) return rows;
     const copy = [...rows];
     copy.sort((a, b) => {
       const av = (a as any)[sortKey];
@@ -62,7 +55,7 @@ export function DataTable<T>({
       return sortDir === "asc" ? cmp : -cmp;
     });
     return copy;
-  }, [rows, sortKey, sortDir, columns]);
+  }, [rows, sortKey, sortDir]);
 
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
   const safePage = Math.min(page, pageCount - 1);
@@ -70,24 +63,27 @@ export function DataTable<T>({
 
   const onHeaderClick = (col: Column<T>) => {
     if (!col.sortable) return;
-    if (sortKey === col.key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
+    if (sortKey === col.key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
       setSortKey(col.key);
       setSortDir("asc");
     }
   };
 
   return (
-    <div className={`data-table-wrap ${className}`}>
-      <div className="data-table-scroll">
-        <div className="data-table" role="table" aria-busy={loading || undefined}>
-          <div className="data-table-head" role="row">
+    <div className={cn("overflow-hidden rounded-card border border-border bg-white", className)}>
+      <div className="overflow-x-auto">
+        <div role="table" aria-busy={loading || undefined} className="min-w-full">
+          <div className="sticky top-0 z-[1] flex bg-sage-100 border-b border-border" role="row">
             {columns.map((col) => (
               <div
                 key={col.key}
-                className={`data-table-th ${col.essential ? "essential" : "optional"} ${col.sortable ? "sortable" : ""}`}
                 role="columnheader"
+                className={cn(
+                  "flex-1 min-w-0 px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-sage-700",
+                  col.sortable && "cursor-pointer select-none hover:text-sage-900",
+                  !col.essential && "hidden md:block"
+                )}
                 style={col.width ? { flex: `0 0 ${col.width}` } : undefined}
                 tabIndex={col.sortable ? 0 : undefined}
                 onClick={() => onHeaderClick(col)}
@@ -97,118 +93,110 @@ export function DataTable<T>({
                     onHeaderClick(col);
                   }
                 }}
-                aria-sort={
-                  sortKey === col.key ? (sortDir === "asc" ? "ascending" : "descending") : undefined
-                }
+                aria-sort={sortKey === col.key ? (sortDir === "asc" ? "ascending" : "descending") : undefined}
               >
                 {col.header}
                 {col.sortable && sortKey === col.key && (
-                  <span className="sort-chevron" aria-hidden="true">
-                    {sortDir === "asc" ? " ↑" : " ↓"}
-                  </span>
+                  <span aria-hidden="true">{sortDir === "asc" ? " ↑" : " ↓"}</span>
                 )}
               </div>
             ))}
           </div>
 
-          {loading && (
-            <div className="data-table-body" role="rowgroup">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} className="data-table-row skeleton-row" role="row">
-                  {columns.map((col) => (
-                    <div
-                      key={col.key}
-                      className={`data-table-td ${col.essential ? "essential" : "optional"}`}
-                      role="cell"
-                    >
-                      <div className="skeleton-bar" />
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
+          {loading &&
+            [0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex border-b border-border animate-pulse" role="row">
+                {columns.map((col) => (
+                  <div
+                    key={col.key}
+                    className={cn("flex-1 px-4 py-3", !col.essential && "hidden md:block")}
+                    role="cell"
+                  >
+                    <div className="h-3 rounded bg-sage-100" />
+                  </div>
+                ))}
+              </div>
+            ))}
 
           {!loading && pageRows.length === 0 && (
-            <div className="data-table-empty">
-              <div className="empty-title">{emptyTitle}</div>
-              {emptyBody && <div className="empty-body">{emptyBody}</div>}
-              {emptyAction && <div className="empty-action">{emptyAction}</div>}
+            <div className="px-4 py-10 text-center text-sm text-slate-700">
+              <div className="font-semibold text-ink">{emptyTitle}</div>
+              {emptyBody && <div className="mt-1">{emptyBody}</div>}
+              {emptyAction && <div className="mt-3">{emptyAction}</div>}
             </div>
           )}
 
-          {!loading && pageRows.length > 0 && (
-            <div className="data-table-body">
-              {pageRows.map((row) => (
-                <div
-                  key={rowKey(row)}
-                  className={`data-table-row ${onRowClick ? "clickable" : ""}`}
-                  role="row"
-                  tabIndex={onRowClick ? 0 : undefined}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={
-                    onRowClick
-                      ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            onRowClick(row);
-                          }
+          {!loading &&
+            pageRows.map((row) => (
+              <div
+                key={rowKey(row)}
+                className={cn(
+                  "flex items-center border-b border-border last:border-0",
+                  onRowClick && "cursor-pointer hover:bg-sage-100/60"
+                )}
+                role="row"
+                tabIndex={onRowClick ? 0 : undefined}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                onKeyDown={
+                  onRowClick
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onRowClick(row);
                         }
-                      : undefined
-                  }
-                >
-                  {columns.map((col) => (
-                    <div
-                      key={col.key}
-                      className={`data-table-td ${col.essential ? "essential" : "optional"}`}
-                      role="cell"
-                      style={col.width ? { flex: `0 0 ${col.width}` } : undefined}
-                    >
-                      {col.render ? col.render(row) : String((row as any)[col.key] ?? "")}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
+                      }
+                    : undefined
+                }
+              >
+                {columns.map((col) => (
+                  <div
+                    key={col.key}
+                    className={cn("flex-1 min-w-0 px-4 py-3 text-sm text-ink", !col.essential && "hidden md:block")}
+                    role="cell"
+                    style={col.width ? { flex: `0 0 ${col.width}` } : undefined}
+                  >
+                    {col.render ? col.render(row) : String((row as any)[col.key] ?? "")}
+                  </div>
+                ))}
+              </div>
+            ))}
         </div>
       </div>
 
       {!loading && sorted.length > 0 && (
-        <div className="data-table-footer">
-          <div className="data-table-page-size">
-            <label>
-              Rows
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(0);
-                }}
-              >
-                {pageSizeOptions.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div className="data-table-pager">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2 text-sm">
+          <label className="flex items-center gap-2 text-slate-700">
+            Rows
+            <select
+              className="rounded border border-border-strong bg-cream px-2 py-1"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(0);
+              }}
+            >
+              {pageSizeOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              className="btn btn-ghost btn-sm"
+              className="text-sage-700 font-semibold disabled:opacity-40"
               disabled={safePage <= 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
             >
               Prev
             </button>
-            <span className="caption">
+            <span className="text-slate-700">
               {safePage + 1} / {pageCount}
             </span>
             <button
               type="button"
-              className="btn btn-ghost btn-sm"
+              className="text-sage-700 font-semibold disabled:opacity-40"
               disabled={safePage >= pageCount - 1}
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
             >

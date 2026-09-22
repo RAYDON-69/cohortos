@@ -7,3 +7,23 @@
     @apply bg-cream text-ink font-body antialiased;
   }
 }
+
+/* pdfjs text layer — selection + highlight */
+.textLayer {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  line-height: 1;
+  pointer-events: auto;
+}
+.textLayer span,
+.textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.textLayer ::selection {
+  background: rgba(161, 181, 216, 0.45);
+}

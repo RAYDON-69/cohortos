@@ -20,3 +20,4 @@ frontend/release-desktop/
 .idea/
 .vscode/
 *.log
+models/minilm/*.onnx

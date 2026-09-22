@@ -49,6 +49,10 @@ export function FileViewer({
   const [imgPan, setImgPan] = useState({ x: 0, y: 0 });
   const [fitMode, setFitMode] = useState<"fit" | "actual">("fit");
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
+  const pinchRef = useRef<{ dist: number; zoom: number } | null>(null);
+  const [highlightAll, setHighlightAll] = useState(false);
+  const [thumbVtt, setThumbVtt] = useState<string | null>(null);
   const continuousRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const pdfDocRef = useRef<any>(null);
@@ -153,8 +157,51 @@ export function FileViewer({
 
   useEffect(() => {
     if (pdfMode !== "pdfjs" || !pdfDocRef.current || scrollMode !== "single" || !canvasRef.current) return;
-    void renderPage(pdfPage, canvasRef.current, zoom, rotation);
-  }, [pdfMode, pdfPage, zoom, rotation, scrollMode, renderPage]);
+    let cancelled = false;
+    (async () => {
+      await renderPage(pdfPage, canvasRef.current!, zoom, rotation);
+      if (cancelled || !textLayerRef.current || !pdfDocRef.current) return;
+      try {
+        const pdfjs = await import("pdfjs-dist");
+        const page = await pdfDocRef.current.getPage(pdfPage);
+        const viewport = page.getViewport({ scale: zoom, rotation });
+        const layer = textLayerRef.current;
+        layer.innerHTML = "";
+        layer.style.width = `${viewport.width}px`;
+        layer.style.height = `${viewport.height}px`;
+        // pdfjs v4: TextLayer class
+        const textContent = await page.getTextContent();
+        if ((pdfjs as any).TextLayer) {
+          const tl = new (pdfjs as any).TextLayer({
+            textContentSource: textContent,
+            container: layer,
+            viewport,
+          });
+          await tl.render();
+        } else if ((pdfjs as any).renderTextLayer) {
+          await (pdfjs as any).renderTextLayer({
+            textContentSource: textContent,
+            container: layer,
+            viewport,
+            textDivs: [],
+          }).promise;
+        }
+        if (highlightAll && searchQ.trim()) {
+          const q = searchQ.toLowerCase();
+          layer.querySelectorAll("span").forEach((el) => {
+            if ((el.textContent || "").toLowerCase().includes(q)) {
+              (el as HTMLElement).style.background = "rgba(185, 138, 46, 0.35)";
+            }
+          });
+        }
+      } catch (e) {
+        console.warn("text layer", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pdfMode, pdfPage, zoom, rotation, scrollMode, renderPage, highlightAll, searchQ]);
 
   useEffect(() => {
     if (pdfMode !== "pdfjs" || scrollMode !== "continuous" || !continuousRef.current || !pdfDocRef.current) return;
@@ -208,12 +255,17 @@ export function FileViewer({
         if (cancelled) return;
         const el = mediaRef.current!.querySelector("video, audio") as HTMLElement | null;
         if (!el) return;
-        plyrRef.current = new Plyr(el, {
+        const plyrOpts: any = {
           controls: ["play-large", "play", "progress", "current-time", "mute", "volume", "captions", "settings", "pip", "fullscreen"],
           settings: ["speed"],
           speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] },
           keyboard: { focused: true, global: true },
-        });
+        };
+        // Native Plyr preview thumbnails — requires VTT+sprite generated at upload (ffmpeg)
+        if (thumbVtt) {
+          plyrOpts.previewThumbnails = { enabled: true, src: thumbVtt };
+        }
+        plyrRef.current = new Plyr(el, plyrOpts);
       } catch {
         /* native */
       }
@@ -270,6 +322,30 @@ export function FileViewer({
     w?.print();
   }
 
+
+  function onPinchStart(e: React.TouchEvent) {
+    if (e.touches.length !== 2) return;
+    const d = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    pinchRef.current = { dist: d, zoom: kind === "pdf" ? zoom : imgScale };
+  }
+  function onPinchMove(e: React.TouchEvent) {
+    if (e.touches.length !== 2 || !pinchRef.current) return;
+    e.preventDefault();
+    const d = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const scale = (d / pinchRef.current.dist) * pinchRef.current.zoom;
+    if (kind === "pdf") setZoom(Math.min(3, Math.max(0.5, scale)));
+    else if (kind === "image") setImgScale(Math.min(4, Math.max(0.5, scale)));
+  }
+  function onPinchEnd() {
+    pinchRef.current = null;
+  }
+
   const bg = theme === "dark" ? "bg-sage-900 text-white" : "bg-white text-ink";
   const sibIdx = siblingIds.indexOf(resourceId);
 
@@ -295,6 +371,9 @@ export function FileViewer({
               <Button size="sm" variant="ghost" onClick={printPdf}>Print</Button>
               <input className="h-8 w-28 rounded border border-border-strong px-2 text-xs text-ink" placeholder="Search" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void runPdfSearch()} />
               <Button size="sm" variant="secondary" onClick={() => void runPdfSearch()}>Find</Button>
+              <Button size="sm" variant="ghost" onClick={() => setHighlightAll((h) => !h)}>
+                {highlightAll ? "Clear highlight" : "Highlight all"}
+              </Button>
               {searchMatches.length > 0 && (
                 <>
                   <span className="text-xs">{matchIdx + 1}/{searchMatches.length}</span>
@@ -347,7 +426,20 @@ export function FileViewer({
             {error && <p role="alert" className="text-error">{error}</p>}
             {!error && !url && <p className="text-sm opacity-70">Loading…</p>}
             {url && kind === "pdf" && pdfMode === "pdfjs" && scrollMode === "single" && (
-              <canvas ref={canvasRef} data-testid="pdf-canvas" className="mx-auto block max-w-full select-text" />
+              <div
+                className="relative mx-auto inline-block max-w-full"
+                onTouchStart={onPinchStart}
+                onTouchMove={onPinchMove}
+                onTouchEnd={onPinchEnd}
+              >
+                <canvas ref={canvasRef} data-testid="pdf-canvas" className="block max-w-full" />
+                <div
+                  ref={textLayerRef}
+                  data-testid="pdf-text-layer"
+                  className="textLayer absolute left-0 top-0 overflow-hidden leading-none"
+                  style={{ opacity: 1 }}
+                />
+              </div>
             )}
             {url && kind === "pdf" && pdfMode === "pdfjs" && scrollMode === "continuous" && (
               <div ref={continuousRef} data-testid="pdf-continuous" />
@@ -375,6 +467,9 @@ export function FileViewer({
                 onMouseLeave={() => {
                   dragRef.current = null;
                 }}
+                onTouchStart={onPinchStart}
+                onTouchMove={onPinchMove}
+                onTouchEnd={onPinchEnd}
               >
                 <img
                   src={url}

@@ -1,114 +1,41 @@
-import React, { useEffect } from "react";
-import { Button } from "./Button";
-import "./Confirm.css";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent } from "./ui/dialog";
 
-/**
- * Two confirm tiers §4.7:
- * 1. Inline — button replaced by confirm/cancel in place
- * 2. Modal — destructive, not easily reversible; states specific consequence
- */
-
-export interface InlineConfirmProps {
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-  loading?: boolean;
-  destructive?: boolean;
-}
-
-export function InlineConfirm({
-  message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  onConfirm,
-  onCancel,
-  loading,
-  destructive,
-}: InlineConfirmProps) {
-  return (
-    <div className="inline-confirm" role="group" aria-label={message}>
-      <span className="inline-confirm-msg">{message}</span>
-      <div className="inline-confirm-actions">
-        <Button size="sm" variant="ghost" onClick={onCancel} disabled={loading}>
-          {cancelLabel}
-        </Button>
-        <Button
-          size="sm"
-          variant={destructive ? "primary" : "primary"}
-          onClick={onConfirm}
-          loading={loading}
-          className={destructive ? "btn-destructive" : undefined}
-        >
-          {confirmLabel}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-export interface ModalConfirmProps {
+type Props = {
   open: boolean;
   title: string;
-  consequence: string;
+  body?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  loading?: boolean;
-  destructive?: boolean;
-}
+  danger?: boolean;
+};
 
-export function ModalConfirm({
+export function Confirm({
   open,
   title,
-  consequence,
+  body,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   onConfirm,
   onCancel,
-  loading,
-  destructive = true,
-}: ModalConfirmProps) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancel();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancel]);
-
-  if (!open) return null;
-
+  danger,
+}: Props) {
   return (
-    <div className="modal-scrim" role="presentation" onClick={onCancel}>
-      <div
-        className="modal-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-confirm-title"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 id="modal-confirm-title" className="card-title">
-          {title}
-        </h2>
-        <p className="modal-consequence">{consequence}</p>
-        <div className="modal-actions">
-          <Button variant="ghost" onClick={onCancel} disabled={loading}>
+    <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
+      <DialogContent>
+        <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
+        {body && <p className="mt-2 text-sm text-slate-700">{body}</p>}
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
             {cancelLabel}
           </Button>
-          <Button
-            variant="primary"
-            onClick={onConfirm}
-            loading={loading}
-            className={destructive ? "btn-destructive" : undefined}
-          >
+          <Button variant={danger ? "destructive" : "default"} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

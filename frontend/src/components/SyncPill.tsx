@@ -1,68 +1,33 @@
-import React, { useEffect, useState } from "react";
-import { getSyncState, getLastSyncedAt, setSyncStateListener } from "../api/client"
-import type { SyncState } from "../api/client"
-import { useLocale } from "../i18n/LocaleContext";
-import "./SyncPill.css";
+import { cn } from "../lib/utils";
+import { useConnectivity } from "../hooks/useConnectivity";
 
-/**
- * Connectivity/sync pill — signature element §4.4 / offline-first-ux-states.
- * Always visible. Four states exactly. Offline is neutral, never error-styled.
- */
-
-function formatRelative(ms: number | null, t: (k: any, v?: any) => string): string {
-  if (ms == null) return t("justNow");
-  const diff = Math.max(0, Date.now() - ms);
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return t("justNow");
-  if (mins < 60) return t("minutesAgo", { n: mins });
-  const hours = Math.floor(mins / 60);
-  return t("hoursAgo", { n: hours });
-}
-
-export interface SyncPillProps {
-  onConflictClick?: () => void;
-  className?: string;
-}
-
-export function SyncPill({ onConflictClick, className = "" }: SyncPillProps) {
-  const { t } = useLocale();
-  const [state, setState] = useState<SyncState>(getSyncState);
-  const [relative, setRelative] = useState(() => formatRelative(getLastSyncedAt(), t));
-
-  useEffect(() => {
-    setSyncStateListener(setState);
-  }, []);
-
-  useEffect(() => {
-    if (state !== "synced") return;
-    const tick = () => setRelative(formatRelative(getLastSyncedAt(), t));
-    tick();
-    const id = setInterval(tick, 15000);
-    return () => clearInterval(id);
-  }, [state, t]);
-
+export function SyncPill({ onConflictClick }: { onConflictClick?: () => void }) {
+  const { state } = useConnectivity();
   const label =
     state === "offline"
-      ? t("syncOffline")
+      ? "Offline"
       : state === "syncing"
-        ? t("syncSyncing")
+        ? "Syncing…"
         : state === "conflict"
-          ? t("syncConflict")
-          : t("syncSynced", { time: relative });
-
-  const isClickable = state === "conflict" && onConflictClick;
-
+          ? "Conflicts"
+          : "Synced";
+  const dot =
+    state === "offline"
+      ? "bg-slate-500"
+      : state === "conflict"
+        ? "bg-error"
+        : state === "syncing"
+          ? "bg-gold-500"
+          : "bg-sage-500";
   return (
     <button
       type="button"
-      className={`sync-pill sync-pill-${state} ${className}`}
-      onClick={isClickable ? onConflictClick : undefined}
-      disabled={!isClickable}
-      aria-live="polite"
-      aria-label={label}
+      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold text-ink"
+      onClick={state === "conflict" ? onConflictClick : undefined}
+      title={label}
     >
-      <span className={`sync-dot sync-dot-${state}`} aria-hidden="true" />
-      <span className="sync-label">{label}</span>
+      <span className={cn("h-2 w-2 rounded-full", dot)} aria-hidden />
+      {label}
     </button>
   );
 }

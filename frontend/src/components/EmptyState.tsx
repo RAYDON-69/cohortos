@@ -1,33 +1,29 @@
-import React from "react";
-import "./EmptyState.css";
+import { cn } from "../lib/utils";
 
-/**
- * Empty states §4.9 — specific, non-generic; invitation to act.
- */
-
-export interface EmptyStateProps {
-  mark?: React.ReactNode;
-  title: string;
+export function EmptyState({
+  title = "Nothing here yet",
+  body,
+  action,
+  className,
+}: {
+  title?: string;
   body?: string;
   action?: React.ReactNode;
   className?: string;
-}
-
-export function EmptyState({
-  mark = "·",
-  title,
-  body,
-  action,
-  className = "",
-}: EmptyStateProps) {
+}) {
   return (
-    <div className={`empty-state ${className}`} role="status">
-      <div className="empty-mark" aria-hidden="true">
-        {mark}
+    <div
+      className={cn(
+        "rounded-card border border-dashed border-border bg-white px-4 py-10 text-center text-slate-700",
+        className
+      )}
+    >
+      <div className="text-2xl text-sage-300" aria-hidden>
+        ···
       </div>
-      <div className="empty-title">{title}</div>
-      {body && <div className="empty-body">{body}</div>}
-      {action && <div className="empty-action">{action}</div>}
+      <div className="mt-2 text-sm font-semibold text-ink">{title}</div>
+      {body && <div className="mt-1 text-sm">{body}</div>}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }

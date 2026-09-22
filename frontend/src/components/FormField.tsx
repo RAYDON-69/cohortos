@@ -1,82 +1,81 @@
-import React from "react";
-import "./FormField.css";
+import { cn } from "../lib/utils";
+import { Input } from "./ui/input";
 
-export interface FormFieldProps {
-  id: string;
+type Props = {
   label: string;
+  name?: string;
+  type?: string;
+  value?: string | number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   error?: string;
-  hint?: string;
   required?: boolean;
-  children: React.ReactNode;
+  disabled?: boolean;
+  placeholder?: string;
+  as?: "input" | "select" | "textarea";
+  children?: React.ReactNode;
   className?: string;
-}
+  id?: string;
+};
 
-/**
- * Form field §4.6 — label always above, never placeholder-as-label.
- * Inline validation in error color, plain language.
- */
 export function FormField({
-  id,
   label,
+  name,
+  type = "text",
+  value,
+  onChange,
   error,
-  hint,
   required,
+  disabled,
+  placeholder,
+  as = "input",
   children,
-  className = "",
-}: FormFieldProps) {
+  className,
+  id,
+}: Props) {
+  const fid = id || name || label.replace(/\s+/g, "-").toLowerCase();
+  const fieldClass = cn(
+    "w-full rounded-md border border-border-strong bg-cream px-3 py-2.5 text-sm text-ink min-h-11",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-peri-300 focus-visible:bg-white",
+    error && "border-error",
+    disabled && "opacity-50 cursor-not-allowed"
+  );
   return (
-    <div className={`form-field ${error ? "has-error" : ""} ${className}`}>
-      <label htmlFor={id} className="form-label">
+    <div className={cn("mb-4 max-w-md", className)}>
+      <label htmlFor={fid} className="mb-1.5 block text-[13px] font-semibold text-ink">
         {label}
-        {required && <span className="form-required" aria-hidden="true"> *</span>}
+        {required && <span className="text-error"> *</span>}
       </label>
-      {children}
-      {error && (
-        <div className="form-error" role="alert" id={`${id}-error`}>
-          {error}
-        </div>
+      {as === "select" ? (
+        <select id={fid} name={name} className={fieldClass} value={value as string} onChange={onChange} disabled={disabled}>
+          {children}
+        </select>
+      ) : as === "textarea" ? (
+        <textarea
+          id={fid}
+          name={name}
+          className={cn(fieldClass, "min-h-24")}
+          value={value as string}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder={placeholder}
+        />
+      ) : (
+        <Input
+          id={fid}
+          name={name}
+          type={type}
+          value={value as string}
+          onChange={onChange as any}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={error ? "border-error" : undefined}
+        />
       )}
-      {!error && hint && <div className="form-hint caption">{hint}</div>}
-    </div>
-  );
-}
-
-export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  hasError?: boolean;
-}
-
-export function TextInput({ hasError, className = "", ...rest }: TextInputProps) {
-  return (
-    <input
-      className={`form-input ${hasError ? "form-input-error" : ""} ${className}`}
-      aria-invalid={hasError || undefined}
-      {...rest}
-    />
-  );
-}
-
-export function SelectInput({
-  hasError,
-  className = "",
-  children,
-  ...rest
-}: React.SelectHTMLAttributes<HTMLSelectElement> & { hasError?: boolean }) {
-  return (
-    <select
-      className={`form-input form-select ${hasError ? "form-input-error" : ""} ${className}`}
-      aria-invalid={hasError || undefined}
-      {...rest}
-    >
-      {children}
-    </select>
-  );
-}
-
-/** Warning banner above form — not a modal (§4.6) */
-export function WarningBanner({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`warning-banner ${className}`} role="alert">
-      {children}
+      {error && (
+        <p className="mt-1 text-xs text-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
