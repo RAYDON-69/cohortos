@@ -55,8 +55,9 @@ export function ModalConfirm(props: Props) {
 
 /** Inline confirm used by fee screens */
 export function InlineConfirm({
-  open,
+  open = true,
   title,
+  message,
   body,
   consequence,
   confirmLabel = "Confirm",
@@ -64,6 +65,33 @@ export function InlineConfirm({
   onCancel,
   loading,
   destructive,
+}: {
+  open?: boolean;
+  title?: string;
+  message?: string;
+  body?: string;
+  consequence?: string;
+  confirmLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading?: boolean;
+  destructive?: boolean;
+}) {
+  if (!open) return null;
+  const text = message || body || consequence || title || "Confirm?";
+  return (
+    <div className="mt-2 rounded-md border border-border bg-cream p-3 text-sm" role="alertdialog">
+      <div className="font-semibold text-ink">{text}</div>
+      <div className="mt-2 flex gap-2">
+        <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button size="sm" variant={destructive ? "destructive" : "default"} onClick={onConfirm} loading={loading}>
+          {confirmLabel}
+        </Button>
+      </div>
+    </div>
+  );
 }: Props) {
   if (!open) return null;
   return (

@@ -55,7 +55,7 @@ export function TextInput({
   );
   if (label) {
     return (
-      <FormField id={fid} label={label} error={error} required={required}>
+      <FormField id={fid} label={label} error={error} required={!!rest.required}>
         {input}
       </FormField>
     );
