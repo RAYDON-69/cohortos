@@ -3,7 +3,8 @@
 # Do NOT run electron-builder in the 1.2GiB agent sandbox — it will OOM / hang.
 #
 # Trigger: push tag v* or manual workflow_dispatch.
-# Artifacts: release-desktop/* uploaded per OS job.
+# Installers are published as GitHub Release assets (tag desktop-latest), NOT
+# Actions artifacts — Release assets are outside the Actions storage quota.
 
 name: Desktop release
 
@@ -22,7 +23,6 @@ permissions:
   contents: write
 
 jobs:
-  # ── Per-OS matrix: API binary must match the installer OS (prd §25) ──
   package:
     name: Package ${{ matrix.os }}
     runs-on: ${{ matrix.runner }}
@@ -34,14 +34,24 @@ jobs:
             runner: ubuntu-22.04
             api_out: cohortos-api
             eb_args: --linux AppImage
+            asset_glob: |
+              frontend/release-desktop/*.AppImage
+              frontend/release-desktop/*.AppImage.zsync
           - os: win
             runner: windows-2022
             api_out: cohortos-api.exe
             eb_args: --win nsis portable
+            asset_glob: |
+              frontend/release-desktop/*.exe
+              frontend/release-desktop/*.yml
           - os: mac
             runner: macos-14
             api_out: cohortos-api
             eb_args: --mac dmg
+            asset_glob: |
+              frontend/release-desktop/*.dmg
+              frontend/release-desktop/*.zip
+              frontend/release-desktop/*.yml
 
     steps:
       - name: Checkout
@@ -64,17 +74,13 @@ jobs:
           pyinstaller cohortos-api.spec --noconfirm --clean
           mkdir -p dist
           # Normalize for electron-builder extraResources: ../dist/cohortos-api
-          # Unix onefile → dist/cohortos-api
-          # Windows onefile → dist/cohortos-api.exe (also copy to dist/cohortos-api for extraResources path)
-          # onedir → dist/cohortos-api/cohortos-api
           # Git Bash on Windows treats cohortos-api and cohortos-api.exe as the same path —
-          # never cp between those two names. Verify the real onefile output in place.
+          # never cp between those two names.
           if [ -f "dist/cohortos-api.exe" ]; then
             API_BIN="dist/cohortos-api.exe"
           elif [ -f "dist/cohortos-api" ] && [ ! -d "dist/cohortos-api" ]; then
             API_BIN="dist/cohortos-api"
           elif [ -f "dist/cohortos-api/cohortos-api" ]; then
-            # onedir layout → flatten to onefile path for extraResources filter
             cp dist/cohortos-api/cohortos-api /tmp/cohortos-api-bin
             rm -rf dist/cohortos-api
             mv /tmp/cohortos-api-bin dist/cohortos-api
@@ -121,35 +127,42 @@ jobs:
       - name: electron-builder ${{ matrix.os }}
         working-directory: frontend
         env:
-          # Optional: set GH secrets for signing when ready
-          # CSC_LINK / CSC_KEY_PASSWORD (Windows)
-          # APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID (Mac notarization)
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx electron-builder ${{ matrix.eb_args }} --publish never
 
-      - name: Upload installers
-        uses: actions/upload-artifact@v4
-        with:
-          name: cohortos-${{ matrix.os }}
-          path: |
-            frontend/release-desktop/*
-          if-no-files-found: warn
+      - name: List installer outputs
+        shell: bash
+        run: |
+          echo "=== frontend/release-desktop ==="
+          ls -la frontend/release-desktop/ || true
+          find frontend/release-desktop -type f 2>/dev/null | head -40
 
-  # Optional: attach artifacts to the GitHub Release when triggered by a tag
-  release:
-    name: Attach to GitHub Release
-    needs: package
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: installers
-
-      - name: Publish release assets
+      # Publish to GitHub Release assets (NOT Actions artifacts — avoids storage quota).
+      # Rolling tag desktop-latest always points at the newest successful package set.
+      - name: Publish to GitHub Release (desktop-latest)
         uses: softprops/action-gh-release@v2
         with:
-          files: installers/**/*
+          tag_name: desktop-latest
+          name: CohortOS desktop (latest build)
+          body: |
+            Auto-built installers from commit `${{ github.sha }}` (${{ matrix.os }}).
+            Re-run **Desktop release** to refresh all three platforms.
+
+            Download the asset for your OS below.
+          draft: false
+          prerelease: true
+          make_latest: false
+          files: ${{ matrix.asset_glob }}
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # When triggered by a version tag (v*), also attach the same files to that release.
+      - name: Publish to version tag release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.asset_glob }}
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
