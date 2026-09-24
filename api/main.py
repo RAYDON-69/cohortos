@@ -3093,6 +3093,70 @@ def create_api_app(
         cm = registry.get_app(tenant_id)
         return BillingService(cm.data_layer, tenant_id).create_draft_invoice(tenant_id)
 
+
+    @app.get("/t/{tenant_id}/billing/providers")
+    def billing_providers(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.payment_providers.factory import list_providers
+        return {"providers": list_providers()}
+
+    @app.post("/t/{tenant_id}/billing/provider")
+    def billing_set_provider(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        from services.payment_providers.base import ProviderError
+        cm = registry.get_app(tenant_id)
+        try:
+            sub = BillingService(cm.data_layer, tenant_id).set_payment_provider(
+                tenant_id, str(body.get("provider") or "")
+            )
+        except ProviderError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"subscription": sub}
+
+    @app.post("/t/{tenant_id}/billing/checkout")
+    def billing_checkout(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        from services.payment_providers.base import ProviderError
+        cm = registry.get_app(tenant_id)
+        provider = str(body.get("provider") or "bkash")
+        amount = float(body.get("amount") or 0)
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="amount must be > 0")
+        currency = str(body.get("currency") or ("USD" if provider == "stripe" else "BDT"))
+        callback = str(body.get("callback_url") or "http://127.0.0.1:8741/billing/callback")
+        try:
+            out = BillingService(cm.data_layer, tenant_id).create_checkout(
+                tenant_id,
+                provider=provider,
+                amount=amount,
+                currency=currency,
+                callback_url=callback,
+                description=str(body.get("description") or ""),
+            )
+        except ProviderError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return out
+
+    @app.post("/t/{tenant_id}/billing/confirm")
+    def billing_confirm(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        from services.payment_providers.base import ProviderError
+        cm = registry.get_app(tenant_id)
+        provider = str(body.get("provider") or "")
+        session_id = str(body.get("session_id") or "")
+        if not provider or not session_id:
+            raise HTTPException(status_code=400, detail="provider and session_id required")
+        try:
+            out = BillingService(cm.data_layer, tenant_id).confirm_checkout(
+                tenant_id, provider, session_id, **{k: v for k, v in body.items() if k not in ("provider", "session_id")}
+            )
+        except ProviderError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return out
+
     return app
 
 

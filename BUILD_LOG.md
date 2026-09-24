@@ -987,3 +987,68 @@ Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm conf
 ### Tests
 `tests/test_phase11_billing.py` — **5 passed**
 
+
+
+## Phase 12 — Payment rails sandbox (2026-09-24)
+
+### Engineering checklist (per provider)
+
+| Provider | Abstraction | Sandbox mock (no keys) | Live HTTP path | Status |
+|----------|-------------|------------------------|----------------|--------|
+| **bKash PGW** | `BkashProvider` | **PROVEN** (mock checkout→confirm→sub active) | Grant/create/execute when `COHORTOS_BKASH_*` set | **PROVEN** mock; live HTTP **NOT-DONE** until sandbox merchant credentials from Raiyan |
+| **Nagad** | `NagadProvider` | **PROVEN** mock | Init when keys + `COHORTOS_NAGAD_SIMPLE=1` | **PROVEN** mock; full RSA sign **NOT-DONE** until merchant keys + signed challenge helpers verified against Nagad sandbox |
+| **Stripe** | `StripeProvider` | **PROVEN** mock | Checkout Sessions when `COHORTOS_STRIPE_SECRET_KEY=sk_test_…` | **PROVEN** mock; real test-mode API **NOT-DONE** until `sk_test_` supplied |
+
+| API | Status |
+|-----|--------|
+| `GET /billing/providers` | **PROVEN** |
+| `POST /billing/provider` | **PROVEN** |
+| `POST /billing/checkout` | **PROVEN** |
+| `POST /billing/confirm` | **PROVEN** (activates subscription on success) |
+| Per-tenant `payment_provider` on Subscription | **PROVEN** |
+
+**Tests:** `tests/test_phase12_payments.py` + phase11 — **14 passed**
+
+**Env vars (sandbox only until production keys):**
+```
+COHORTOS_BKASH_MODE=sandbox
+COHORTOS_BKASH_USERNAME=…
+COHORTOS_BKASH_PASSWORD=…
+COHORTOS_BKASH_APP_KEY=…
+COHORTOS_BKASH_APP_SECRET=…
+
+COHORTOS_NAGAD_MODE=sandbox
+COHORTOS_NAGAD_MERCHANT_ID=…
+COHORTOS_NAGAD_PUBLIC_KEY=…
+COHORTOS_NAGAD_PRIVATE_KEY=…
+
+COHORTOS_STRIPE_SECRET_KEY=sk_test_…
+COHORTOS_STRIPE_WEBHOOK_SECRET=whsec_…   # optional
+COHORTOS_STRIPE_MODE=sandbox
+```
+
+### Raiyan's real-world to-do (cannot be done in code)
+
+1. **bKash PGW merchant account**
+   - Register at bKash merchant / PGW integration portal (business/trade licence, NID, TIN, BD bank account).
+   - Request **sandbox** credentials first (username, password, app_key, app_secret).
+   - After sandbox works, request production credentials; never put live keys in git.
+
+2. **Nagad merchant account**
+   - Apply via Nagad merchant portal with business docs + BD bank account.
+   - Obtain merchant id + public/private key pair for **sandbox**.
+   - Whitelist server IP if required by Nagad.
+   - Share sandbox keys to enable non-mock checkout.
+
+3. **Stripe account**
+   - Create Stripe account (business details + bank for payouts).
+   - Enable **test mode**; copy `sk_test_…` (and later `pk_test` if client-side Elements).
+   - For production later: activate account, switch to `sk_live_` only after explicit go-live.
+
+4. **Compliance / ops**
+   - Decide settlement currency display (BDT vs USD) per tenant region.
+   - Confirm invoice tax treatment for BD SaaS (consult local accountant).
+   - Provide public HTTPS callback URL for PGW redirects (local tunnel ok for sandbox).
+
+None of the above can be completed by the coding agent.
+

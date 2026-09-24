@@ -258,3 +258,11 @@ Honest limit: not full neural semantic parity with BGE/MiniLM. Neural local mode
 - Settings → **Usage** meter (AI calls this period per provider)
 - **Not** live payment capture until Raiyan picks providers
 
+
+
+## Phase 12 — Payment provider wiring (sandbox)
+
+Chosen rails: **bKash + Nagad** (BD), **Stripe** (international).
+Implementation: `services/payment_providers/{bkash,nagad,stripe_provider}.py` + factory.
+Without credentials, providers return **mock sandbox** sessions so CI can prove checkout→confirm→subscription active.
+With credentials, HTTP paths call real sandbox APIs (bKash tokenized checkout, Stripe Checkout Sessions).

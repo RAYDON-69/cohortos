@@ -178,3 +178,96 @@ class BillingService:
         d["id"] = str(rid) if rid else d["id"]
         d["usage_snapshot"] = usage
         return d
+
+
+    def set_payment_provider(self, tenant_id: str, provider: str) -> Dict[str, Any]:
+        """Attach preferred rail to subscription (bkash|nagad|stripe)."""
+        from services.payment_providers.factory import get_payment_provider
+        get_payment_provider(provider)  # validate name
+        sub = self.get_or_create_subscription(tenant_id)
+        sid = sub.get("id")
+        sub["payment_provider"] = provider
+        sub["updated_at"] = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
+        if sid:
+            try:
+                self.data_layer.update("billing_subscriptions", sid, sub)
+            except Exception:
+                # some layers need UUID
+                try:
+                    import uuid as _uuid
+                    self.data_layer.update("billing_subscriptions", _uuid.UUID(str(sid)), sub)
+                except Exception:
+                    pass
+        return sub
+
+    def create_checkout(
+        self,
+        tenant_id: str,
+        provider: str,
+        amount: float,
+        currency: str = "BDT",
+        callback_url: str = "http://localhost/billing/callback",
+        description: str = "",
+    ) -> Dict[str, Any]:
+        from services.payment_providers.factory import get_payment_provider
+        inv = self.create_draft_invoice(tenant_id)
+        # Override amount if provided
+        inv_id = str(inv.get("id") or "")
+        # Mark invoice open + provider
+        inv["status"] = "open"
+        inv["payment_provider"] = provider
+        inv["total"] = float(amount)
+        inv["subtotal"] = float(amount)
+        inv["currency"] = currency
+        if inv_id:
+            try:
+                self.data_layer.update("billing_invoices", inv_id, inv)
+            except Exception:
+                try:
+                    import uuid as _uuid
+                    self.data_layer.update("billing_invoices", _uuid.UUID(inv_id), inv)
+                except Exception:
+                    pass
+        self.set_payment_provider(tenant_id, provider)
+        pp = get_payment_provider(provider)
+        session = pp.create_checkout(
+            amount=float(amount),
+            currency=currency,
+            invoice_id=inv_id or f"inv-{tenant_id[:8]}",
+            callback_url=callback_url,
+            description=description or f"CohortOS subscription {tenant_id[:8]}",
+        )
+        return {
+            "checkout": session.to_dict(),
+            "invoice_id": inv_id,
+            "provider_configured": pp.is_configured(),
+        }
+
+    def confirm_checkout(
+        self,
+        tenant_id: str,
+        provider: str,
+        session_id: str,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        from services.payment_providers.factory import get_payment_provider
+        from models.billing import INV_PAID, SUB_ACTIVE
+        pp = get_payment_provider(provider)
+        result = pp.confirm_payment(session_id, **kwargs)
+        out = {"payment": result.to_dict()}
+        if result.success:
+            sub = self.get_or_create_subscription(tenant_id)
+            sub["status"] = SUB_ACTIVE
+            sub["payment_provider"] = provider
+            sid = sub.get("id")
+            if sid:
+                try:
+                    self.data_layer.update("billing_subscriptions", sid, sub)
+                except Exception:
+                    try:
+                        import uuid as _uuid
+                        self.data_layer.update("billing_subscriptions", _uuid.UUID(str(sid)), sub)
+                    except Exception:
+                        pass
+            out["subscription"] = sub
+        return out
