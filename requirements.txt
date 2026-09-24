@@ -4,8 +4,10 @@ fastapi>=0.110
 uvicorn>=0.27
 PyJWT>=2.8
 httpx>=0.27
+numpy>=1.24
 
-# Optional — enable deferred features
+# Optional - enable deferred features
 # google-generativeai>=0.8   # Gemini SDK
 # pyzk>=0.9                  # ZKTeco biometric
-onnxruntime>=1.16\ntokenizers>=0.15
+onnxruntime>=1.16
+tokenizers>=0.15

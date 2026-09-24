@@ -39,3 +39,8 @@ export function Confirm({
     </Dialog>
   );
 }
+
+/** Legacy alias used by screens */
+export function ModalConfirm(props: Props) {
+  return <Confirm {...props} />;
+}

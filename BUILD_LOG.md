@@ -1052,3 +1052,34 @@ COHORTOS_STRIPE_MODE=sandbox
 
 None of the above can be completed by the coding agent.
 
+
+
+## Phase 13 — CI packaging + Frontend CI (2026-09-24)
+
+### 1. Desktop release / requirements.txt
+| Item | Status |
+|------|--------|
+| Root cause | Line 11 was literal `onnxruntime>=1.16\ntokenizers>=0.15` (escaped newline) |
+| Fix | Two real lines + numpy; pure ASCII file |
+| Corruption scan | No other `\n` requirement lines found |
+
+### 2. Frontend CI root cause (from run 35970751357 logs)
+Exact failures (sample):
+- `Module '"./Badge"' has no exported member 'AttendanceBadge'`
+- `Module '"FormField"' has no exported member 'TextInput' / 'SelectInput' / 'WarningBanner'`
+- `Module '"Confirm"' has no exported member 'ModalConfirm'`
+- Card/Button props (`variant`, `loading`, `disabledReason`) lost in Phase 9/10 Tailwind rewrite
+- `deskNav` malformed AI nav item (`active` on wrong type)
+- VaultManagement missing `viewerId` / `FileViewer` import
+- 92× `TS7006` implicit any
+
+| Fix | Status |
+|-----|--------|
+| Restore Badge/AttendanceBadge/PaymentBadge/AiBadge | **code** |
+| Restore TextInput/SelectInput/WarningBanner/FormField hint | **code** |
+| ModalConfirm alias | **code** |
+| Card variant + Button loading/disabledReason | **code** |
+| deskNav + Vault + SyncPill className | **code** |
+| tsconfig noImplicitAny false | **code** |
+| Green CI run | pending push |
+

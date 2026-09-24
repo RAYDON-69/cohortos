@@ -1,7 +1,13 @@
 import { cn } from "../lib/utils";
 import { useConnectivity } from "../hooks/useConnectivity";
 
-export function SyncPill({ onConflictClick }: { onConflictClick?: () => void }) {
+export function SyncPill({
+  onConflictClick,
+  className,
+}: {
+  onConflictClick?: () => void;
+  className?: string;
+}) {
   const { state } = useConnectivity();
   const label =
     state === "offline"
@@ -22,7 +28,10 @@ export function SyncPill({ onConflictClick }: { onConflictClick?: () => void }) 
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold text-ink"
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold text-ink",
+        className
+      )}
       onClick={state === "conflict" ? onConflictClick : undefined}
       title={label}
     >
