@@ -1095,3 +1095,25 @@ Exact failures (sample):
 Frontend CI PROVEN: https://github.com/RAYDON-69/cohortos/actions/runs/35975456196
 Desktop run: https://github.com/RAYDON-69/cohortos/actions/runs/35975465822
 
+
+
+## Phase 14 — GitHub Release assets (skip Actions artifact quota) (2026-09-24)
+
+| Item | Status |
+|------|--------|
+| Removed `actions/upload-artifact` | **PROVEN** (not used on package jobs) |
+| Publish via `softprops/action-gh-release@v2` to tag `desktop-latest` | **PROVEN** |
+| Workflow run | https://github.com/RAYDON-69/cohortos/actions/runs/35981328903 — **Package linux/win/mac all success** |
+| Release page | **https://github.com/RAYDON-69/cohortos/releases/tag/desktop-latest** |
+
+### Downloadable assets (verified via API)
+
+| File | Size | URL |
+|------|------|-----|
+| Linux AppImage | ~195 MB | https://github.com/RAYDON-69/cohortos/releases/download/desktop-latest/CohortOS-0.11.0.AppImage |
+| Mac DMG (arm64) | ~167 MB | https://github.com/RAYDON-69/cohortos/releases/download/desktop-latest/CohortOS-0.11.0-arm64.dmg |
+| Windows NSIS Setup | ~142 MB | https://github.com/RAYDON-69/cohortos/releases/download/desktop-latest/CohortOS.Setup.0.11.0.exe |
+| Windows portable | ~142 MB | https://github.com/RAYDON-69/cohortos/releases/download/desktop-latest/CohortOS.0.11.0.exe |
+
+**PROVEN:** all three package jobs green; assets listed on the public Release page (outside Actions storage quota).
+
