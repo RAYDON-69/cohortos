@@ -532,8 +532,8 @@ def create_api_app(
 
 
 
-    def _llm_cost_guard(tenant_id: str) -> None:
-        """Shared AI cost guard for every external LLM path."""
+    def _llm_cost_guard(tenant_id: str, provider: str = "", route: str = "ai") -> None:
+        """Shared AI cost guard for every external LLM path; also records durable usage."""
         max_llm = int(os.environ.get("COHORTOS_AI_MAX_CALLS_PER_WINDOW") or "60")
         window_sec = int(os.environ.get("COHORTOS_AI_COST_WINDOW_SEC") or "3600")
         if not hasattr(registry, "_llm_cost"):
@@ -551,6 +551,14 @@ def create_api_app(
             )
         bucket["count"] = int(bucket.get("count") or 0) + 1
         registry._llm_cost[cost_key] = bucket
+        try:
+            from services.billing_service import BillingService
+            cm = registry.get_app(tenant_id)
+            BillingService(cm.data_layer, tenant_id).record_ai_usage(
+                tenant_id, provider=provider or "unknown", route=route or "ai"
+            )
+        except Exception:
+            pass
 
     @app.post("/auth/centre-trial")
     def centre_trial(body: CentreTrialBody, request: Request):
@@ -3053,6 +3061,37 @@ def create_api_app(
             "pyzk": PYZK_AVAILABLE,
             "gemini_sdk": False,  # filled at runtime if importable
         }
+
+
+    @app.get("/t/{tenant_id}/billing/usage")
+    def billing_usage(tenant_id: str, period: Optional[str] = None, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        cm = registry.get_app(tenant_id)
+        return BillingService(cm.data_layer, tenant_id).usage_summary(tenant_id, period_key=period)
+
+    @app.get("/t/{tenant_id}/billing/subscription")
+    def billing_subscription(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        cm = registry.get_app(tenant_id)
+        bs = BillingService(cm.data_layer, tenant_id)
+        sub = bs.get_or_create_subscription(tenant_id)
+        return {"subscription": sub, "plans": bs.list_plans()}
+
+    @app.get("/t/{tenant_id}/billing/plans")
+    def billing_plans(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        cm = registry.get_app(tenant_id)
+        return {"plans": BillingService(cm.data_layer, tenant_id).list_plans()}
+
+    @app.post("/t/{tenant_id}/billing/invoices/draft")
+    def billing_draft_invoice(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.billing_service import BillingService
+        cm = registry.get_app(tenant_id)
+        return BillingService(cm.data_layer, tenant_id).create_draft_invoice(tenant_id)
 
     return app
 

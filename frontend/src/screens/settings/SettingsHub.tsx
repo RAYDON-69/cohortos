@@ -30,6 +30,7 @@ const SECTIONS: Section[] = [
   {
     heading: "Billing / License",
     items: [
+      { to: "/settings/usage", title: "Usage meter", body: "AI calls and estimated cost this billing period." },
       { to: "/support", title: "License & support", body: "Plan status, lockouts, and how to contact support." },
     ],
   },

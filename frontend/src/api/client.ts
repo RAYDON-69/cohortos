@@ -2050,3 +2050,28 @@ export async function ensureSession(): Promise<boolean> {
   }
   return false;
 }
+
+
+/** Phase 11 — billing usage meter (no live payments) */
+export async function billingUsage(tenantId: string, period?: string) {
+  const q = period ? `?period=${encodeURIComponent(period)}` : "";
+  return apiRequest<{
+    tenant_id: string;
+    period_key: string;
+    total_calls: number;
+    total_estimated_cost_usd: number;
+    by_provider: { provider: string; calls: number; tokens_in: number; tokens_out: number; estimated_cost_usd: number }[];
+    plan_code?: string;
+    subscription_status?: string;
+    ai_calls_included?: number;
+    ai_calls_remaining?: number | null;
+    payment_provider?: string;
+  }>(tenantPath(tenantId, `/billing/usage${q}`));
+}
+
+export async function billingSubscription(tenantId: string) {
+  return apiRequest<{
+    subscription: Record<string, unknown>;
+    plans: Record<string, unknown>[];
+  }>(tenantPath(tenantId, "/billing/subscription"));
+}

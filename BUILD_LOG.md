@@ -955,3 +955,35 @@ Rewritten to match exact two-terminal flow: venv API on 8741, frontend `npm conf
 
 **Installer note:** 23MB is ~same order as a single Electron locale pack; ship model beside `cohortos-api` or download on first AI use.
 
+
+
+## Phase 11 — Commercial layer (2026-09-24)
+
+### Research (PLAN.md)
+| Item | Status |
+|------|--------|
+| Marketing site in repo? | **None** — decision for Raiyan, not built |
+| Competitor IA (Teachmint, ClassDojo, PowerSchool, DreamClass, Classroom) | **PROVEN** in PLAN.md |
+| BD rails (bKash, Nagad, aggregators) | **PROVEN** comparison + fees |
+| International (Stripe Billing / Connect, PayPal) | **PROVEN** comparison |
+| Live payment integration | **NOT-DONE** — awaits Raiyan provider choice (compliance) |
+
+### Data model
+| Entity | Status |
+|--------|--------|
+| BillingPlan / Subscription / UsageLineItem / Invoice | **PROVEN** (`models/billing.py`) |
+| BillingService + default Starter/Growth/Scale | **PROVEN** |
+| payment_provider defaults to `none` | **PROVEN** |
+
+### Usage meter
+| Item | Status |
+|------|--------|
+| GET `/t/{id}/billing/usage` | **PROVEN** (pytest) |
+| Durable record on `_llm_cost_guard` | **PROVEN** |
+| Settings → Usage UI | **PROVEN** (code) |
+| Settings hub link | **PROVEN** |
+| Device visual | **UNVERIFIED-NEEDS-DEVICE-TEST** |
+
+### Tests
+`tests/test_phase11_billing.py` — **5 passed**
+

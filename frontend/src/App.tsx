@@ -25,6 +25,7 @@ import { BackupExportScreen } from "./screens/settings/BackupExport";
 import { BiometricDevicesScreen } from "./screens/settings/BiometricDevices";
 import { StorageProviderScreen } from "./screens/settings/StorageProvider";
 import { SettingsHubScreen } from "./screens/settings/SettingsHub";
+import { UsageMeterScreen } from "./screens/settings/UsageMeter";
 import { AiKeysScreen } from "./screens/settings/AiKeys";
 import { TeacherCopilotScreen } from "./screens/ai/TeacherCopilot";
 import { AutomationsScreen } from "./screens/settings/Automations";
@@ -78,6 +79,7 @@ export default function App() {
       <Route path="/settings/backup" element={<RequireAuth><BackupExportScreen /></RequireAuth>} />
       <Route path="/settings/biometric" element={<RequireAuth><BiometricDevicesScreen /></RequireAuth>} />
       <Route path="/settings" element={<RequireAuth><SettingsHubScreen /></RequireAuth>} />
+      <Route path="/settings/usage" element={<RequireAuth><UsageMeterScreen /></RequireAuth>} />
       <Route path="/ai" element={<RequireAuth><TeacherCopilotScreen /></RequireAuth>} />
       <Route path="/settings/automations" element={<RequireAuth><AutomationsScreen /></RequireAuth>} />
       <Route path="/student/tutor" element={<RequireAuth><StudentTutorScreen /></RequireAuth>} />
