@@ -31,16 +31,7 @@ export function FormField({ id, label, hint, error, required, className, childre
   );
 }
 
-type TextProps = {
-  id?: string;
-  name?: string;
-  type?: string;
-  value?: string | number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  required?: boolean;
-  className?: string;
+type TextProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   error?: string;
 };
@@ -48,28 +39,18 @@ type TextProps = {
 export function TextInput({
   id,
   name,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-  disabled,
-  required,
-  className,
   label,
   error,
+  className,
+  ...rest
 }: TextProps) {
   const fid = id || name;
   const input = (
     <Input
       id={fid}
       name={name}
-      type={type}
-      value={value as string}
-      onChange={onChange}
-      placeholder={placeholder}
-      disabled={disabled}
-      required={required}
       className={cn(error && "border-error", className)}
+      {...rest}
     />
   );
   if (label) {

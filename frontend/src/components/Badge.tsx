@@ -150,3 +150,16 @@ export function AiBadge({
 }) {
   return <Badge kind={{ vocab: "ai", status }} label={label} showDot={showDot} />;
 }
+
+
+export function SourceBadge({
+  status,
+  label,
+  showDot = false,
+}: {
+  status: SourceAnnotation;
+  label?: string;
+  showDot?: boolean;
+}) {
+  return <Badge kind={{ vocab: "source", status }} label={label} showDot={showDot} />;
+}

@@ -9,9 +9,11 @@ export {
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
   variant?: string;
+  title?: string;
+  eyebrow?: string;
 };
 
-export function Card({ className, variant, ...props }: Props) {
+export function Card({ className, variant, title, eyebrow, children, ...props }: Props) {
   return (
     <div
       className={cn(
@@ -21,6 +23,10 @@ export function Card({ className, variant, ...props }: Props) {
         className
       )}
       {...props}
-    />
+    >
+      {eyebrow && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-sage-700">{eyebrow}</p>}
+      {title && <h3 className="mb-2 font-semibold text-ink">{title}</h3>}
+      {children}
+    </div>
   );
 }
