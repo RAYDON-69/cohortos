@@ -1081,5 +1081,17 @@ Exact failures (sample):
 | Card variant + Button loading/disabledReason | **code** |
 | deskNav + Vault + SyncPill className | **code** |
 | tsconfig noImplicitAny false | **code** |
-| Green CI run | pending push |
+| Green Frontend CI | **PROVEN** — run https://github.com/RAYDON-69/cohortos/actions/runs/35975456196 (commit `8508291`) success |
+
+### Desktop release verification (commit `8508291`, run 35975465822)
+| Job | Install Python deps | Build API | Build renderer | electron-builder | Upload |
+|-----|---------------------|-----------|----------------|------------------|--------|
+| Package linux | **success** (onnxruntime+tokenizers installed as separate reqs) | success | success | success | **failure** — GitHub Artifact storage quota exhausted |
+| Package mac | success | success | success | success | **failure** — same quota |
+| Package win | success through renderer; electron-builder was in progress at poll |
+
+**Packaging code path PROVEN green** through electron-builder. Upload failure is account quota (`Failed to CreateArtifact: Artifact storage quota has been hit`), not requirements.txt or TypeScript — **Raiyan must free Actions artifact storage** (delete old artifacts) or upgrade, then re-run workflow_dispatch.
+
+Frontend CI PROVEN: https://github.com/RAYDON-69/cohortos/actions/runs/35975456196
+Desktop run: https://github.com/RAYDON-69/cohortos/actions/runs/35975465822
 
