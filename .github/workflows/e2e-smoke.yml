@@ -46,20 +46,31 @@ jobs:
         working-directory: .
         env:
           COHORTOS_JWT_SECRET: e2e-test-secret-not-for-prod
+          COHORTOS_FOUNDER_TOKEN: e2e-founder-token-not-for-prod
           COHORTOS_AUTH_DB: /tmp/cohortos-e2e-auth.db
           COHORTOS_CLOUD_DB: /tmp/cohortos-e2e-cloud.db
           COHORTOS_PILOT_OTP: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
         run: |
-          nohup python -m uvicorn api.main:app --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
+          # api.main has no module-level `app` — use the factory entry
+          # (api_entry.py / INTEGRATION_NOTES.md: create_api_app_or_raise --factory)
+          nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
-          for i in $(seq 1 30); do
+          for i in $(seq 1 40); do
             if curl -sf http://127.0.0.1:8741/health >/dev/null; then
               echo "API up"
-              break
+              exit 0
+            fi
+            if ! kill -0 "$(cat /tmp/api.pid)" 2>/dev/null; then
+              echo "API process exited early:"
+              cat /tmp/api.log || true
+              exit 1
             fi
             sleep 1
           done
-          curl -sf http://127.0.0.1:8741/health || (cat /tmp/api.log; exit 1)
+          echo "API failed to become healthy:"
+          cat /tmp/api.log || true
+          exit 1
 
       - name: Install frontend deps
         run: |
