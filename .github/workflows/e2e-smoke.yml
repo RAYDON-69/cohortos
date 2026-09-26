@@ -76,6 +76,9 @@ jobs:
         run: |
           npm config set registry https://registry.npmjs.org/
           npm install
+          # Must use the project-local @playwright/test (in package.json), not a
+          # transient npx playwright that leaves @playwright/test unresolved.
+          test -d node_modules/@playwright/test || { echo "ERROR: @playwright/test missing after npm install"; exit 1; }
           npx playwright install --with-deps chromium
 
       - name: Build frontend
@@ -90,11 +93,16 @@ jobs:
         run: |
           npx vite preview --host 127.0.0.1 --port 5173 &
           echo $! > /tmp/vite.pid
-          for i in $(seq 1 20); do
-            if curl -sf http://127.0.0.1:5173 >/dev/null; then break; fi
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:5173 >/dev/null; then
+              echo "Frontend up"
+              break
+            fi
             sleep 1
           done
-          npx playwright test e2e/smoke.spec.ts --reporter=list
+          curl -sf http://127.0.0.1:5173 >/dev/null || { echo "Frontend never became ready"; exit 1; }
+          # Prefer local binary so config can resolve @playwright/test from node_modules
+          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list
 
       - name: Upload screenshots (always, 3-day retention)
         if: always()

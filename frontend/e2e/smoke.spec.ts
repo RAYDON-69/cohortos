@@ -34,10 +34,10 @@ test("desk smoke — login through support", async ({ page, request }) => {
     test.skip(true, `API not reachable at ${API}/health — start backend first`);
   }
 
-  // 1. Login
+  // 1. Login — screenshot immediately so early failures still leave an artifact
   await page.goto("/login");
-  await expect(page.getByText(/CohortOS|Welcome back|sign in/i).first()).toBeVisible({ timeout: 15000 });
   await shot(page, "01-login");
+  await expect(page.getByText(/CohortOS|Welcome back|sign in/i).first()).toBeVisible({ timeout: 15000 });
 
   const phoneInput = page.getByLabel(/Phone/i).or(page.locator('input[type="tel"], input[placeholder*="01"]')).first();
   await phoneInput.fill(PHONE);
@@ -70,8 +70,8 @@ test("desk smoke — login through support", async ({ page, request }) => {
 
   // 2. Attendance
   await page.goto("/attendance");
-  await expect(page.getByText(/Attendance|Present|Absent|Batch/i).first()).toBeVisible({ timeout: 15000 });
   await shot(page, "04-attendance");
+  await expect(page.getByText(/Attendance|Present|Absent|Batch/i).first()).toBeVisible({ timeout: 15000 });
   // Try mark Present if buttons exist
   const presentBtn = page.getByRole("button", { name: /^Present$/i }).first();
   if (await presentBtn.count()) {
