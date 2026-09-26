@@ -18,7 +18,20 @@ export function useApi() {
       const data = await apiRequest<T>(path, options);
       return data;
     } catch (e) {
-      const detail = (e as ApiError)?.detail || (e instanceof Error ? e.message : "Request failed");
+      const raw = (e as ApiError)?.detail ?? (e instanceof Error ? e.message : e);
+      // Never put a non-string into React children (React error #31).
+      const detail =
+        typeof raw === "string"
+          ? raw
+          : raw == null
+            ? "Request failed"
+            : (() => {
+                try {
+                  return JSON.stringify(raw);
+                } catch {
+                  return "Request failed";
+                }
+              })();
       setError(detail);
       return null;
     } finally {

@@ -1,20 +1,26 @@
-import { useMemo } from "react";
-import { loadTokens } from "../api/client";
+import { useSyncExternalStore } from "react";
+import { loadTokens, onTokenChange } from "../api/client";
 
 /**
  * Current tenant_id, centre name (when available), and mode placeholder.
  * Screens should prefer this over scattered loadTokens() calls.
+ *
+ * Subscribes to token changes so that after ensureSession / saveTokens
+ * (module-level memory + localStorage) consumers re-render with the new
+ * tenant_id instead of showing "No centre selected".
  */
+function getTenantSnapshot(): string {
+  const t = loadTokens();
+  return `${t.tenant_id || ""}|${t.account_id || ""}`;
+}
+
 export function useTenant() {
-  const tokens = loadTokens();
-  return useMemo(
-    () => ({
-      tenantId: tokens.tenant_id || "",
-      accountId: tokens.account_id || "",
-      // centre name / mode filled when /me or settings endpoints are wired into context
-      centreName: "",
-      mode: "offline-first" as "offline-first" | "cloud-first" | "hybrid",
-    }),
-    [tokens.tenant_id, tokens.account_id]
-  );
+  const snap = useSyncExternalStore(onTokenChange, getTenantSnapshot, getTenantSnapshot);
+  const [tenantId, accountId] = snap.split("|");
+  return {
+    tenantId: tenantId || "",
+    accountId: accountId || "",
+    centreName: "",
+    mode: "offline-first" as "offline-first" | "cloud-first" | "hybrid",
+  };
 }

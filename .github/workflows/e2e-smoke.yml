@@ -1,0 +1,114 @@
+# Playwright desk smoke — login through Support with screenshots.
+# Artifacts: screenshots always (short retention); video only on failure.
+# PROVEN for GUI-facing work requires this job green + screenshots.
+name: E2E Smoke
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "frontend/**"
+      - "api/**"
+      - "services/**"
+      - "tests/**"
+      - ".github/workflows/e2e-smoke.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "api/**"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python deps
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start API (background)
+        working-directory: .
+        env:
+          COHORTOS_JWT_SECRET: e2e-test-secret-not-for-prod
+          COHORTOS_AUTH_DB: /tmp/cohortos-e2e-auth.db
+          COHORTOS_CLOUD_DB: /tmp/cohortos-e2e-cloud.db
+          COHORTOS_PILOT_OTP: "1"
+        run: |
+          nohup python -m uvicorn api.main:app --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8741/health >/dev/null; then
+              echo "API up"
+              break
+            fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8741/health || (cat /tmp/api.log; exit 1)
+
+      - name: Install frontend deps
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Serve frontend + run smoke
+        env:
+          COHORTOS_API_BASE: http://127.0.0.1:8741
+          COHORTOS_WEB_BASE: http://127.0.0.1:5173
+          COHORTOS_E2E_PHONE: "01774656829"
+          CI: "1"
+        run: |
+          npx vite preview --host 127.0.0.1 --port 5173 &
+          echo $! > /tmp/vite.pid
+          for i in $(seq 1 20); do
+            if curl -sf http://127.0.0.1:5173 >/dev/null; then break; fi
+            sleep 1
+          done
+          npx playwright test e2e/smoke.spec.ts --reporter=list
+
+      - name: Upload screenshots (always, 3-day retention)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-smoke-screenshots
+          path: |
+            frontend/test-results/smoke-shots/
+            frontend/test-results/**/*.png
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload failure video / trace (failures only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-smoke-failure
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 5
+          if-no-files-found: ignore
+
+      - name: Stop processes
+        if: always()
+        run: |
+          kill $(cat /tmp/api.pid) 2>/dev/null || true
+          kill $(cat /tmp/vite.pid) 2>/dev/null || true
