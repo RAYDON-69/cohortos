@@ -1117,3 +1117,47 @@ Desktop run: https://github.com/RAYDON-69/cohortos/actions/runs/35975465822
 
 **PROVEN:** all three package jobs green; assets listed on the public Release page (outside Actions storage quota).
 
+
+---
+
+## Phase 15 — Auth/session hardening + Playwright desk smoke (2026-09-26)
+
+### Live failures addressed (Raiyan 2026-09-25 session)
+| Symptom | Root cause | Fix |
+|---------|------------|-----|
+| React error #31 on Exams (raw `{type,loc,msg,input}`) | `apiRequest` put Pydantic `detail` list/object into UI state | `normalizeErrorDetail()` always returns string |
+| Literal "Missing bearer token" / "No centre selected" on Fees/Exams/Storage/Backup | 401 after failed refresh left tokens half-cleared; `useTenant` non-reactive | Clear tokens on definitive 401/403; `useTenant` via `useSyncExternalStore` + `onTokenChange` |
+| Silent sign-outs | Refresh failure did not clear session; screens rendered error strings | Same clearTokens path; RequireAuth already shows "Session required" |
+| "No centre selected" after reload | `useTenant` memoized one-shot `loadTokens()` | Reactive subscription |
+
+### Code changes (commit `63e73c4` on `phase15-auth-e2e-hardening`)
+- `frontend/src/api/client.ts` — normalizeErrorDetail, emitTokenChange, clear on 401
+- `frontend/src/hooks/useTenant.ts` — useSyncExternalStore
+- `frontend/src/hooks/useApi.ts` — never set non-string error
+- `frontend/e2e/smoke.spec.ts` — full desk path + screenshots
+- `frontend/playwright.config.ts` — video on failure only
+- `.github/workflows/e2e-smoke.yml` — new job, short retention artifacts
+
+### Artifact quota
+Desktop-release already publishes to GitHub Release assets (Phase 14). E2E job uploads screenshots (3d) always and video only on failure (5d) — does not re-fill Actions storage.
+
+### PROVEN / NOT-DONE / UNVERIFIED (Phase 15)
+| Item | Status | Evidence |
+|------|--------|----------|
+| Error detail never React child | **PROVEN** (code) | normalizeErrorDetail unit path; useApi stringify |
+| useTenant reactive after saveTokens | **PROVEN** (code) | onTokenChange + useSyncExternalStore |
+| 401 → clear session | **PROVEN** (code) | apiRequest clearTokens after failed refresh |
+| Playwright smoke suite exists | **PROVEN** (code + workflow) | e2e/smoke.spec.ts + e2e-smoke.yml |
+| Smoke green on CI with screenshots | **UNVERIFIED** | Needs workflow_dispatch / PR run + artifact review |
+| Vault file viewer 404 | **NOT-DONE** | Storage/serving path still open |
+| Automations real builder (n8n-style) | **NOT-DONE** | Still name + Save stub |
+| AI Copilot live LLM answers | **NOT-DONE** | Falls back to local snapshot without key completion |
+| Support/Legal as separate deep links | **PROVEN** (code) | /support renders Contact/About/Terms/Feedback cards |
+| Remix pdf.js / Vidstack / shadcn expansion | **NOT-DONE** this phase | Prior phases had pdfjs/plyr; further component remix deferred |
+
+### Needs from Raiyan
+1. Re-run the AppImage / installer from `desktop-latest` after merge and confirm session survives restart (loadTokens + refresh).
+2. Confirm pilot OTP phone `01774656829` still valid for E2E, or provide a stable E2E phone + tenant.
+3. Free any remaining Actions artifact quota if other workflows still upload large binaries (E2E is intentionally light).
+4. Prefer: merge `phase15-auth-e2e-hardening` → main and trigger `E2E Smoke` workflow_dispatch; paste screenshot artifact links here for PROVEN upgrade.
+
