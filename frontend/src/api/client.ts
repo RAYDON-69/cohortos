@@ -22,6 +22,45 @@ export interface ApiError {
   retryAfter?: number;
 }
 
+/** Always produce a human-readable string from FastAPI / Pydantic error payloads. */
+export function normalizeErrorDetail(detail: unknown, fallback = "Request failed"): string {
+  if (detail == null) return fallback;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    // Pydantic v2 validation errors: [{type, loc, msg, input}, ...]
+    const msgs = detail
+      .map((item) => {
+        if (item == null) return null;
+        if (typeof item === "string") return item;
+        if (typeof item === "object" && "msg" in (item as object)) {
+          const m = (item as { msg?: unknown; loc?: unknown }).msg;
+          const loc = (item as { loc?: unknown }).loc;
+          const locStr = Array.isArray(loc) ? loc.filter((x) => x !== "body").join(".") : "";
+          return locStr ? `${locStr}: ${String(m)}` : String(m);
+        }
+        try {
+          return JSON.stringify(item);
+        } catch {
+          return String(item);
+        }
+      })
+      .filter(Boolean);
+    return msgs.length ? msgs.join("; ") : fallback;
+  }
+  if (typeof detail === "object") {
+    const o = detail as Record<string, unknown>;
+    if (typeof o.msg === "string") return o.msg;
+    if (typeof o.message === "string") return o.message;
+    if (typeof o.detail === "string") return o.detail;
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return fallback;
+    }
+  }
+  return String(detail);
+}
+
 type RequestOptions = {
   method?: string;
   body?: unknown;
@@ -116,6 +155,26 @@ export function loadTokens(): Partial<AuthTokens> {
   };
 }
 
+/** Subscribers notified when tokens / tenant identity change (used by useTenant). */
+const tokenChangeListeners = new Set<() => void>();
+
+export function onTokenChange(cb: () => void): () => void {
+  tokenChangeListeners.add(cb);
+  return () => {
+    tokenChangeListeners.delete(cb);
+  };
+}
+
+function emitTokenChange() {
+  tokenChangeListeners.forEach((l) => {
+    try {
+      l();
+    } catch {
+      /* ignore listener errors */
+    }
+  });
+}
+
 export function saveTokens(tokens: Partial<AuthTokens>) {
   if (tokens.access_token) memoryAccessToken = tokens.access_token;
   if (tokens.account_id) {
@@ -135,6 +194,7 @@ export function saveTokens(tokens: Partial<AuthTokens>) {
       void electronStoreRefresh(tokens.refresh_token);
     }
   }
+  emitTokenChange();
 }
 
 export function clearTokens() {
@@ -149,6 +209,7 @@ export function clearTokens() {
     localStorage.removeItem(STORAGE_KEYS.refresh);
   }
   if (isElectron()) void electronClearRefresh();
+  emitTokenChange();
 }
 
 async function refreshAccessToken(): Promise<AuthTokens | null> {
@@ -244,8 +305,12 @@ export async function apiRequest<T = unknown>(
   // 429 rate limit (SPEC §9.3 pattern)
   if (response.status === 429) {
     const retryAfter = parseInt(response.headers.get("Retry-After") || "60", 10);
-    const detail = (await response.json().catch(() => ({})))?.detail || "Rate limit exceeded";
-    const error: ApiError = { status: 429, detail, retryAfter };
+    const payload = await response.json().catch(() => ({}));
+    const error: ApiError = {
+      status: 429,
+      detail: normalizeErrorDetail(payload?.detail ?? payload, "Rate limit exceeded"),
+      retryAfter,
+    };
     throw error;
   }
 
@@ -259,7 +324,11 @@ export async function apiRequest<T = unknown>(
         headers: finalHeaders,
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal,
+        credentials: "include",
       });
+    } else {
+      // Refresh failed → session is gone; clear so RequireAuth redirects.
+      clearTokens();
     }
   }
 
@@ -267,8 +336,15 @@ export async function apiRequest<T = unknown>(
     const payload = await response.json().catch(() => ({}));
     const error: ApiError = {
       status: response.status,
-      detail: payload.detail || response.statusText || "Request failed",
+      detail: normalizeErrorDetail(
+        payload?.detail ?? payload,
+        response.statusText || "Request failed"
+      ),
     };
+    // Definitive auth rejection after refresh attempt → clear session.
+    if ((response.status === 401 || response.status === 403) && !skipAuth) {
+      clearTokens();
+    }
     throw error;
   }
 
@@ -1690,14 +1766,17 @@ async function founderRequest<T>(
     throw error;
   }
   if (!response.ok) {
-    let detail = response.statusText;
+    let raw: unknown = response.statusText;
     try {
       const j = await response.json();
-      detail = j.detail || detail;
+      raw = j.detail ?? j;
     } catch {
       /* */
     }
-    const error: ApiError = { status: response.status, detail };
+    const error: ApiError = {
+      status: response.status,
+      detail: normalizeErrorDetail(raw, response.statusText || "Request failed"),
+    };
     throw error;
   }
   if (response.status === 204) return {} as T;
