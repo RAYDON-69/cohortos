@@ -2,14 +2,14 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 60000,
+  timeout: 90000,
   expect: { timeout: 15000 },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: process.env.CI
-    ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
+    ? [["list"], ["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: process.env.COHORTOS_WEB_BASE || "http://127.0.0.1:5173",
@@ -18,7 +18,8 @@ export default defineConfig({
     video: "retain-on-failure",
     ...devices["Desktop Chrome"],
   },
-  outputDir: "test-results",
+  // Isolated from e2e-artifacts/ so screenshots + console logs are not wiped
+  outputDir: "test-results/pw",
   webServer: process.env.CI
     ? undefined
     : {

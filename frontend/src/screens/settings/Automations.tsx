@@ -25,6 +25,9 @@ export function AutomationsScreen() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [log, setLog] = useState<unknown[]>([]);
   const [name, setName] = useState("Fee overdue reminder");
+  const [triggerType, setTriggerType] = useState("manual");
+  const [actionType, setActionType] = useState("fee_reminder");
+  const [conditionField, setConditionField] = useState("none");
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,9 +58,12 @@ export function AutomationsScreen() {
         body: {
           name: name.trim(),
           enabled: true,
-          trigger: { type: "manual" },
-          conditions: [],
-          actions: [{ type: "fee_reminder", params: {} }],
+          trigger: { type: triggerType },
+          conditions:
+            conditionField === "none"
+              ? []
+              : [{ field: conditionField, op: "eq", value: true }],
+          actions: [{ type: actionType, params: {} }],
         },
       });
       setMsg("Automation saved");
@@ -109,7 +115,45 @@ export function AutomationsScreen() {
           <FormField id="aname" label="Name">
             <TextInput id="aname" value={name} onChange={(e) => setName(e.target.value)} />
           </FormField>
-          <p className="caption muted">Default action: fee reminder (manual trigger).</p>
+          <FormField id="atrigger" label="Trigger">
+            <select
+              id="atrigger"
+              className="w-full h-11 rounded-md border border-border-strong bg-cream px-3 text-sm"
+              value={triggerType}
+              onChange={(e) => setTriggerType(e.target.value)}
+            >
+              <option value="manual">Manual (desk button)</option>
+              <option value="schedule">Schedule (cron / server)</option>
+              <option value="event">Event (attendance / payment change)</option>
+            </select>
+          </FormField>
+          <FormField id="acond" label="Condition (optional)">
+            <select
+              id="acond"
+              className="w-full h-11 rounded-md border border-border-strong bg-cream px-3 text-sm"
+              value={conditionField}
+              onChange={(e) => setConditionField(e.target.value)}
+            >
+              <option value="none">None — always run when triggered</option>
+              <option value="fee_overdue">Fee overdue students exist</option>
+              <option value="low_attendance">Low attendance students exist</option>
+            </select>
+          </FormField>
+          <FormField id="aaction" label="Action">
+            <select
+              id="aaction"
+              className="w-full h-11 rounded-md border border-border-strong bg-cream px-3 text-sm"
+              value={actionType}
+              onChange={(e) => setActionType(e.target.value)}
+            >
+              <option value="fee_reminder">Send fee reminder</option>
+              <option value="attendance_nag">Send attendance nag</option>
+              <option value="notify_owner">Notify owner / desk</option>
+            </select>
+          </FormField>
+          <p className="caption muted" style={{ marginBottom: 12 }}>
+            Rules are stored and executed by the automation engine — enable or disable without code changes.
+          </p>
           <Button variant="primary" onClick={() => void createRule()}>
             Save automation
           </Button>

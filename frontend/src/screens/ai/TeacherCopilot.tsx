@@ -39,10 +39,18 @@ export function TeacherCopilotScreen() {
         used_external_llm?: boolean;
         grounded?: Record<string, unknown>;
         tools_used?: unknown[];
+        llm_error?: string | null;
+        provider_configured?: boolean;
+        needs_for_external_llm?: string | null;
+        model?: string | null;
       }>(tenantPath(tenantId, "/ai/query"), { method: "POST", body: { question } });
-      const meta = res.used_external_llm
-        ? "External model"
+      let meta = res.used_external_llm
+        ? `External model${res.model ? ` · ${res.model}` : ""}`
         : `Local grounded · students ${res.grounded?.student_count ?? "—"}`;
+      if (res.llm_error) meta += ` · LLM error: ${res.llm_error}`;
+      else if (!res.used_external_llm && res.needs_for_external_llm) {
+        meta += ` · ${res.needs_for_external_llm}`;
+      }
       setMsgs((m) => [...m, { role: "assistant", text: res.answer || "No answer", meta }]);
     } catch (e) {
       setMsgs((m) => [

@@ -2056,11 +2056,32 @@ def create_api_app(
         from services.storage_service import build_storage_provider, LocalFsStorageProvider
         try:
             store = build_storage_provider(section)
-            if not store.is_configured() or not store.exists(remote_id):
-                store = LocalFsStorageProvider(section.get("root") or "/tmp/cohortos-storage")
-            if not store.exists(remote_id):
+            root = section.get("root") or "/tmp/cohortos-storage"
+            if not store.is_configured():
+                store = LocalFsStorageProvider(root)
+            # Resolve remote_id with a few path normalizations (upload may store
+            # vault/{tenant}/file.pdf while an older row has a bare filename).
+            candidates = [remote_id]
+            if remote_id.startswith("/"):
+                candidates.append(remote_id.lstrip("/"))
+            if "/" in remote_id:
+                candidates.append(remote_id.split("/")[-1])
+            # Prefer configured store, then always fall back to local FS under root
+            resolved = None
+            for cand in candidates:
+                if store.exists(cand):
+                    resolved = cand
+                    break
+            if resolved is None:
+                local = LocalFsStorageProvider(root)
+                for cand in candidates:
+                    if local.exists(cand):
+                        store = local
+                        resolved = cand
+                        break
+            if resolved is None:
                 raise HTTPException(status_code=404, detail="File missing in storage")
-            stream = store.download(remote_id)
+            stream = store.download(resolved)
             # Cap read so a corrupt/huge object cannot hang or OOM the API
             max_bytes = 25 * 1024 * 1024
             data = stream.read(max_bytes + 1)
