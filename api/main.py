@@ -2054,12 +2054,20 @@ def create_api_app(
             raise HTTPException(status_code=404, detail="No file attached to this resource")
         section = cm.config.get_section("storage") or {}
         from services.storage_service import build_storage_provider, LocalFsStorageProvider
+        import os as _os
+        _default_root = section.get("root") or _os.environ.get("COHORTOS_STORAGE_ROOT") or "/tmp/cohortos-storage"
         try:
-            store = build_storage_provider(section)
+            store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
             if not store.is_configured() or not store.exists(remote_id):
-                store = LocalFsStorageProvider(section.get("root") or "/tmp/cohortos-storage")
+                store = LocalFsStorageProvider(_default_root)
             if not store.exists(remote_id):
-                raise HTTPException(status_code=404, detail="File missing in storage")
+                # Last resort: try basename under vault/tenant (legacy uploads)
+                from pathlib import Path as _P
+                alt = str(_P("vault") / tenant_id / _P(str(remote_id)).name)
+                if store.exists(alt):
+                    remote_id = alt
+                else:
+                    raise HTTPException(status_code=404, detail="File missing in storage")
             stream = store.download(remote_id)
             # Cap read so a corrupt/huge object cannot hang or OOM the API
             max_bytes = 25 * 1024 * 1024

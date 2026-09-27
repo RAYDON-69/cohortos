@@ -51,6 +51,7 @@ jobs:
           COHORTOS_CLOUD_DB: /tmp/cohortos-e2e-cloud.db
           COHORTOS_PILOT_OTP: "1"
           COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage
         run: |
           # api.main has no module-level `app` — use the factory entry
           # (api_entry.py / INTEGRATION_NOTES.md: create_api_app_or_raise --factory)
@@ -91,7 +92,9 @@ jobs:
           CI: "1"
         run: |
           mkdir -p test-results/smoke-shots playwright-report
-          : > test-results/playwright-output.txt
+          # Log OUTSIDE Playwright outputDir (test-results is wiped on run start)
+          LOG=/tmp/cohortos-playwright-output.txt
+          : > "$LOG"
           npx vite preview --host 127.0.0.1 --port 5173 &
           echo $! > /tmp/vite.pid
           for i in $(seq 1 30); do
@@ -102,13 +105,12 @@ jobs:
             sleep 1
           done
           curl -sf http://127.0.0.1:5173 >/dev/null || { echo "Frontend never became ready"; exit 1; }
-          # Prefer local binary so config can resolve @playwright/test from node_modules
           set +e
-          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list > test-results/playwright-output.txt 2>&1
+          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list > "$LOG" 2>&1
           PW_EXIT=$?
-          # Always echo reporter output into the job log (not only via artifact)
+          cp "$LOG" test-results/playwright-output.txt 2>/dev/null || true
           echo "===== playwright-output.txt (last 200 lines) ====="
-          tail -n 200 test-results/playwright-output.txt || true
+          tail -n 200 "$LOG" || true
           echo "===== end playwright-output.txt ====="
           set -e
           exit $PW_EXIT
@@ -116,11 +118,14 @@ jobs:
       - name: Print playwright log to job console
         if: always()
         run: |
+          LOG=/tmp/cohortos-playwright-output.txt
           echo "===== playwright-output.txt (full, always-on) ====="
-          if [ -f test-results/playwright-output.txt ]; then
+          if [ -f "$LOG" ]; then
+            cat "$LOG"
+          elif [ -f test-results/playwright-output.txt ]; then
             cat test-results/playwright-output.txt
           else
-            echo "(no test-results/playwright-output.txt — smoke step may have failed before writing)"
+            echo "(no playwright log found)"
             ls -la test-results/ 2>/dev/null || true
           fi
           echo "===== end ====="
