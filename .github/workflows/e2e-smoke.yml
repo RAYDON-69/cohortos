@@ -91,6 +91,7 @@ jobs:
           COHORTOS_E2E_PHONE: "01774656829"
           CI: "1"
         run: |
+          mkdir -p test-results/smoke-shots playwright-report
           npx vite preview --host 127.0.0.1 --port 5173 &
           echo $! > /tmp/vite.pid
           for i in $(seq 1 30); do
@@ -102,10 +103,26 @@ jobs:
           done
           curl -sf http://127.0.0.1:5173 >/dev/null || { echo "Frontend never became ready"; exit 1; }
           # Prefer local binary so config can resolve @playwright/test from node_modules
-          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list
+          # Capture full reporter output to a text file for diagnosis when artifacts fail
+          set +e
+          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list 2>&1 | tee test-results/playwright-output.txt
+          PW_EXIT=${PIPESTATUS[0]}
+          set -e
+          exit $PW_EXIT
 
-      - name: Upload screenshots (always, 3-day retention)
+      - name: Upload playwright text log (always; tiny — survives quota better)
         if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-smoke-playwright-log
+          path: frontend/test-results/playwright-output.txt
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Upload screenshots (always; ignore empty / quota)
+        if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: e2e-smoke-screenshots
@@ -115,8 +132,9 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
-      - name: Upload failure video / trace (failures only)
+      - name: Upload failure video / trace (failures only; ignore quota)
         if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: e2e-smoke-failure
