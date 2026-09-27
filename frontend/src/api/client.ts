@@ -2154,3 +2154,11 @@ export async function billingSubscription(tenantId: string) {
     plans: Record<string, unknown>[];
   }>(tenantPath(tenantId, "/billing/subscription"));
 }
+
+
+/** E2E / debug: allow Playwright to hydrate memory access token after localStorage inject */
+if (typeof window !== "undefined") {
+  (window as any).__COHORTOS_SAVE_TOKENS__ = saveTokens;
+  (window as any).__COHORTOS_CLEAR_TOKENS__ = clearTokens;
+}
+
