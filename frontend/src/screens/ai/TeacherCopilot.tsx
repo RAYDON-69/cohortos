@@ -42,7 +42,9 @@ export function TeacherCopilotScreen() {
       }>(tenantPath(tenantId, "/ai/query"), { method: "POST", body: { question } });
       const meta = res.used_external_llm
         ? "External model"
-        : `Local grounded · students ${res.grounded?.student_count ?? "—"}`;
+        : (res.grounded as { rag?: { backend?: string; citations?: unknown[] } })?.rag?.citations?.length
+          ? `Vault RAG (${(res.grounded as { rag?: { backend?: string } }).rag?.backend || "index"} · ${(res.grounded as { rag?: { citations?: unknown[] } }).rag?.citations?.length} source(s))`
+          : `Local grounded · students ${res.grounded?.student_count ?? "—"}`;
       setMsgs((m) => [...m, { role: "assistant", text: res.answer || "No answer", meta }]);
     } catch (e) {
       setMsgs((m) => [

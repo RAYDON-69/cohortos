@@ -1387,26 +1387,48 @@ def create_api_app(
                     break
             if "run" in q_lower:
                 grounded["automation_result"] = tool_run_automation(str(run_name))
-        answer = (
-            f"Centre snapshot: {grounded['student_count']} students, "
-            f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "
-        )
-        if "struggle" in q or "weak" in q:
-            bid = ""
-            if bt:
-                bid = str(bt[0].get("id") or "")
-            struggle = tool_struggle(bid)
-            if struggle:
-                names = [str(s.get("name") or s.get("student_id")) for s in struggle[:8]]
-                answer += "Students flagged by analytics: " + ", ".join(names) + "."
+        # RAG-first (Chroma + MiniLM embeddings via RagService). Replaces the
+        # generic "Centre snapshot" string when vault content can answer.
+        question_raw = str(body.get("question") or body.get("q") or "")
+        session_id = str(body.get("session_id") or claims.get("sub") or "default")
+        rag_meta = {}
+        answer = ""
+        if hasattr(cm, "rag") and cm.rag:
+            try:
+                # Keep vault index warm (cheap for desk-scale corpora)
+                cm.rag.reindex_vault()
+                rag_out = cm.rag.answer(question_raw, session_id=session_id, llm_complete=None)
+                answer = str(rag_out.get("answer") or "")
+                rag_meta = {
+                    "backend": rag_out.get("backend"),
+                    "citations": rag_out.get("citations") or [],
+                    "memory_turns": rag_out.get("memory_turns"),
+                }
+                grounded["rag"] = rag_meta
+                tool_trace.append({"tool": "vault_rag", "hits": len(rag_meta.get("citations") or [])})
+            except Exception as e:
+                tool_trace.append({"tool": "vault_rag", "error": str(e)})
+        if not answer:
+            answer = (
+                f"Centre snapshot: {grounded['student_count']} students, "
+                f"{grounded['batch_count']} batches, {grounded['exam_count']} exams. "
+            )
+            if "struggle" in q or "weak" in q:
+                bid = ""
+                if bt:
+                    bid = str(bt[0].get("id") or "")
+                struggle = tool_struggle(bid)
+                if struggle:
+                    names = [str(s.get("name") or s.get("student_id")) for s in struggle[:8]]
+                    answer += "Students flagged by analytics: " + ", ".join(names) + "."
+                else:
+                    answer += "No struggle flags yet (need exam results). Open Analytics when data exists."
+            elif "batch" in q:
+                answer += "Batches: " + ", ".join(str(b.get("name") or b.get("id")) for b in bt[:10])
+            elif "student" in q or "how many" in q:
+                answer += f"Student roster size is {len(st)}."
             else:
-                answer += "No struggle flags yet (need exam results). Open Analytics when data exists."
-        elif "batch" in q:
-            answer += "Batches: " + ", ".join(str(b.get("name") or b.get("id")) for b in bt[:10])
-        elif "student" in q or "how many" in q:
-            answer += f"Student roster size is {len(st)}."
-        else:
-            answer += "Ask about batches, student counts, or struggling students for grounded answers."
+                answer += "Ask about batches, student counts, or struggling students for grounded answers."
         # Rate-limit AI queries per account
         try:
             registry.limiter.check(
@@ -2033,6 +2055,11 @@ def create_api_app(
             actor_role=str(claims.get("role") or "owner"),
         )
         resource = cm.content.get_resource(rid)
+        try:
+            if hasattr(cm, "rag") and cm.rag:
+                cm.rag.index_resource(resource or {})
+        except Exception:
+            pass
         return {"resource_id": rid, "resource": resource, "storage_id": remote_id}
 
     @app.get("/t/{tenant_id}/vault/{resource_id}/content")
@@ -2119,6 +2146,11 @@ def create_api_app(
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
         resource = cm.content.get_resource(rid)
+        try:
+            if hasattr(cm, "rag") and cm.rag:
+                cm.rag.index_resource(resource or {})
+        except Exception:
+            pass
         return {"resource_id": rid, "resource": resource}
 
     @app.put("/t/{tenant_id}/vault/{resource_id}/access-rules")
