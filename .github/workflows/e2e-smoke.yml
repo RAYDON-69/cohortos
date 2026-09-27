@@ -88,10 +88,10 @@ jobs:
         env:
           COHORTOS_API_BASE: http://127.0.0.1:8741
           COHORTOS_WEB_BASE: http://127.0.0.1:5173
-          COHORTOS_E2E_PHONE: "01774656829"
           CI: "1"
         run: |
           mkdir -p test-results/smoke-shots playwright-report
+          : > test-results/playwright-output.txt
           npx vite preview --host 127.0.0.1 --port 5173 &
           echo $! > /tmp/vite.pid
           for i in $(seq 1 30); do
@@ -103,12 +103,27 @@ jobs:
           done
           curl -sf http://127.0.0.1:5173 >/dev/null || { echo "Frontend never became ready"; exit 1; }
           # Prefer local binary so config can resolve @playwright/test from node_modules
-          # Capture full reporter output to a text file for diagnosis when artifacts fail
           set +e
-          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list 2>&1 | tee test-results/playwright-output.txt
-          PW_EXIT=${PIPESTATUS[0]}
+          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list > test-results/playwright-output.txt 2>&1
+          PW_EXIT=$?
+          # Always echo reporter output into the job log (not only via artifact)
+          echo "===== playwright-output.txt (last 200 lines) ====="
+          tail -n 200 test-results/playwright-output.txt || true
+          echo "===== end playwright-output.txt ====="
           set -e
           exit $PW_EXIT
+
+      - name: Print playwright log to job console
+        if: always()
+        run: |
+          echo "===== playwright-output.txt (full, always-on) ====="
+          if [ -f test-results/playwright-output.txt ]; then
+            cat test-results/playwright-output.txt
+          else
+            echo "(no test-results/playwright-output.txt — smoke step may have failed before writing)"
+            ls -la test-results/ 2>/dev/null || true
+          fi
+          echo "===== end ====="
 
       - name: Upload playwright text log (always; tiny — survives quota better)
         if: always()
