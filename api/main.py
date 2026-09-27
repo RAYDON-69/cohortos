@@ -1408,6 +1408,41 @@ def create_api_app(
                 tool_trace.append({"tool": "vault_rag", "hits": len(rag_meta.get("citations") or [])})
             except Exception as e:
                 tool_trace.append({"tool": "vault_rag", "error": str(e)})
+
+        # Hermes-style function calling (structured tool_calls JSON)
+        tool_calls_out = []
+        tool_results = []
+        try:
+            from services.copilot_tools import run_copilot_tools, tools_for_prompt
+            auto_svc = None
+            try:
+                auto_svc = _auto(cm)
+            except Exception:
+                auto_svc = getattr(cm, "automation", None)
+            # Optional: ask LLM to emit tool_calls when configured (handled below after keys load)
+            tool_calls_out, tool_results = run_copilot_tools(
+                question_raw,
+                automation_service=auto_svc,
+                llm_tool_text=None,
+            )
+            if tool_results:
+                tool_trace.append({"tool": "function_calling", "calls": tool_calls_out, "results": tool_results})
+                grounded["tool_calls"] = tool_calls_out
+                grounded["tool_results"] = tool_results
+                # Surface action outcome in the answer when a tool ran
+                ok_bits = []
+                for r in tool_results:
+                    if r.get("ok"):
+                        rule = (r.get("result") or {}).get("rule") or {}
+                        ok_bits.append(
+                            f"Created automation “{rule.get('name') or r.get('name')}” (id={rule.get('id') or '—'})."
+                        )
+                    else:
+                        ok_bits.append(f"Tool {r.get('name')}: {r.get('error')}")
+                if ok_bits:
+                    answer = (answer + " " if answer else "") + " ".join(ok_bits)
+        except Exception as e:
+            tool_trace.append({"tool": "function_calling", "error": str(e)})
         if not answer:
             answer = (
                 f"Centre snapshot: {grounded['student_count']} students, "
