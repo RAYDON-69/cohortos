@@ -1397,7 +1397,20 @@ def create_api_app(
             try:
                 # Keep vault index warm (cheap for desk-scale corpora)
                 cm.rag.reindex_vault()
-                rag_out = cm.rag.answer(question_raw, session_id=session_id, llm_complete=None)
+                def _local_synth(prompt: str) -> str:
+                    # Prefer cloud later; for no-key path use local GGUF when available
+                    try:
+                        keys_local = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
+                        if keys_local.get("api_key"):
+                            return ""
+                        from services.local_model import local_available, local_complete, resolve_model_id
+                        if not local_available():
+                            return ""
+                        mid = resolve_model_id(keys_local)
+                        return local_complete(prompt, model_id=mid, max_tokens=400, temperature=0.2)
+                    except Exception:
+                        return ""
+                rag_out = cm.rag.answer(question_raw, session_id=session_id, llm_complete=_local_synth)
                 answer = str(rag_out.get("answer") or "")
                 rag_meta = {
                     "backend": rag_out.get("backend"),
@@ -1423,7 +1436,10 @@ def create_api_app(
             tool_calls_out, tool_results = run_copilot_tools(
                 question_raw,
                 automation_service=auto_svc,
+                admission_service=getattr(cm, "admission", None),
+                batch_service=getattr(cm, "batch", None),
                 llm_tool_text=None,
+                use_local_for_ambiguous=True,
             )
             if tool_results:
                 tool_trace.append({"tool": "function_calling", "calls": tool_calls_out, "results": tool_results})
@@ -1550,6 +1566,25 @@ def create_api_app(
 
 
     
+
+    @app.get("/t/{tenant_id}/ai/local-model/status")
+    def local_model_status(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.local_model import progress, resolve_model_id, model_path, local_available, MODEL_REGISTRY
+        cm = registry.get_app(tenant_id)
+        keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
+        mid = resolve_model_id(keys)
+        path = model_path(mid)
+        return {
+            "model_id": mid,
+            "available_models": list(MODEL_REGISTRY.keys()),
+            "llama_cpp_installed": local_available(),
+            "file_present": path.is_file(),
+            "path": str(path),
+            "progress": progress(),
+            "packaging": "download-on-first-run",
+        }
+
     @app.get("/t/{tenant_id}/automations/rules")
     def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)

@@ -80,6 +80,47 @@ class CohortOSEmbedding:
         return self._get_text_embedding(text)
 
 
+
+def clean_thinking_content(text: str) -> str:
+    """Open Notebook pattern (graphs/ask.py): strip model thinking blocks."""
+    import re
+    if not text:
+        return ""
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.I)
+    text = re.sub(r"<thinking>[\s\S]*?</thinking>", "", text, flags=re.I)
+    return text.strip()
+
+
+def expand_search_terms(question: str) -> List[str]:
+    """
+    Open Notebook ask strategy pattern (graphs/ask.py Strategy.searches):
+    fan out 1–3 concrete search terms from the user question instead of
+    a single raw query. Keeps terms non-empty (their filter on blank terms).
+    """
+    q = (question or "").strip()
+    if not q:
+        return []
+    terms = [q]
+    # Pull quoted phrases
+    import re
+    for m in re.finditer(r"[\"']([^\"']{3,80})[\"']", q):
+        terms.append(m.group(1).strip())
+    # Significant tokens as secondary term
+    toks = [t for t in re.findall(r"[A-Za-z0-9_\u0980-\u09ff]{4,}", q) if t.lower() not in {
+        "what", "which", "where", "when", "this", "that", "with", "from", "your", "have", "tell", "about"
+    }]
+    if toks:
+        terms.append(" ".join(toks[:6]))
+    # Dedupe preserving order
+    seen = set()
+    out = []
+    for t in terms:
+        k = t.lower()
+        if k not in seen and t.strip():
+            seen.add(k)
+            out.append(t.strip())
+    return out[:3]
+
 class RagService:
     def __init__(
         self,
@@ -419,26 +460,56 @@ class RagService:
                 return []
         return []
 
+
     def answer(
         self,
         question: str,
         session_id: str = "default",
         llm_complete=None,
     ) -> Dict[str, Any]:
+        """
+        Multi-query retrieve (Open Notebook ask Strategy.searches) +
+        inline [n] citations (citations.md / provide_answer ids) +
+        optional local/cloud synthesis.
+        """
         q = (question or "").strip()
-        hits = self.retrieve(q, limit=5)
-        if not hits:
-            self.reindex_vault()
-            hits = self.retrieve(q, limit=5)
+        terms = expand_search_terms(q) or ([q] if q else [])
+        # Warm index once
+        self.reindex_vault()
+        # Merge hits across terms (Open Notebook fans out provide_answer per term)
+        by_key: Dict[str, Dict[str, Any]] = {}
+        for term in terms:
+            for h in self.retrieve(term, limit=4):
+                key = str(h.get("resource_id") or "") + "|" + (h.get("excerpt") or "")[:80]
+                prev = by_key.get(key)
+                if not prev or float(h.get("score") or 0) > float(prev.get("score") or 0):
+                    by_key[key] = h
+        hits = sorted(by_key.values(), key=lambda x: float(x.get("score") or 0), reverse=True)[:5]
 
         history = self.recent_turns(session_id=session_id, limit=8)
         hist_txt = "\n".join(f"{h.get('role')}: {h.get('content')}" for h in history)
-        context_blocks = [f"[{h.get('title') or 'doc'}] {h.get('excerpt') or ''}" for h in hits]
+
+        # Citation list: [1] title — excerpt (Open Notebook reference list pattern)
+        citations = []
+        context_blocks = []
+        for i, h in enumerate(hits, 1):
+            title = h.get("title") or "document"
+            excerpt = (h.get("excerpt") or "").strip()
+            citations.append(
+                {
+                    "n": i,
+                    "resource_id": h.get("resource_id"),
+                    "title": title,
+                    "excerpt": excerpt[:400],
+                    "score": h.get("score"),
+                }
+            )
+            context_blocks.append(f"[{i}] {title}: {excerpt}")
         context = "\n\n".join(context_blocks) if context_blocks else "(no vault matches)"
 
         prompt = (
-            "You are CohortOS desk assistant. Answer using the vault context and prior turns. "
-            "If the context contains the answer, quote or paraphrase it. "
+            "You are CohortOS desk assistant. Answer using ONLY the vault context. "
+            "Cite sources inline as [1], [2] matching the context numbers. "
             "If context is empty, say you could not find it in the centre vault.\n\n"
             f"Prior turns:\n{hist_txt or '(none)'}\n\n"
             f"Vault context:\n{context}\n\n"
@@ -449,17 +520,24 @@ class RagService:
         used_llm = False
         if callable(llm_complete) and hits:
             try:
-                answer = str(llm_complete(prompt) or "").strip()
+                raw = str(llm_complete(prompt) or "").strip()
+                answer = clean_thinking_content(raw)
+                # Open Notebook: drop empty after stripping thinking
+                if not answer.strip():
+                    answer = ""
                 used_llm = bool(answer)
             except Exception:
                 answer = ""
 
         if not answer:
             if hits:
-                top = hits[0]
+                # Extractive with inline citations (always verifiable)
+                parts = []
+                for c in citations[:3]:
+                    parts.append(f"[{c['n']}] {c['title']}: {c['excerpt'][:240]}")
                 answer = (
-                    f"From your centre vault (“{top.get('title') or 'document'}”): "
-                    f"{(top.get('excerpt') or '').strip()}"
+                    f"From your centre vault: {parts[0]}"
+                    + ((" " + " ".join(parts[1:])) if len(parts) > 1 else "")
                 )
             else:
                 answer = (
@@ -471,8 +549,10 @@ class RagService:
         self.append_turn("assistant", answer, session_id=session_id)
         return {
             "answer": answer,
-            "citations": hits,
+            "citations": citations,
             "backend": self.backend_name(),
             "used_llm": used_llm,
             "memory_turns": len(history) + 2,
+            "search_terms": terms,
         }
+
