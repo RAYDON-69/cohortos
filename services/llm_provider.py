@@ -649,6 +649,48 @@ class DeepSeekProvider(LLMProvider):
             raw=data,
         )
 
+
+class LlamaCppProvider(LLMProvider):
+    """
+    Local GGUF via llama-cpp-python (LFM2.5-1.2B-Instruct default;
+    swap model via kwargs model_id / COHORTOS_LOCAL_MODEL_ID → Qwen2.5-1.5B-Instruct-FC).
+    """
+
+    def __init__(self, model_id: str = "lfm2.5-1.2b-instruct", **kwargs):
+        self.model_id = model_id or "lfm2.5-1.2b-instruct"
+        self.max_tokens = int(kwargs.get("max_tokens") or 512)
+
+    def complete(self, request: LLMRequest) -> LLMResponse:
+        from services.local_model import local_complete, local_available
+        if not local_available():
+            raise OfflineError("llama-cpp-python not installed")
+        system = ""
+        prompt = request.prompt or ""
+        # LLMRequest may carry system on different attrs — keep prompt-only
+        if getattr(request, "system", None):
+            system = str(request.system or "")
+        try:
+            text = local_complete(
+                prompt,
+                model_id=self.model_id,
+                system=system,
+                max_tokens=self.max_tokens,
+                temperature=float(getattr(request, "temperature", None) or 0.2),
+            )
+        except FileNotFoundError as e:
+            raise OfflineError(str(e)) from e
+        except Exception as e:
+            raise LLMError(f"local GGUF failed: {e}") from e
+        return LLMResponse(
+            text=text or "",
+            model=self.model_id,
+            tier=request.tier,
+            tokens_in=0,
+            tokens_out=0,
+            raw={"provider": "llama-cpp", "model_id": self.model_id},
+        )
+
+
 def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
     p = (provider or "").strip().lower()
     if p in ("groq",):
@@ -670,6 +712,15 @@ def build_llm_provider(provider: str, api_key: str, **kwargs) -> LLMProvider:
         return AnthropicProvider(api_key, model=kwargs.get("model") or "claude-3-5-haiku-latest")
     if p in ("gemini", "google", "google_gemini"):
         return GeminiAPIProvider(api_key, model=kwargs.get("model") or "gemini-2.0-flash")
-    if p in ("mock", "", "local"):
+    if p in ("llama-cpp", "llamacpp", "gguf", "lfm2.5", "lfm2.5-1.2b-instruct"):
+        mid = kwargs.get("model_id") or kwargs.get("model") or "lfm2.5-1.2b-instruct"
+        return LlamaCppProvider(model_id=str(mid))
+    if p in ("qwen2.5-fc", "qwen2.5-1.5b-instruct-fc", "qwen-local"):
+        return LlamaCppProvider(model_id="qwen2.5-1.5b-instruct-fc")
+    if p in ("local",):
+        # Config-driven local model (default LFM2.5; override local_model_id)
+        mid = kwargs.get("model_id") or kwargs.get("local_model_id") or "lfm2.5-1.2b-instruct"
+        return LlamaCppProvider(model_id=str(mid))
+    if p in ("mock", ""):
         return MockLLMProvider()
     return MockLLMProvider()
