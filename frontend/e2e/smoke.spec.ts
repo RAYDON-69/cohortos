@@ -15,7 +15,10 @@ import path from "path";
 import fs from "fs";
 
 const API = process.env.COHORTOS_API_BASE || "http://127.0.0.1:8741";
-const PHONE = process.env.COHORTOS_E2E_PHONE || "01774656829";
+/** Unique per run so CI empty DBs and retries never collide. */
+const PHONE =
+  process.env.COHORTOS_E2E_PHONE ||
+  `0177${String(Date.now()).slice(-8)}`;
 
 const shotDir = path.join("test-results", "smoke-shots");
 fs.mkdirSync(shotDir, { recursive: true });
@@ -47,6 +50,25 @@ test("desk smoke — login through support", async ({ page, request }) => {
     test.skip(true, `API not reachable at ${API}/health — start backend first`);
   }
 
+  // 0b. Seed a centre + owner on the empty CI DB. request-otp returns otp_id:null
+  // for unknown phones ("If this phone is registered…") so OTP UI never appears.
+  const trialRes = await request.post(`${API}/auth/centre-trial`, {
+    data: {
+      centre_name: `E2E Centre ${Date.now()}`,
+      owner_phone: PHONE,
+      owner_name: "E2E Owner",
+      student_count: 1,
+    },
+  });
+  if (!trialRes.ok()) {
+    const body = await trialRes.text();
+    throw new Error(`centre-trial failed ${trialRes.status()}: ${body}`);
+  }
+  const trial = await trialRes.json();
+  if (!trial.tenant_id) {
+    throw new Error(`centre-trial missing tenant_id: ${JSON.stringify(trial)}`);
+  }
+
   // 1. Login — screenshot immediately so early failures still leave an artifact
   await page.goto(h("/login"));
   await shot(page, "01-login");
@@ -64,18 +86,34 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await phoneInput.fill(PHONE);
   await page.getByRole("button", { name: /Send login code|Request OTP|OTP/i }).click();
 
-  // Pilot mode shows code in banner or input
-  await page.waitForTimeout(1000);
+  // Wait for OTP step (pilot exposes code in banner when COHORTOS_TEST_EXPOSE_OTP=1)
+  await expect(page.locator("#staff-otp").or(page.getByText(/login code is|6-digit/i))).toBeVisible({
+    timeout: 15000,
+  });
   await shot(page, "02-otp");
 
-  // Prefer pilot banner code, else type a known pilot code pattern
+  // Prefer pilot banner code; API also returns _test_code when expose flag is set
   const banner = page.locator("text=/login code is \\d+/i");
-  let code = "695094";
+  let code = "";
   if (await banner.count()) {
     const txt = await banner.first().textContent();
     const m = txt?.match(/(\d{6})/);
     if (m) code = m[1];
   }
+  if (!code) {
+    // Fallback: request OTP via API with expose flag and read _test_code
+    const otpApi = await request.post(`${API}/auth/request-otp`, {
+      data: { phone: PHONE, tenant_id: trial.tenant_id },
+    });
+    const otpBody = await otpApi.json();
+    code = String(otpBody._test_code || "");
+  }
+  if (!code) {
+    throw new Error(
+      "No OTP code available — set COHORTOS_TEST_EXPOSE_OTP=1 on the API (CI workflow should)."
+    );
+  }
+
   const codeInput = page
     .locator("#staff-otp")
     .or(page.getByLabel(/6-digit code|code/i))
