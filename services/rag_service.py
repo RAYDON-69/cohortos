@@ -1,20 +1,17 @@
 """
-Centre Vault RAG — LlamaIndex workflows + Chroma persistent store (Phase 20).
+Centre Vault RAG — LlamaIndex + Chroma persistent store (Phase 21).
 
-Vector store choice: ChromaDB (persistent client under the tenant data dir).
-Why not LanceDB / sqlite-vec for this round:
-  - Chroma has first-class LlamaIndex VectorStoreIndex adapters and a
-    zero-server PersistentClient that fits desk packaging.
-  - sqlite-vec is attractive for an all-SQLite stack but LlamaIndex support
-    is thinner; LanceDB is fine but we already ship ONNX MiniLM embeddings
-    and Chroma accepts those vectors without an extra embedding service.
+Vector store: ChromaDB PersistentClient under COHORTOS_RAG_DIR/{tenant}/chroma.
 
-Embeddings: reuse services.embedding_service.embed_text (ONNX MiniLM or
-hashing fallback) so offline desk mode does not download a second model.
+Pipeline (preferred):
+  llama-index-core VectorStoreIndex
+  + ChromaVectorStore (llama-index-vector-stores-chroma)
+  + CohortOSEmbedding (wraps services.embedding_service.embed_text)
 
-Indexing: vault resource title + description + topic + extracted text
-(when a local file path is readable). Conversation memory is persisted
-per centre in the tenant SQLite `ai_chat_turns` table.
+Fallback when LlamaIndex / Chroma packages are missing:
+  direct chromadb collection API, then JSON index on disk.
+
+Conversation memory is persisted per centre (SQLite ai_chat_turns or JSONL).
 """
 from __future__ import annotations
 
@@ -33,24 +30,54 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _tokens(text: str) -> List[str]:
-    return [t for t in re.findall(r"[a-z0-9\u0980-\u09ff]+", (text or "").lower()) if len(t) > 1]
+def _chunk(text: str, max_chars: int = 900, overlap: int = 120) -> List[str]:
+    text = (text or "").strip()
+    if not text:
+        return []
+    if len(text) <= max_chars:
+        return [text]
+    out: List[str] = []
+    start = 0
+    while start < len(text):
+        end = min(len(text), start + max_chars)
+        out.append(text[start:end])
+        if end >= len(text):
+            break
+        start = max(end - overlap, start + 1)
+    return out
 
 
-class _HashEmbedAdapter:
-    """LlamaIndex-compatible embedding wrapper over CohortOS embed_text."""
+class CohortOSEmbedding:
+    """LlamaIndex BaseEmbedding adapter over CohortOS ONNX/hash embed_text."""
 
     def __init__(self):
         from services.embedding_service import embed_text, DIM
 
         self._embed = embed_text
         self.dim = DIM
+        self.model_name = "cohortos-minilm"
 
-    def get_text_embedding(self, text: str) -> List[float]:
+    # --- LlamaIndex BaseEmbedding interface (duck-typed) ---
+    def _get_query_embedding(self, query: str) -> List[float]:
+        return list(self._embed(query or ""))
+
+    def _get_text_embedding(self, text: str) -> List[float]:
         return list(self._embed(text or ""))
 
-    def get_text_embeddings(self, texts: List[str]) -> List[List[float]]:
-        return [self.get_text_embedding(t) for t in texts]
+    def _get_text_embeddings(self, texts: List[str]) -> List[List[float]]:
+        return [self._get_text_embedding(t) for t in texts]
+
+    def get_text_embedding(self, text: str) -> List[float]:
+        return self._get_text_embedding(text)
+
+    def get_query_embedding(self, query: str) -> List[float]:
+        return self._get_query_embedding(query)
+
+    async def _aget_query_embedding(self, query: str) -> List[float]:
+        return self._get_query_embedding(query)
+
+    async def _aget_text_embedding(self, text: str) -> List[float]:
+        return self._get_text_embedding(text)
 
 
 class RagService:
@@ -73,34 +100,82 @@ class RagService:
         )
         self.persist_dir = base / "chroma" / tid
         self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self._index = None
-        self._chroma = None
-        self._llama_ok = False
+        self._embedder = CohortOSEmbedding()
+        self._collection = None
+        self._llama_index = None
+        self._backend = "none"
         self._init_backend()
 
     def _init_backend(self) -> None:
+        # 1) Prefer LlamaIndex + ChromaVectorStore
         try:
             import chromadb
             from chromadb.config import Settings
 
-            self._chroma = chromadb.PersistentClient(
+            client = chromadb.PersistentClient(
                 path=str(self.persist_dir),
                 settings=Settings(anonymized_telemetry=False),
             )
-            self._collection = self._chroma.get_or_create_collection(
+            collection = client.get_or_create_collection(
                 name="vault",
                 metadata={"hnsw:space": "cosine"},
             )
-            self._llama_ok = True
+            self._collection = collection
+
+            try:
+                from llama_index.core import VectorStoreIndex, StorageContext, Settings as LISettings
+                from llama_index.core.schema import TextNode
+                from llama_index.vector_stores.chroma import ChromaVectorStore
+
+                vector_store = ChromaVectorStore(chroma_collection=collection)
+                storage_context = StorageContext.from_defaults(vector_store=vector_store)
+                # Embeddings: inject CohortOS embedder via Settings when BaseEmbedding subclass works;
+                # otherwise we still use collection.query with our vectors in retrieve().
+                try:
+                    from llama_index.core.embeddings import BaseEmbedding
+
+                    class _LIEmbed(BaseEmbedding):
+                        def __init__(self, inner: CohortOSEmbedding):
+                            super().__init__()
+                            self._inner = inner
+
+                        def _get_query_embedding(self, query: str) -> List[float]:
+                            return self._inner.get_query_embedding(query)
+
+                        def _get_text_embedding(self, text: str) -> List[float]:
+                            return self._inner.get_text_embedding(text)
+
+                        def _get_text_embeddings(self, texts: List[str]) -> List[List[float]]:
+                            return self._inner._get_text_embeddings(texts)
+
+                        async def _aget_query_embedding(self, query: str) -> List[float]:
+                            return self._get_query_embedding(query)
+
+                        async def _aget_text_embedding(self, text: str) -> List[float]:
+                            return self._get_text_embedding(text)
+
+                    LISettings.embed_model = _LIEmbed(self._embedder)
+                    self._llama_index = VectorStoreIndex.from_vector_store(
+                        vector_store,
+                        storage_context=storage_context,
+                        embed_model=LISettings.embed_model,
+                    )
+                    self._backend = "llama-index+chroma"
+                    self._TextNode = TextNode
+                    return
+                except Exception:
+                    # Chroma ok, LlamaIndex partial
+                    self._backend = "chroma"
+                    return
+            except Exception:
+                self._backend = "chroma"
+                return
         except Exception:
-            self._chroma = None
             self._collection = None
-            self._llama_ok = False
+            self._backend = "json-fallback"
 
     def backend_name(self) -> str:
-        return "chroma+llamaindex" if self._llama_ok else "memory-fallback"
-
-    # ── document body extraction ──────────────────────────────────────
+        return self._backend
 
     def _resource_text(self, res: Dict[str, Any]) -> str:
         parts = [
@@ -109,23 +184,20 @@ class RagService:
             str(res.get("subject") or ""),
             str(res.get("description") or ""),
         ]
-        # Prefer explicit body / notes fields when present
         for key in ("body", "notes", "text", "content"):
             if res.get(key):
                 parts.append(str(res.get(key)))
         path = str(res.get("file_path") or "")
         if path:
             parts.append(Path(path).name)
-            # Best-effort local file text (pdf / plain)
             try:
                 root = os.environ.get("COHORTOS_STORAGE_ROOT") or "/tmp/cohortos-storage"
-                candidates = [Path(path), Path(root) / path, Path(root) / Path(path).name]
-                for c in candidates:
+                for c in (Path(path), Path(root) / path, Path(root) / Path(path).name):
                     if c.is_file() and c.stat().st_size < 5_000_000:
                         raw = c.read_bytes()
-                        if path.lower().endswith(".pdf") or (res.get("mime_type") or "").endswith("pdf"):
+                        if str(path).lower().endswith(".pdf") or "pdf" in str(res.get("mime_type") or "").lower():
                             try:
-                                from pypdf import PdfReader  # type: ignore
+                                from pypdf import PdfReader
                                 import io
 
                                 reader = PdfReader(io.BytesIO(raw))
@@ -151,34 +223,26 @@ class RagService:
         except Exception:
             return []
 
-    # ── indexing ──────────────────────────────────────────────────────
-
     def reindex_vault(self) -> Dict[str, Any]:
-        """Rebuild the vector collection from current vault resources."""
         resources = self._list_resources()
         docs = 0
         if self._collection is not None:
             try:
-                # Clear + rebuild (small centre corpora)
                 existing = self._collection.get()
                 ids = existing.get("ids") or []
                 if ids:
                     self._collection.delete(ids=ids)
             except Exception:
                 pass
-            from services.embedding_service import embed_text
-
             for res in resources:
                 text = self._resource_text(res)
                 if not text:
                     continue
                 rid = str(res.get("id") or uuid.uuid4())
-                # Simple chunking
-                chunks = _chunk(text, 900, 120)
-                for i, ch in enumerate(chunks):
+                for i, ch in enumerate(_chunk(text, 900, 120)):
                     cid = f"{rid}:{i}"
                     try:
-                        emb = embed_text(ch)
+                        emb = self._embedder.get_text_embedding(ch)
                         self._collection.add(
                             ids=[cid],
                             documents=[ch],
@@ -194,14 +258,25 @@ class RagService:
                         docs += 1
                     except Exception:
                         continue
+            # Refresh LlamaIndex handle after rebuild
+            if self._backend.startswith("llama-index"):
+                try:
+                    from llama_index.core import VectorStoreIndex, StorageContext
+                    from llama_index.vector_stores.chroma import ChromaVectorStore
+
+                    vs = ChromaVectorStore(chroma_collection=self._collection)
+                    self._llama_index = VectorStoreIndex.from_vector_store(
+                        vs,
+                        storage_context=StorageContext.from_defaults(vector_store=vs),
+                        embed_model=getattr(self, "_li_embed", None) or self._embedder,
+                    )
+                except Exception:
+                    pass
         else:
-            # Persist a JSON fallback index for CI without chromadb
             docs = self._reindex_fallback(resources)
         return {"indexed_chunks": docs, "backend": self.backend_name(), "resources": len(resources)}
 
     def _reindex_fallback(self, resources: List[Dict[str, Any]]) -> int:
-        from services.embedding_service import embed_text
-
         rows = []
         for res in resources:
             text = self._resource_text(res)
@@ -215,7 +290,7 @@ class RagService:
                         "resource_id": rid,
                         "title": res.get("title") or "",
                         "text": ch,
-                        "vec": list(embed_text(ch)),
+                        "vec": list(self._embedder.get_text_embedding(ch)),
                     }
                 )
         path = self.persist_dir / "fallback_index.json"
@@ -224,24 +299,43 @@ class RagService:
         return len(rows)
 
     def index_resource(self, res: Dict[str, Any]) -> int:
-        """Index a single resource (call after vault upload)."""
         if not res:
             return 0
-        # Full rebuild is fine for desk-scale corpora
         return int(self.reindex_vault().get("indexed_chunks") or 0)
-
-    # ── retrieval ─────────────────────────────────────────────────────
 
     def retrieve(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
         q = (query or "").strip()
         if not q:
             return []
-        from services.embedding_service import embed_text, cosine
-
         out: List[Dict[str, Any]] = []
+
+        # Prefer LlamaIndex retriever when index is live
+        if self._llama_index is not None:
+            try:
+                retriever = self._llama_index.as_retriever(similarity_top_k=max(1, limit))
+                nodes = retriever.retrieve(q)
+                for n in nodes:
+                    meta = dict(getattr(n, "metadata", None) or {})
+                    text = getattr(n, "text", None) or getattr(n, "node", None)
+                    if hasattr(text, "text"):
+                        text = text.text
+                    score = float(getattr(n, "score", None) or 0.0)
+                    out.append(
+                        {
+                            "resource_id": meta.get("resource_id"),
+                            "title": meta.get("title") or "",
+                            "excerpt": str(text or "")[:500],
+                            "score": score,
+                        }
+                    )
+                if out:
+                    return out
+            except Exception:
+                pass
+
         if self._collection is not None:
             try:
-                qemb = list(embed_text(q))
+                qemb = list(self._embedder.get_query_embedding(q))
                 hits = self._collection.query(
                     query_embeddings=[qemb],
                     n_results=max(1, limit),
@@ -263,15 +357,15 @@ class RagService:
                 return out
             except Exception:
                 pass
-        # Fallback JSON index
+
+        from services.embedding_service import cosine
+
         path = self.persist_dir / "fallback_index.json"
         if path.is_file():
             try:
                 rows = json.loads(path.read_text(encoding="utf-8"))
-                qv = embed_text(q)
-                ranked = []
-                for r in rows:
-                    ranked.append((cosine(qv, r.get("vec") or []), r))
+                qv = self._embedder.get_query_embedding(q)
+                ranked = [(cosine(qv, r.get("vec") or []), r) for r in rows]
                 ranked.sort(key=lambda x: x[0], reverse=True)
                 for score, r in ranked[:limit]:
                     out.append(
@@ -286,8 +380,6 @@ class RagService:
                 pass
         return out
 
-    # ── conversation memory ───────────────────────────────────────────
-
     def append_turn(self, role: str, content: str, session_id: str = "default") -> None:
         row = {
             "id": str(uuid.uuid4()),
@@ -299,7 +391,6 @@ class RagService:
         try:
             self.data_layer.create("ai_chat_turns", row)
         except Exception:
-            # Soft-fail: memory is best-effort
             mem = self.persist_dir / "chat_memory.jsonl"
             mem.parent.mkdir(parents=True, exist_ok=True)
             with mem.open("a", encoding="utf-8") as f:
@@ -328,34 +419,21 @@ class RagService:
                 return []
         return []
 
-    # ── answer synthesis ──────────────────────────────────────────────
-
     def answer(
         self,
         question: str,
         session_id: str = "default",
         llm_complete=None,
     ) -> Dict[str, Any]:
-        """
-        Retrieve vault chunks, optionally call llm_complete(prompt)->str,
-        persist turns. Never returns the bare "Centre snapshot" string when
-        vault hits exist.
-        """
         q = (question or "").strip()
         hits = self.retrieve(q, limit=5)
-        # Ensure index is warm
         if not hits:
             self.reindex_vault()
             hits = self.retrieve(q, limit=5)
 
         history = self.recent_turns(session_id=session_id, limit=8)
         hist_txt = "\n".join(f"{h.get('role')}: {h.get('content')}" for h in history)
-
-        context_blocks = []
-        for h in hits:
-            context_blocks.append(
-                f"[{h.get('title') or 'doc'}] {h.get('excerpt') or ''}"
-            )
+        context_blocks = [f"[{h.get('title') or 'doc'}] {h.get('excerpt') or ''}" for h in hits]
         context = "\n\n".join(context_blocks) if context_blocks else "(no vault matches)"
 
         prompt = (
@@ -377,7 +455,6 @@ class RagService:
                 answer = ""
 
         if not answer:
-            # Grounded extractive answer — prove retrieval worked
             if hits:
                 top = hits[0]
                 answer = (
@@ -392,7 +469,6 @@ class RagService:
 
         self.append_turn("user", q, session_id=session_id)
         self.append_turn("assistant", answer, session_id=session_id)
-
         return {
             "answer": answer,
             "citations": hits,
@@ -400,20 +476,3 @@ class RagService:
             "used_llm": used_llm,
             "memory_turns": len(history) + 2,
         }
-
-
-def _chunk(text: str, max_chars: int = 900, overlap: int = 120) -> List[str]:
-    text = (text or "").strip()
-    if not text:
-        return []
-    if len(text) <= max_chars:
-        return [text]
-    out: List[str] = []
-    start = 0
-    while start < len(text):
-        end = min(len(text), start + max_chars)
-        out.append(text[start:end])
-        if end >= len(text):
-            break
-        start = max(end - overlap, start + 1)
-    return out

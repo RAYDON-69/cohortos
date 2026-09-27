@@ -174,16 +174,14 @@ test("desk smoke — login through support", async ({ page, request }) => {
     headers: { Authorization: `Bearer ${session.access_token}` },
     data: {
       title: `E2E Vault Note ${RAG_TOKEN}`,
-      resource_type: "note",
+      resource_type: "pdf",
       topic: "e2e",
       description: `This confidential centre note contains the marker ${RAG_TOKEN} for retrieval tests.`,
     },
   });
   if (!vaultCreate.ok()) {
-    // upload path may require different shape — try content create via description only is enough if 422
     const body = await vaultCreate.text();
-    // Non-fatal if create fails shape; still attempt query
-    console.log("vault create status", vaultCreate.status(), body.slice(0, 200));
+    throw new Error(`vault create failed ${vaultCreate.status()}: ${body}`);
   }
   const aiRes = await request.post(`${API}/t/${tenantForApi}/ai/query`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
@@ -241,6 +239,26 @@ test("desk smoke — login through support", async ({ page, request }) => {
   if (!fired) {
     throw new Error(`automation did not fire; log=${JSON.stringify(log).slice(0, 500)}`);
   }
+
+  // --- Function-calling proof: Copilot creates a rule via structured tool_calls ---
+  const toolQ = `Please create an automation rule named "E2E Copilot Rule ${Date.now()}" for fee reminders`;
+  const toolAi = await request.post(`${API}/t/${tenantForApi}/ai/query`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { question: toolQ, session_id: "e2e-tools" },
+  });
+  const toolText = await toolAi.text();
+  if (!toolAi.ok()) {
+    throw new Error(`tool ai/query failed ${toolAi.status()}: ${toolText}`);
+  }
+  const toolJson = JSON.parse(toolText);
+  const tr = toolJson.grounded?.tool_results || [];
+  const created = tr.some((r: { ok?: boolean; name?: string }) => r.ok && r.name === "create_automation_rule");
+  if (!created) {
+    throw new Error(
+      `function-calling did not create rule; tool_results=${JSON.stringify(tr).slice(0, 400)} answer=${String(toolJson.answer || "").slice(0, 200)}`
+    );
+  }
+
 
 
   await page.goto(h("/ai"));
