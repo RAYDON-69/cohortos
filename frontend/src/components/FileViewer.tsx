@@ -349,6 +349,26 @@ export function FileViewer({
   const bg = theme === "dark" ? "bg-sage-900 text-white" : "bg-white text-ink";
   const sibIdx = siblingIds.indexOf(resourceId);
 
+
+  async function openImageLightbox() {
+    if (!url || kind !== "image") return;
+    try {
+      const PhotoSwipe = (await import("photoswipe")).default;
+      await import("photoswipe/style.css");
+      const img = new Image();
+      img.src = url;
+      await img.decode().catch(() => undefined);
+      const ps = new PhotoSwipe({
+        dataSource: [{ src: url, width: img.naturalWidth || 1600, height: img.naturalHeight || 1200, alt: title || "Image" }],
+        index: 0,
+      });
+      ps.init();
+    } catch {
+      // photoswipe optional at runtime
+    }
+  }
+
+
   return (
     <div className="fixed inset-0 z-[1000] flex flex-col bg-ink/60 p-2 md:p-4" data-testid="file-viewer" role="dialog" aria-modal="true">
       <div className={cn("flex flex-1 flex-col overflow-hidden rounded-card shadow-soft", bg)}>
@@ -384,6 +404,7 @@ export function FileViewer({
           )}
           {kind === "image" && (
             <>
+              <Button size="sm" variant="secondary" data-testid="image-lightbox" onClick={() => void openImageLightbox()}>Lightbox</Button>
               <Button size="sm" variant="ghost" onClick={() => setImgScale((s) => Math.max(0.5, s - 0.25))}>Zoom out</Button>
               <Button size="sm" variant="ghost" onClick={() => setImgScale((s) => Math.min(4, s + 0.25))}>Zoom in</Button>
               <Button size="sm" variant="ghost" onClick={() => { setFitMode((m) => (m === "fit" ? "actual" : "fit")); setImgScale(fitMode === "fit" ? 1 : 1); setImgPan({ x: 0, y: 0 }); }}>

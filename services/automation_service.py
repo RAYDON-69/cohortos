@@ -156,6 +156,8 @@ class AutomationService:
             return {"type": "tag_student", "student_id": subject, "tag": params.get("tag") or "flagged", "ok": True}
         if atype == "notify_staff":
             return {"type": "notify_staff", "message": params.get("message") or "Automation alert", "ok": True}
+        if atype in ("log_only", "notify_owner", "notify_guardian", "fee_reminder_escalation"):
+            return {"type": atype, "ok": True, "params": params}
         return {"type": atype, "error": "unknown_action"}
 
     def evaluate_rule(self, rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

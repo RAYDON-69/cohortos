@@ -32,7 +32,8 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
     "pdfjs-dist": "^4.10.38",
-    "plyr": "^3.7.8"
+    "plyr": "^3.7.8",
+    "photoswipe": "^5.4.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",

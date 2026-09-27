@@ -167,6 +167,82 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await shot(page, "09-vault");
   await expect(page.getByText("Missing bearer token")).toHaveCount(0);
 
+  // --- RAG proof: seed vault text, query AI, answer must cite unique token ---
+  const RAG_TOKEN = `E2E_RAG_TOKEN_${Date.now()}`;
+  const tenantForApi = String(session.tenant_id || trial.tenant_id);
+  const vaultCreate = await request.post(`${API}/t/${tenantForApi}/vault`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {
+      title: `E2E Vault Note ${RAG_TOKEN}`,
+      resource_type: "note",
+      topic: "e2e",
+      description: `This confidential centre note contains the marker ${RAG_TOKEN} for retrieval tests.`,
+    },
+  });
+  if (!vaultCreate.ok()) {
+    // upload path may require different shape — try content create via description only is enough if 422
+    const body = await vaultCreate.text();
+    // Non-fatal if create fails shape; still attempt query
+    console.log("vault create status", vaultCreate.status(), body.slice(0, 200));
+  }
+  const aiRes = await request.post(`${API}/t/${tenantForApi}/ai/query`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { question: `What is the marker token in the E2E vault note? Look for E2E_RAG_TOKEN`, session_id: "e2e-smoke" },
+  });
+  const aiText = await aiRes.text();
+  if (!aiRes.ok()) {
+    throw new Error(`ai/query failed ${aiRes.status()}: ${aiText}`);
+  }
+  const aiJson = JSON.parse(aiText);
+  const answer = String(aiJson.answer || "");
+  if (!answer.includes(RAG_TOKEN) && !(JSON.stringify(aiJson.grounded || {}).includes(RAG_TOKEN))) {
+    throw new Error(
+      `RAG did not ground on seeded vault content. answer=${answer.slice(0, 300)} grounded=${JSON.stringify(aiJson.grounded).slice(0, 400)}`
+    );
+  }
+
+  // --- Automation fire proof: create rule, run, log must contain rule_run ---
+  const ruleRes = await request.post(`${API}/t/${tenantForApi}/automations/rules`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {
+      name: `E2E Fire ${Date.now()}`,
+      enabled: true,
+      trigger: { type: "manual" },
+      conditions: [],
+      actions: [{ type: "log_only", params: { note: "e2e" } }],
+    },
+  });
+  const ruleText = await ruleRes.text();
+  if (!ruleRes.ok()) {
+    throw new Error(`create rule failed ${ruleRes.status()}: ${ruleText}`);
+  }
+  const ruleJson = JSON.parse(ruleText);
+  const ruleId = ruleJson.rule?.id || ruleJson.id;
+  if (!ruleId) {
+    throw new Error(`create rule missing id: ${ruleText}`);
+  }
+  const runRes = await request.post(`${API}/t/${tenantForApi}/automations/rules/${ruleId}/run`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {},
+  });
+  const runText = await runRes.text();
+  if (!runRes.ok()) {
+    throw new Error(`run rule failed ${runRes.status()}: ${runText}`);
+  }
+  const logRes = await request.get(`${API}/t/${tenantForApi}/automations/log`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  const logJson = await logRes.json();
+  const log = logJson.log || [];
+  const fired = log.some(
+    (e: { type?: string; rule_id?: string }) =>
+      e.type === "rule_run" && String(e.rule_id) === String(ruleId)
+  );
+  if (!fired) {
+    throw new Error(`automation did not fire; log=${JSON.stringify(log).slice(0, 500)}`);
+  }
+
+
   await page.goto(h("/ai"));
   await page.waitForTimeout(800);
   await shot(page, "10-ai-copilot");

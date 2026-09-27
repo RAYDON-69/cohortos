@@ -33,6 +33,7 @@ from services.notification_service import NotificationService
 from services.data_access import DataService
 from services.llm_provider import LLMProvider, MockLLMProvider, GeminiProvider
 from services.retrieval_service import RetrievalService
+from services.rag_service import RagService
 from services.ai_quota_service import AIQuotaService
 from services.ai_solve_service import AISolveService
 from services.ai_teach_service import AITeachService
@@ -167,6 +168,12 @@ class CohortOSApp:
         self.llm = llm or MockLLMProvider()
         self.retrieval = RetrievalService(
             self.tenant_context, self.data_layer, content_service=self.content
+        )
+
+        self.rag = RagService(
+            self.tenant_context,
+            data_layer=self.data_layer,
+            content_service=self.content,
         )
         self.ai_quota = AIQuotaService(
             self.tenant_context, self.data_layer, self.config
