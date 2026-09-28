@@ -1,3 +1,4 @@
+import { StudentImportPanel } from "./StudentImport";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { buildDeskNav } from "../../nav/deskNav";
@@ -379,6 +380,7 @@ export function AdmissionsListScreen() {
           </Card>
         </div>
       )}
-    </AppShell>
+            <StudentImportPanel />
+</AppShell>
   );
 }

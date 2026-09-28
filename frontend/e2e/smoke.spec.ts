@@ -244,7 +244,7 @@ test("desk smoke — login through support", async ({ page, request }) => {
   const toolQ = `Please create an automation rule named "E2E Copilot Rule ${Date.now()}" for fee reminders`;
   const toolAi = await request.post(`${API}/t/${tenantForApi}/ai/query`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
-    data: { question: toolQ, session_id: "e2e-tools" },
+    data: { question: toolQ, session_id: "e2e-tools", confirm_tools: true },
   });
   const toolText = await toolAi.text();
   if (!toolAi.ok()) {
@@ -283,5 +283,41 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await page.goto(h("/support"));
   await shot(page, "13-support");
   await expect(page.getByText(/Support|Contact|About/i).first()).toBeVisible({ timeout: 10000 });
+
+  // CSV import preview API
+  const csv = "name,phone\nImportStu,01911112222\n";
+  const imp = await request.post(`${API}/t/${tenantForApi}/admissions/import/preview`, {
+    headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "text/csv" },
+    data: csv,
+  });
+  if (!imp.ok()) throw new Error(`import preview ${imp.status()}`);
+  const impJ = await imp.json();
+  if ((impJ.valid || 0) < 1) throw new Error(`import preview invalid: ${JSON.stringify(impJ)}`);
+
+  // Scheduled rule dry-run
+  const sched = await request.post(`${API}/t/${tenantForApi}/automations/rules`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {
+      name: `E2E Schedule ${Date.now()}`,
+      enabled: true,
+      trigger: { type: "schedule.daily" },
+      conditions: [{ field: "fee.days_overdue", op: ">=", value: 7 }],
+      actions: [{ type: "log_only", params: {} }],
+    },
+  });
+  const schedJ = await sched.json();
+  const sid = schedJ.rule?.id;
+  if (sid) {
+    const dry = await request.post(`${API}/t/${tenantForApi}/automations/rules/${sid}/dry-run`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      data: { "fee.days_overdue": 10 },
+    });
+    if (!dry.ok()) throw new Error(`dry-run failed ${dry.status()}`);
+    const dryJ = await dry.json();
+    if (!dryJ.dry_run && dryJ.type !== "rule_run_dry") {
+      throw new Error(`expected dry_run log entry: ${JSON.stringify(dryJ)}`);
+    }
+  }
+
   await expect(page.getByText("support@cohortos.app")).toBeVisible();
 });

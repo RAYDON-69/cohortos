@@ -111,6 +111,7 @@ async function createWindow() {
     title: "CohortOS",
     webPreferences: {
       contextIsolation: true,
+      sandbox: true,
       nodeIntegration: false,
       preload: path.join(__dirname, "preload.cjs"),
     },
