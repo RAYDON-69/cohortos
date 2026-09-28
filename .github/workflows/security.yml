@@ -1,0 +1,82 @@
+name: Security
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt --severity high || pip-audit -r requirements.txt --desc on
+
+  npm-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install --package-lock-only || npm install
+      - run: npm audit --audit-level=high
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, python
+      - uses: github/codeql-action/analyze@v3
+
+  electron-hardening:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: |
+          node -e "
+          const fs=require('fs');
+          const main=fs.readFileSync('electron/main.cjs','utf8');
+          const checks=[
+            [/contextIsolation\s*:\s*true/, 'contextIsolation:true'],
+            [/nodeIntegration\s*:\s*false/, 'nodeIntegration:false'],
+            [/sandbox\s*:\s*true/, 'sandbox:true'],
+          ];
+          let fail=false;
+          for (const [re,name] of checks) {
+            if (!re.test(main)) { console.error('MISSING '+name); fail=true; }
+            else console.log('OK '+name);
+          }
+          if (fail) process.exit(1);
+          "

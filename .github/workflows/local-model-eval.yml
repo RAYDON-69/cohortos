@@ -1,0 +1,36 @@
+name: Local Model Eval
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Model id to eval (or both)"
+        default: "both"
+        required: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache local models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cohortos-models
+          key: local-gguf-v1
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+          pip install llama-cpp-python==0.3.4 || pip install llama-cpp-python
+          pip install psutil
+      - name: Run tool-routing eval (console only)
+        env:
+          COHORTOS_LOCAL_MODEL_DIR: ${{ runner.temp }}/cohortos-models
+          COHORTOS_MODEL_CONSENT: "1"
+        run: |
+          mkdir -p "$COHORTOS_LOCAL_MODEL_DIR"
+          python scripts/local_model_eval.py --models both --min-json 0.90 --min-correct 0.70
+        # Results print to console — do NOT upload artifacts (quota)

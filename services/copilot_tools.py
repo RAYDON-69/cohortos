@@ -223,7 +223,12 @@ def execute_tool_calls(
     automation_service=None,
     admission_service=None,
     batch_service=None,
+    confirm: bool = False,
+    actor_role: str = "owner",
+    audit_service=None,
+    actor_id: str = "",
 ) -> List[Dict[str, Any]]:
+    from services.agent_safety import WRITE_TOOLS, role_can_write
     results: List[Dict[str, Any]] = []
     for tc in tool_calls or []:
         fn = tc.get("function") if isinstance(tc, dict) else None
@@ -232,6 +237,13 @@ def execute_tool_calls(
             continue
         name = str(fn.get("name") or "")
         args = _parse_args(fn.get("arguments"))
+        if name in WRITE_TOOLS:
+            if not confirm:
+                results.append({"name": name, "ok": False, "needs_confirm": True, "error": "confirm_required"})
+                continue
+            if not role_can_write(actor_role):
+                results.append({"name": name, "ok": False, "error": f"role_denied:{actor_role}"})
+                continue
         try:
             if name == "create_automation_rule":
                 if automation_service is None:
@@ -246,6 +258,11 @@ def execute_tool_calls(
                 }
                 rule = automation_service.upsert_rule(body)
                 results.append({"name": name, "ok": True, "result": {"rule": rule}})
+                if audit_service and hasattr(audit_service, "log"):
+                    try:
+                        audit_service.log("tool.create_automation_rule", actor_id=actor_id, detail={"name": args.get("name")})
+                    except Exception:
+                        pass
             elif name == "set_automation_enabled":
                 if automation_service is None:
                     results.append({"name": name, "ok": False, "error": "automation_service_unavailable"})
@@ -340,6 +357,10 @@ def run_copilot_tools(
     batch_service=None,
     llm_tool_text: Optional[str] = None,
     use_local_for_ambiguous: bool = True,
+    confirm: bool = False,
+    actor_role: str = "owner",
+    audit_service=None,
+    actor_id: str = "",
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     calls = parse_tool_calls(llm_tool_text or "")
     if not calls:
@@ -353,5 +374,9 @@ def run_copilot_tools(
         automation_service=automation_service,
         admission_service=admission_service,
         batch_service=batch_service,
+        confirm=confirm,
+        actor_role=actor_role,
+        audit_service=audit_service,
+        actor_id=actor_id,
     )
     return calls, results

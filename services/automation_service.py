@@ -160,7 +160,7 @@ class AutomationService:
             return {"type": atype, "ok": True, "params": params}
         return {"type": atype, "error": "unknown_action"}
 
-    def evaluate_rule(self, rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def evaluate_rule(self, rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None, dry_run: bool = False) -> Dict[str, Any]:
         context = dict(context or {})
         context.setdefault("actor_id", "system")
         rid = str(rule.get("id") or "")
@@ -175,14 +175,18 @@ class AutomationService:
         results = []
         for action in rule.get("actions") or []:
             try:
-                results.append(self._run_action(action, context, rid))
+                if dry_run:
+                    results.append({"type": action.get("type"), "dry_run": True, "would_run": True})
+                else:
+                    results.append(self._run_action(action, context, rid))
             except Exception as e:
                 results.append({"type": action.get("type"), "error": str(e)})
         entry = {
-            "type": "rule_run",
+            "type": "rule_run_dry" if dry_run else "rule_run",
             "rule_id": rid,
             "name": rule.get("name"),
             "results": results,
+            "dry_run": dry_run,
             "at": _now(),
             "actor_id": context.get("actor_id"),
         }

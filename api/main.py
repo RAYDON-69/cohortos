@@ -1427,6 +1427,7 @@ def create_api_app(
         tool_results = []
         try:
             from services.copilot_tools import run_copilot_tools, tools_for_prompt
+            from services.agent_safety import cloud_llm_allowed, redact_pii
             auto_svc = None
             try:
                 auto_svc = _auto(cm)
@@ -1440,6 +1441,10 @@ def create_api_app(
                 batch_service=getattr(cm, "batch", None),
                 llm_tool_text=None,
                 use_local_for_ambiguous=True,
+                confirm=bool(body.get("confirm_tools")),
+                actor_role=str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk"),
+                audit_service=getattr(cm, "audit", None),
+                actor_id=str(claims.get("sub") or ""),
             )
             if tool_results:
                 tool_trace.append({"tool": "function_calling", "calls": tool_calls_out, "results": tool_results})
@@ -1585,6 +1590,49 @@ def create_api_app(
             "packaging": "download-on-first-run",
         }
 
+
+    @app.post("/t/{tenant_id}/ai/local-model/download")
+    def local_model_download(tenant_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.local_model import ensure_model, resolve_model_id, ram_policy
+        policy = ram_policy()
+        if policy["tier"] == "low":
+            raise HTTPException(status_code=400, detail=policy.get("caution") or "Local model disabled on this device")
+        if not body.get("consent"):
+            raise HTTPException(status_code=400, detail="Explicit consent required to download ~1GB model")
+        mid = str(body.get("model_id") or resolve_model_id())
+        try:
+            path = ensure_model(mid, consent=True)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"ok": True, "path": str(path), "model_id": mid, "ram_policy": policy}
+
+    @app.delete("/t/{tenant_id}/ai/local-model")
+    def local_model_delete(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.local_model import delete_model, resolve_model_id
+        mid = resolve_model_id()
+        return {"ok": delete_model(mid), "model_id": mid}
+
+    @app.post("/t/{tenant_id}/admissions/import/preview")
+    async def admissions_import_preview(tenant_id: str, request: Request, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.student_importer import preview_csv
+        body = await request.body()
+        return preview_csv(body)
+
+    @app.post("/t/{tenant_id}/admissions/import")
+    async def admissions_import(tenant_id: str, request: Request, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        if role not in ("owner", "desk", "admin"):
+            raise HTTPException(status_code=403, detail="Only owner/desk can import students")
+        from services.student_importer import import_students
+        body = await request.body()
+        cm = registry.get_app(tenant_id)
+        return import_students(body, admission=getattr(cm, "admission", None))
+
+
     @app.get("/t/{tenant_id}/automations/rules")
     def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
@@ -1616,6 +1664,21 @@ def create_api_app(
         if not ok:
             raise HTTPException(status_code=404, detail="Rule not found")
         return {"ok": True}
+
+    @app.post("/t/{tenant_id}/automations/rules/{rule_id}/dry-run")
+    def dry_run_automation_rule(
+        tenant_id: str, rule_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)
+    ):
+        _require_tenant(claims, tenant_id)
+        auto = _auto(registry.get_app(tenant_id))
+        rule = None
+        for r in auto.list_rules():
+            if str(r.get("id")) == str(rule_id):
+                rule = r
+                break
+        if not rule:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        return auto.evaluate_rule(rule, context=body or {}, dry_run=True)
 
     @app.post("/t/{tenant_id}/automations/rules/{rule_id}/run")
     def run_automation_rule(
