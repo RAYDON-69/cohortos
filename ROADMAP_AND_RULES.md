@@ -15,7 +15,7 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 
 ## 1. Product constraints
 - Offline-first. Must run on low-end PCs (4GB RAM target). Heavy features (local LLM) are OFF by default on low-RAM machines.
-- Bangla-first UI and input; BD phone format 01XXXXXXXXX; BDT default currency.
+- BD phone format 01XXXXXXXXX; BDT default currency.
 - Student data is children's data: least privilege, consent, no ads, no data sales, delete on request.
 - Agentic writes are never silent: confirm, log, role-check.
 
