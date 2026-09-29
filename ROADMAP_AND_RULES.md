@@ -11,7 +11,7 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 7. Never weaken or skip a test to get green. Never commit secrets.
 8. **Finish with a punch-list:** PROVEN / UNVERIFIED / NOT-DONE + recommendation for next round.
 9. **Self-audit before finishing:** list 10 ways this round could still fail on a 4GB Windows laptop with power cuts and Bangla input; test the top 5.
-10. Use the whole session. Do not stop at the first plausible stopping point.
+10. **Use the whole session — enforced, not a suggestion.** Attempt every workstream listed in the prompt; a workstream with zero commits and zero tests is a failure for that workstream, not an acceptable scope cut. If you find yourself wanting to stop, that is the signal to pick the next UNVERIFIED or NOT-DONE item and keep going. Only stop when every workstream has at least one real commit and one real test, or you've hit a genuine technical wall — and if so, name that wall precisely in the punch-list, don't just go quiet.
 
 ## 1. Product constraints
 - Offline-first. Must run on low-end PCs (4GB RAM target). Heavy features (local LLM) are OFF by default on low-RAM machines.
@@ -20,14 +20,17 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - Agentic writes are never silent: confirm, log, role-check.
 
 ## 2. Roadmap (sequence)
-- **P23** Local-LLM safety + proof; agent safety; automation depth; CSV/Excel student importer; security CI; threat model + legal drafts.
-- **P24** Public website (static; Bangla+English; Home, Features, Pricing, About, Support, Legal) from an existing open-source landing template; in-app onboarding tour + Help; demo-video script.
-- **P25** Student/parent surface: PWA first (installable on Android, no store), Capacitor APK only if needed. Attendance, dues + pay, results, notices, AI Tutor (backend exists), notification centre.
-- **P26** Messaging: real SMS via a BTRC-licensed BD aggregator (sender-ID/masking registration), Bangla templates, delivery reports, cost meter. WhatsApp Business later.
-- **P27** Live payments: bKash + Nagad + international rail (see Legal) after merchant onboarding. Webhook signature verification, idempotent confirm, reconciliation report, refunds, PDF invoices, VAT lines.
-- **P28** Founder panel: tenant list, plan/license control, usage + cost caps, support inbox, feature flags / regional packs, release channel + signed auto-update, opt-in crash reporting.
-- **P29** Hardening: OWASP ASVS L1/L2 pass, backup/restore drill, multi-desk sync-conflict UX, SQLite→Postgres path for large centres, low-end-PC performance budget (startup, RSS), accessibility.
-- **Later:** live classes (integrate Jitsi / LiveKit / BigBlueButton — do not build), AI voice outreach (only after consent + regulatory check), regional packs.
+**Phase gate (confirmed by Raiyan, 2026-09-29): nothing past P25 starts until the coaching-centre desktop app — including the voice agent and class workspace — is fully done.** Do not open work on P26+ items early even if a round finishes ahead of schedule; use spare time to close out UNVERIFIED items in P23–P25 instead.
+- **P23** [done, E2E-verified] Local-LLM safety + proof; agent safety; automation depth; CSV/Excel student importer; security CI; threat model + legal drafts.
+- **P24** Voice agent for the centre's own call staff (outbound reminder/follow-up calls to students/parents — this is currently done by a dedicated human caller). Remix a real open-source voice-agent stack: a telephony provider's streaming call API + an STT/TTS pipeline, routed through the existing local/cloud LLM abstraction from §3 — don't hand-roll audio/signal handling. **Hard gate: assisted mode only (agent drafts a script / summarizes the call for a human to place) until BTRC's automated-call and DND rules are confirmed (§5); no auto-dial capability ships before that.**
+- **P25** Online class workspace, replacing the centre's current Zoom+Telegram setup. Integrate one existing self-hostable video/conferencing project — Jitsi Meet, LiveKit, or BigBlueButton — with a stated reason for the pick, plus a lightweight class chat/notice layer. Do not build a WebRTC stack from scratch.
+- **P26** Public website (static; Bangla+English; Home, Features, Pricing, About, Support, Legal) from an existing open-source landing template; in-app onboarding tour + Help; demo-video script.
+- **P27** Student/parent surface: PWA first (installable on Android, no store), Capacitor APK only if needed. Attendance, dues + pay, results, notices, AI Tutor (backend exists), notification centre.
+- **P28** Messaging: real SMS via a BTRC-licensed BD aggregator (sender-ID/masking registration), Bangla templates, delivery reports, cost meter. WhatsApp Business later.
+- **P29** Live payments: bKash + Nagad + international rail (see Legal) after merchant onboarding. Webhook signature verification, idempotent confirm, reconciliation report, refunds, PDF invoices, VAT lines.
+- **P30** Founder panel: tenant list, plan/license control, usage + cost caps, support inbox, feature flags / regional packs, release channel + signed auto-update, opt-in crash reporting.
+- **P31** Hardening: OWASP ASVS L1/L2 pass, backup/restore drill, multi-desk sync-conflict UX, SQLite→Postgres path for large centres, low-end-PC performance budget (startup, RSS), accessibility.
+- **Later:** regional packs beyond Bangladesh.
 
 ## 3. Local model policy (decided)
 - Detect total AND free RAM (psutil). Total <5GB (a "4GB device"): OFF, hidden under Advanced, red caution ("may freeze this computer; use a cloud key instead"). 5–<8GB: OFF by default, opt-in with caution. ≥8GB: offer enable.
