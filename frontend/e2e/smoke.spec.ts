@@ -319,5 +319,38 @@ test("desk smoke — login through support", async ({ page, request }) => {
     }
   }
 
+
+  // P25 Class workspace — create session, join URL, list by batch
+  const cls = await request.post(`${API}/t/${tenantForApi}/classes/sessions`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { batch_id: "e2e-batch-1", title: "E2E Physics" },
+  });
+  if (!cls.ok()) throw new Error(`classes/sessions create ${cls.status()} ${await cls.text()}`);
+  const created = await cls.json();
+  if (!created.id || !created.room) throw new Error(`session shape: ${JSON.stringify(created)}`);
+
+  const join = await request.post(`${API}/t/${tenantForApi}/classes/sessions/${created.id}/join`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { role: "participant", display_name: "E2E Student" },
+  });
+  if (!join.ok()) throw new Error(`join ${join.status()}`);
+  const j = await join.json();
+  if (!j.join_url || !j.token || !String(j.join_url).includes(created.room)) {
+    throw new Error(`join_url invalid: ${JSON.stringify(j)}`);
+  }
+
+  const listed = await request.get(`${API}/t/${tenantForApi}/classes/sessions?batch_id=e2e-batch-1`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  if (!listed.ok()) throw new Error(`list sessions ${listed.status()}`);
+  const lj = await listed.json();
+  if (!(lj.sessions || []).some((s: { id: string }) => s.id === created.id)) {
+    throw new Error(`session not listed for batch: ${JSON.stringify(lj)}`);
+  }
+
+  await page.goto(h("/classes"));
+  await page.waitForTimeout(600);
+  await shot(page, "15-class-workspace");
+
   await expect(page.getByText("support@cohortos.app")).toBeVisible();
 });

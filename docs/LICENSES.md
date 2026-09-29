@@ -21,3 +21,5 @@
 | Qwen2.5-1.5B GGUF | Apache-2.0 | Preferred for acquirer diligence |
 
 Generated as part of Phase 23. Update when adding dependencies.
+| Jitsi Meet | Apache-2.0 | Class media rooms (external host / self-host) |
+| PyJWT | MIT | Class join tokens |
