@@ -319,5 +319,44 @@ test("desk smoke — login through support", async ({ page, request }) => {
     }
   }
 
+
+  // P24 Voice assist — script + summary (no autodial)
+  const vScript = await request.post(`${API}/t/${tenantForApi}/voice/script`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {
+      student_name: "E2E Student",
+      phone: "01711112222",
+      purpose: "fee_reminder",
+      amount_bdt: 500,
+      language: "bn",
+    },
+  });
+  if (!vScript.ok()) throw new Error(`voice/script ${vScript.status()} ${await vScript.text()}`);
+  const vs = await vScript.json();
+  if (!vs.script || !vs.script_id) throw new Error(`voice script missing: ${JSON.stringify(vs)}`);
+
+  const vSum = await request.post(`${API}/t/${tenantForApi}/voice/summarize`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: {
+      call_notes: "Parent will pay tomorrow morning",
+      student_name: "E2E Student",
+      purpose: "fee_reminder",
+    },
+  });
+  if (!vSum.ok()) throw new Error(`voice/summarize ${vSum.status()}`);
+  const vsum = await vSum.json();
+  if (!vsum.summary) throw new Error(`voice summary missing: ${JSON.stringify(vsum)}`);
+
+  // Hard gate: request-call without human_action_id must fail
+  const badCall = await request.post(`${API}/t/${tenantForApi}/voice/request-call`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { phone: "01711112222", script: vs.script },
+  });
+  if (badCall.ok()) throw new Error("request-call without human_action_id must not succeed");
+
+  await page.goto(h("/voice"));
+  await page.waitForTimeout(800);
+  await shot(page, "14-voice-assist");
+
   await expect(page.getByText("support@cohortos.app")).toBeVisible();
 });

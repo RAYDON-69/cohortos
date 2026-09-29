@@ -16,6 +16,7 @@ import { FeesThisMonthScreen } from "./screens/fees/FeesThisMonth";
 import { GreenWhiteNagListScreen } from "./screens/fees/GreenWhiteNagList";
 import { ExamEntryScreen } from "./screens/exams/ExamEntry";
 import { ExamAnalyticsScreen } from "./screens/exams/ExamAnalytics";
+import { VoiceAssistScreen } from "./screens/voice/VoiceAssist";
 import { VaultManagementScreen } from "./screens/vault/VaultManagement";
 import { StaffRolesScreen } from "./screens/settings/StaffRoles";
 import { ModeSettingsScreen } from "./screens/settings/ModeSettings";
@@ -106,7 +107,8 @@ export default function App() {
       <Route path="/founder/pricing" element={<RequireAuth><PricingScreen /></RequireAuth>} />
       <Route path="/" element={<Navigate to="/attendance" replace />} />
       <Route path="*" element={<Navigate to="/attendance" replace />} />
-    </Routes>
+      <Route path="/voice" element={<RequireAuth><VoiceAssistScreen /></RequireAuth>} />
+        </Routes>
     </PageTransition>
     </ErrorBoundary>
   );

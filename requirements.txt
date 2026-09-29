@@ -19,3 +19,6 @@ llama-index-vector-stores-chroma>=0.2,<0.5
 pypdf>=4.0
 # Optional local GGUF (download-on-first-run); CI sets COHORTOS_SKIP_MODEL_DOWNLOAD=1
 # llama-cpp-python>=0.2.90
+
+cryptography>=42.0
+

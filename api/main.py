@@ -1633,6 +1633,93 @@ def create_api_app(
         return import_students(body, admission=getattr(cm, "admission", None))
 
 
+
+    # ── P24 Voice assist (assisted mode only — no autodial) ─────────────
+    def _voice_assist(cm):
+        from services.voice_assist_service import VoiceAssistService
+        keys = {}
+        try:
+            keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
+        except Exception:
+            pass
+        def _llm(prompt: str) -> str:
+            # Prefer existing provider abstraction when cloud allowed + key present
+            try:
+                from services.agent_safety import cloud_llm_allowed
+                from services.llm_provider import build_llm_provider, LLMRequest
+                if cloud_llm_allowed(keys) and keys.get("api_key"):
+                    prov = build_llm_provider(str(keys.get("provider") or "mock"), str(keys.get("api_key") or ""))
+                    return (prov.complete(LLMRequest(prompt=prompt, tier="cheap")).text or "").strip()
+            except Exception:
+                pass
+            return ""
+        return VoiceAssistService(
+            data_layer=getattr(cm, "data_layer", None),
+            audit_service=getattr(cm, "audit", None),
+            llm_complete=_llm,
+            config_section=keys,
+        )
+
+    @app.post("/t/{tenant_id}/voice/script")
+    def voice_generate_script(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).generate_script(
+                student_name=str(body.get("student_name") or ""),
+                phone=str(body.get("phone") or ""),
+                purpose=str(body.get("purpose") or "fee_reminder"),
+                amount_bdt=body.get("amount_bdt"),
+                language=str(body.get("language") or "bn"),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+                extra_context=str(body.get("extra_context") or ""),
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    @app.post("/t/{tenant_id}/voice/summarize")
+    def voice_summarize(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).summarize_call(
+                call_notes=str(body.get("call_notes") or body.get("notes") or ""),
+                student_name=str(body.get("student_name") or ""),
+                purpose=str(body.get("purpose") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    @app.get("/t/{tenant_id}/voice/summaries")
+    def voice_list_summaries(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        return {"summaries": _voice_assist(cm).list_summaries()}
+
+    @app.post("/t/{tenant_id}/voice/request-call")
+    def voice_request_call(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        """Human-triggered only — requires human_action_id; default provider never autodials."""
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).request_human_call(
+                to_phone=str(body.get("phone") or body.get("to") or ""),
+                script_id=str(body.get("script_id") or ""),
+                script_text=str(body.get("script") or ""),
+                human_action_id=str(body.get("human_action_id") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+
     @app.get("/t/{tenant_id}/automations/rules")
     def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
