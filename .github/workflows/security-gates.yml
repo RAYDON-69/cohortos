@@ -53,8 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           OUT="security-licenses-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          python3 -c "import json,pathlib,datetime; doc={'job':'licenses-and-audit','run_id':'${{ github.run_id }}','sha':'${{ github.sha }}'};
-pathlib.Path('/tmp/$OUT').write_text(json.dumps(doc,indent=2))"
+          python3 -c "import json,pathlib,datetime; doc={'job':'licenses-and-audit','run_id':'${{ github.run_id }}','sha':'${{ github.sha }}'}; pathlib.Path('/tmp/$OUT').write_text(json.dumps(doc,indent=2))"
           python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   headers-and-rate-limit:
