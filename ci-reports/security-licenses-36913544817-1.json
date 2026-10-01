@@ -1,0 +1,3448 @@
+{
+  "job": "licenses-and-audit",
+  "npm_prod": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "@chevrotain/cst-dts-gen": {
+        "name": "@chevrotain/cst-dts-gen",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@chevrotain/gast",
+          "lodash-es"
+        ],
+        "effects": [],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/@chevrotain/cst-dts-gen"
+        ],
+        "fixAvailable": true
+      },
+      "@chevrotain/gast": {
+        "name": "@chevrotain/gast",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "lodash-es"
+        ],
+        "effects": [],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/@chevrotain/gast"
+        ],
+        "fixAvailable": true
+      },
+      "@excalidraw/excalidraw": {
+        "name": "@excalidraw/excalidraw",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@excalidraw/mermaid-to-excalidraw",
+          "nanoid"
+        ],
+        "effects": [],
+        "range": "0.5.0-a78d45417 || 0.17.1-08b13f9 - 0.17.1-test || >=0.18.0-699826",
+        "nodes": [
+          "node_modules/@excalidraw/excalidraw"
+        ],
+        "fixAvailable": {
+          "name": "@excalidraw/excalidraw",
+          "version": "0.17.6",
+          "isSemVerMajor": true
+        }
+      },
+      "@excalidraw/mermaid-to-excalidraw": {
+        "name": "@excalidraw/mermaid-to-excalidraw",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@mermaid-js/parser",
+          "nanoid"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/@excalidraw/mermaid-to-excalidraw"
+        ],
+        "fixAvailable": true
+      },
+      "@mermaid-js/parser": {
+        "name": "@mermaid-js/parser",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "langium"
+        ],
+        "effects": [
+          "@excalidraw/mermaid-to-excalidraw"
+        ],
+        "range": "<=0.6.3",
+        "nodes": [
+          "node_modules/@mermaid-js/parser"
+        ],
+        "fixAvailable": true
+      },
+      "chevrotain": {
+        "name": "chevrotain",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@chevrotain/cst-dts-gen",
+          "@chevrotain/gast",
+          "lodash-es"
+        ],
+        "effects": [
+          "langium"
+        ],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/chevrotain"
+        ],
+        "fixAvailable": true
+      },
+      "exceljs": {
+        "name": "exceljs",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "uuid"
+        ],
+        "effects": [],
+        "range": ">=3.5.0",
+        "nodes": [
+          "node_modules/exceljs"
+        ],
+        "fixAvailable": {
+          "name": "exceljs",
+          "version": "3.4.0",
+          "isSemVerMajor": true
+        }
+      },
+      "langium": {
+        "name": "langium",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "chevrotain"
+        ],
+        "effects": [
+          "@mermaid-js/parser"
+        ],
+        "range": "2.1.0 - 4.1.3",
+        "nodes": [
+          "node_modules/langium"
+        ],
+        "fixAvailable": true
+      },
+      "lodash-es": {
+        "name": "lodash-es",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1115805,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "lodash vulnerable to Code Injection via `_.template` imports key names",
+            "url": "https://github.com/advisories/GHSA-r5fr-rjxr-66jc",
+            "severity": "high",
+            "cwe": [
+              "CWE-94"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": ">=4.0.0 <=4.17.23"
+          },
+          {
+            "source": 1115809,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+            "url": "https://github.com/advisories/GHSA-f23m-r3pf-42rh",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+            },
+            "range": "<=4.17.23"
+          },
+          {
+            "source": 1120368,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
+            "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+            },
+            "range": ">=4.0.0 <=4.17.22"
+          }
+        ],
+        "effects": [
+          "@chevrotain/cst-dts-gen",
+          "@chevrotain/gast",
+          "chevrotain"
+        ],
+        "range": "<=4.17.23",
+        "nodes": [
+          "node_modules/@chevrotain/cst-dts-gen/node_modules/lodash-es",
+          "node_modules/@chevrotain/gast/node_modules/lodash-es",
+          "node_modules/chevrotain/node_modules/lodash-es"
+        ],
+        "fixAvailable": true
+      },
+      "nanoid": {
+        "name": "nanoid",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1109563,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "Predictable results in nanoid generation when given non-integer values",
+            "url": "https://github.com/advisories/GHSA-mwcw-c2x4-8c55",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 4.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+            },
+            "range": "<3.3.8"
+          },
+          {
+            "source": 1109564,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "Predictable results in nanoid generation when given non-integer values",
+            "url": "https://github.com/advisories/GHSA-mwcw-c2x4-8c55",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 4.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+            },
+            "range": ">=4.0.0 <5.0.9"
+          },
+          {
+            "source": 1138810,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: non-secure generators can loop indefinitely with negative size",
+            "url": "https://github.com/advisories/GHSA-28wg-ghj8-5hjv",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=4.0.0 <5.1.16"
+          },
+          {
+            "source": 1138811,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: non-secure generators can loop indefinitely with negative size",
+            "url": "https://github.com/advisories/GHSA-28wg-ghj8-5hjv",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<3.3.16"
+          },
+          {
+            "source": 1139427,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: custom generators can loop indefinitely when size is zero",
+            "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<3.3.18"
+          },
+          {
+            "source": 1139455,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: custom generators can loop indefinitely when size is zero",
+            "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=4.0.0 <5.1.6"
+          },
+          {
+            "source": 1153188,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: Integer Overflow or Wraparound",
+            "url": "https://github.com/advisories/GHSA-xwg4-73v4-xw9w",
+            "severity": "high",
+            "cwe": [
+              "CWE-190"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": ">=4.0.0 <5.1.11"
+          },
+          {
+            "source": 1153189,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: Integer Overflow or Wraparound",
+            "url": "https://github.com/advisories/GHSA-xwg4-73v4-xw9w",
+            "severity": "high",
+            "cwe": [
+              "CWE-190"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": "<3.3.12"
+          }
+        ],
+        "effects": [
+          "@excalidraw/excalidraw",
+          "@excalidraw/mermaid-to-excalidraw"
+        ],
+        "range": "<=3.3.17 || 4.0.0 - 5.1.15",
+        "nodes": [
+          "node_modules/@excalidraw/excalidraw/node_modules/nanoid",
+          "node_modules/@excalidraw/mermaid-to-excalidraw/node_modules/nanoid"
+        ],
+        "fixAvailable": {
+          "name": "@excalidraw/excalidraw",
+          "version": "0.17.6",
+          "isSemVerMajor": true
+        }
+      },
+      "uuid": {
+        "name": "uuid",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119441,
+            "name": "uuid",
+            "dependency": "uuid",
+            "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+            "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-787",
+              "CWE-1285"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<11.1.1"
+          }
+        ],
+        "effects": [
+          "exceljs"
+        ],
+        "range": "<11.1.1",
+        "nodes": [
+          "node_modules/exceljs/node_modules/uuid"
+        ],
+        "fixAvailable": {
+          "name": "exceljs",
+          "version": "3.4.0",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 9,
+        "high": 2,
+        "critical": 0,
+        "total": 11
+      },
+      "dependencies": {
+        "prod": 428,
+        "dev": 633,
+        "optional": 163,
+        "peer": 30,
+        "peerOptional": 0,
+        "total": 1075
+      }
+    }
+  },
+  "npm_all": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "@chevrotain/cst-dts-gen": {
+        "name": "@chevrotain/cst-dts-gen",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@chevrotain/gast",
+          "lodash-es"
+        ],
+        "effects": [],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/@chevrotain/cst-dts-gen"
+        ],
+        "fixAvailable": true
+      },
+      "@chevrotain/gast": {
+        "name": "@chevrotain/gast",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "lodash-es"
+        ],
+        "effects": [],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/@chevrotain/gast"
+        ],
+        "fixAvailable": true
+      },
+      "@electron/rebuild": {
+        "name": "@electron/rebuild",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "node-gyp",
+          "tar"
+        ],
+        "effects": [
+          "app-builder-lib"
+        ],
+        "range": "3.2.10 - 4.0.2",
+        "nodes": [
+          "node_modules/@electron/rebuild"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "@excalidraw/excalidraw": {
+        "name": "@excalidraw/excalidraw",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@excalidraw/mermaid-to-excalidraw",
+          "nanoid"
+        ],
+        "effects": [],
+        "range": "0.5.0-a78d45417 || 0.17.1-08b13f9 - 0.17.1-test || >=0.18.0-699826",
+        "nodes": [
+          "node_modules/@excalidraw/excalidraw"
+        ],
+        "fixAvailable": {
+          "name": "@excalidraw/excalidraw",
+          "version": "0.17.6",
+          "isSemVerMajor": true
+        }
+      },
+      "@excalidraw/mermaid-to-excalidraw": {
+        "name": "@excalidraw/mermaid-to-excalidraw",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@mermaid-js/parser",
+          "nanoid"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/@excalidraw/mermaid-to-excalidraw"
+        ],
+        "fixAvailable": true
+      },
+      "@mermaid-js/parser": {
+        "name": "@mermaid-js/parser",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "langium"
+        ],
+        "effects": [
+          "@excalidraw/mermaid-to-excalidraw"
+        ],
+        "range": "<=0.6.3",
+        "nodes": [
+          "node_modules/@mermaid-js/parser"
+        ],
+        "fixAvailable": true
+      },
+      "@vitest/coverage-v8": {
+        "name": "@vitest/coverage-v8",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "vitest"
+        ],
+        "effects": [],
+        "range": "2.1.0-beta.1 - 4.1.10",
+        "nodes": [
+          "node_modules/@vitest/coverage-v8"
+        ],
+        "fixAvailable": {
+          "name": "@vitest/coverage-v8",
+          "version": "5.0.3",
+          "isSemVerMajor": true
+        }
+      },
+      "@vitest/mocker": {
+        "name": "@vitest/mocker",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1193684,
+            "name": "@vitest/mocker",
+            "dependency": "@vitest/mocker",
+            "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+            "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=2.1.0 <4.1.11"
+          }
+        ],
+        "effects": [
+          "vitest"
+        ],
+        "range": "2.1.0 - 4.1.10",
+        "nodes": [
+          "node_modules/vitest/node_modules/@vitest/mocker"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.11",
+          "isSemVerMajor": true
+        }
+      },
+      "app-builder-lib": {
+        "name": "app-builder-lib",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "@electron/rebuild",
+          {
+            "source": 1124279,
+            "name": "app-builder-lib",
+            "dependency": "app-builder-lib",
+            "title": "electron-updater: Uncontrolled search path elements within `AppImage` built by `app-builder-lib`",
+            "url": "https://github.com/advisories/GHSA-7g7r-gx96-252g",
+            "severity": "high",
+            "cwe": [
+              "CWE-427"
+            ],
+            "cvss": {
+              "score": 7.8,
+              "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": "<26.15.0"
+          },
+          "builder-util",
+          "builder-util-runtime",
+          "dmg-builder",
+          "electron-builder-squirrel-windows",
+          "electron-publish",
+          "tar"
+        ],
+        "effects": [
+          "dmg-builder",
+          "electron-builder",
+          "electron-builder-squirrel-windows"
+        ],
+        "range": "<=26.14.0",
+        "nodes": [
+          "node_modules/app-builder-lib"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "builder-util": {
+        "name": "builder-util",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "builder-util-runtime"
+        ],
+        "effects": [
+          "dmg-builder",
+          "electron-builder-squirrel-windows"
+        ],
+        "range": "2.0.0 - 25.0.6 || 25.1.2 - 26.14.0",
+        "nodes": [
+          "node_modules/builder-util"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "builder-util-runtime": {
+        "name": "builder-util-runtime",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1124278,
+            "name": "builder-util-runtime",
+            "dependency": "builder-util-runtime",
+            "title": "electron-updater: Cross-origin redirect leaks `PRIVATE-TOKEN` and mixed-case `Authorization` credentials in `builder-util-runtime`",
+            "url": "https://github.com/advisories/GHSA-p2f4-r6v6-j797",
+            "severity": "high",
+            "cwe": [
+              "CWE-200"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<9.7.0"
+          }
+        ],
+        "effects": [
+          "app-builder-lib",
+          "builder-util",
+          "dmg-builder",
+          "electron-builder",
+          "electron-publish"
+        ],
+        "range": "<9.7.0",
+        "nodes": [
+          "node_modules/builder-util-runtime"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "cacache": {
+        "name": "cacache",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "tar"
+        ],
+        "effects": [
+          "make-fetch-happen"
+        ],
+        "range": "14.0.0 - 18.0.4",
+        "nodes": [
+          "node_modules/cacache"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "chevrotain": {
+        "name": "chevrotain",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "@chevrotain/cst-dts-gen",
+          "@chevrotain/gast",
+          "lodash-es"
+        ],
+        "effects": [
+          "langium"
+        ],
+        "range": "11.0.0 - 11.1.0",
+        "nodes": [
+          "node_modules/chevrotain"
+        ],
+        "fixAvailable": true
+      },
+      "dmg-builder": {
+        "name": "dmg-builder",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "app-builder-lib",
+          "builder-util",
+          "builder-util-runtime"
+        ],
+        "effects": [
+          "app-builder-lib",
+          "electron-builder"
+        ],
+        "range": "2.0.0 - 26.14.0",
+        "nodes": [
+          "node_modules/dmg-builder"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "electron": {
+        "name": "electron",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          {
+            "source": 1107272,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron has ASAR Integrity Bypass via resource modification",
+            "url": "https://github.com/advisories/GHSA-vmqv-hx8q-j7mg",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-94",
+              "CWE-829"
+            ],
+            "cvss": {
+              "score": 6.1,
+              "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:L/I:H/A:L"
+            },
+            "range": "<35.7.5"
+          },
+          {
+            "source": 1116041,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: AppleScript injection in app.moveToApplicationsFolder on macOS",
+            "url": "https://github.com/advisories/GHSA-5rqw-r77c-jp79",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-78"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:L"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116045,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Service worker can spoof executeJavaScript IPC replies",
+            "url": "https://github.com/advisories/GHSA-xj5x-m3f3-5x3h",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-290",
+              "CWE-345"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:L/I:H/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116049,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Incorrect origin passed to permission request handler for iframe requests",
+            "url": "https://github.com/advisories/GHSA-r5p7-gp4j-qhrx",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-346"
+            ],
+            "cvss": {
+              "score": 5.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116053,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Out-of-bounds read in second-instance IPC on macOS and Linux",
+            "url": "https://github.com/advisories/GHSA-3c8v-cfp5-9885",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-125"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:L"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116057,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: nodeIntegrationInWorker not correctly scoped in shared renderer processes",
+            "url": "https://github.com/advisories/GHSA-xwr5-m59h-vwqr",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-653"
+            ],
+            "cvss": {
+              "score": 6.8,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116060,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Use-after-free in offscreen child window paint callback",
+            "url": "https://github.com/advisories/GHSA-532v-xpq5-8h95",
+            "severity": "high",
+            "cwe": [
+              "CWE-416"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": "<39.8.1"
+          },
+          {
+            "source": 1116064,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Registry key path injection in app.setAsDefaultProtocolClient on Windows",
+            "url": "https://github.com/advisories/GHSA-mwmh-mq4g-g6gr",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-20",
+              "CWE-74"
+            ],
+            "cvss": {
+              "score": 4.7,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116068,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Use-after-free in download save dialog callback",
+            "url": "https://github.com/advisories/GHSA-9w97-2464-8783",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-416"
+            ],
+            "cvss": {
+              "score": 5.8,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:L"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116072,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Use-after-free in WebContents fullscreen, pointer-lock, and keyboard-lock permission callbacks",
+            "url": "https://github.com/advisories/GHSA-8337-3p73-46f4",
+            "severity": "high",
+            "cwe": [
+              "CWE-416"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116076,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Use-after-free in PowerMonitor on Windows and macOS",
+            "url": "https://github.com/advisories/GHSA-jjp3-mq3x-295m",
+            "severity": "high",
+            "cwe": [
+              "CWE-416"
+            ],
+            "cvss": {
+              "score": 7,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116084,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Unquoted executable path in app.setLoginItemSettings on Windows",
+            "url": "https://github.com/advisories/GHSA-jfqx-fxh3-c62j",
+            "severity": "low",
+            "cwe": [
+              "CWE-428"
+            ],
+            "cvss": {
+              "score": 3.9,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:U/C:L/I:L/A:L"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116088,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: HTTP Response Header Injection in custom protocol handlers and webRequest",
+            "url": "https://github.com/advisories/GHSA-4p4r-m79c-wq3v",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-74",
+              "CWE-113"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:H/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116092,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: USB device selection not validated against filtered device list",
+            "url": "https://github.com/advisories/GHSA-9899-m83m-qhpj",
+            "severity": "low",
+            "cwe": [
+              "CWE-862"
+            ],
+            "cvss": {
+              "score": 3.3,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:N"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1116111,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Use-after-free in offscreen shared texture release() callback",
+            "url": "https://github.com/advisories/GHSA-8x5q-pvf5-64mp",
+            "severity": "low",
+            "cwe": [
+              "CWE-416"
+            ],
+            "cvss": {
+              "score": 2.3,
+              "vectorString": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": ">=33.0.0-alpha.1 <39.8.5"
+          },
+          {
+            "source": 1116259,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Crash in clipboard.readImage() on malformed clipboard image data",
+            "url": "https://github.com/advisories/GHSA-f37v-82c4-4x64",
+            "severity": "low",
+            "cwe": [
+              "CWE-476"
+            ],
+            "cvss": {
+              "score": 2.8,
+              "vectorString": "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:N/I:N/A:L"
+            },
+            "range": "<39.8.5"
+          },
+          {
+            "source": 1116320,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Named window.open targets not scoped to the opener's browsing context",
+            "url": "https://github.com/advisories/GHSA-f3pv-wv63-48x8",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-668"
+            ],
+            "cvss": {
+              "score": 6,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:L"
+            },
+            "range": "<39.8.5"
+          },
+          {
+            "source": 1117459,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Renderer command-line switch injection via undocumented commandLineSwitches webPreference",
+            "url": "https://github.com/advisories/GHSA-9wfr-w7mm-pc7f",
+            "severity": "high",
+            "cwe": [
+              "CWE-88",
+              "CWE-912"
+            ],
+            "cvss": {
+              "score": 7.7,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H"
+            },
+            "range": "<38.8.6"
+          },
+          {
+            "source": 1136551,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Parent process code-sign check is spoofable",
+            "url": "https://github.com/advisories/GHSA-jm7p-cc5g-qwxx",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-367"
+            ],
+            "cvss": {
+              "score": 6.3,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136552,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Custom protocol with supportFetchAPI but not corsEnabled allows cross-origin reads",
+            "url": "https://github.com/advisories/GHSA-v3j7-r9gq-3gjw",
+            "severity": "high",
+            "cwe": [
+              "CWE-942"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N"
+            },
+            "range": "<39.8.10"
+          },
+          {
+            "source": 1136559,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Extension tab APIs operate across session boundaries",
+            "url": "https://github.com/advisories/GHSA-m55f-7gqj-fr98",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-284"
+            ],
+            "cvss": {
+              "score": 6.6,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:H/I:L/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136560,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: shell.openPath path validation bypass via embedded null byte",
+            "url": "https://github.com/advisories/GHSA-5c9j-mhmv-5xgx",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-20",
+              "CWE-158"
+            ],
+            "cvss": {
+              "score": 6,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:N"
+            },
+            "range": "<39.8.6"
+          },
+          {
+            "source": 1136567,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Context isolation bypass via Function.prototype.bind hijack",
+            "url": "https://github.com/advisories/GHSA-h7rp-cf8h-j98x",
+            "severity": "high",
+            "cwe": [
+              "CWE-693"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:L/A:N"
+            },
+            "range": "<39.8.9"
+          },
+          {
+            "source": 1136571,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Cross-origin iframe can position native autofill popup",
+            "url": "https://github.com/advisories/GHSA-x8rc-wpg4-grpf",
+            "severity": "low",
+            "cwe": [
+              "CWE-1021"
+            ],
+            "cvss": {
+              "score": 3.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136575,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Permission Check Handler Receives Main Frame Origin Instead of Requesting Iframe Origin",
+            "url": "https://github.com/advisories/GHSA-9pf5-hg6p-4pwp",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-346"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": "<39.8.7"
+          },
+          {
+            "source": 1136579,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Off-screen rendering trusts GPU-supplied geometry over shared-memory size",
+            "url": "https://github.com/advisories/GHSA-pfmc-3mgc-p6fp",
+            "severity": "low",
+            "cwe": [
+              "CWE-125"
+            ],
+            "cvss": {
+              "score": 3.9,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:C/C:L/I:N/A:L"
+            },
+            "range": "<39.8.10"
+          },
+          {
+            "source": 1136590,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: HTTP redirect followed into local file loader",
+            "url": "https://github.com/advisories/GHSA-v64r-4m7r-3mvq",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-918"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136597,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: window.open features string controls some window options considered privileged",
+            "url": "https://github.com/advisories/GHSA-v93f-fgjr-hjrj",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-20"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136607,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Sandboxed iframe can bypass the allow-popups restriction via the OpenURL navigation path",
+            "url": "https://github.com/advisories/GHSA-9f4c-93c8-jc8g",
+            "severity": "high",
+            "cwe": [
+              "CWE-693",
+              "CWE-1021"
+            ],
+            "cvss": {
+              "score": 7.2,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N"
+            },
+            "range": "<39.8.10"
+          },
+          {
+            "source": 1136634,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Sandboxed iframes can launch external protocol handlers",
+            "url": "https://github.com/advisories/GHSA-p2rr-rvmm-c5fp",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-284"
+            ],
+            "cvss": {
+              "score": 5.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:L/A:N"
+            },
+            "range": "<39.8.8"
+          },
+          {
+            "source": 1136647,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: DevTools embedder handler executes arbitrary files via shell open",
+            "url": "https://github.com/advisories/GHSA-f2r8-jv7c-xqmp",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-78"
+            ],
+            "cvss": {
+              "score": 6.9,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:C/C:H/I:H/A:N"
+            },
+            "range": "<39.8.9"
+          },
+          {
+            "source": 1136651,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: contextBridge object copy honors prototype setters",
+            "url": "https://github.com/advisories/GHSA-ff2p-hmqr-hxm4",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 5.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:L/A:N"
+            },
+            "range": "<39.8.9"
+          },
+          {
+            "source": 1136659,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: DevTools JavaScript Injection via Unsanitized Dock State Parameter",
+            "url": "https://github.com/advisories/GHSA-4f78-qhmw-8j8m",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-94",
+              "CWE-116"
+            ],
+            "cvss": {
+              "score": 5.7,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N"
+            },
+            "range": "<39.8.7"
+          },
+          {
+            "source": 1239973,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron drops inherited HTML sandbox restrictions for popups opened through OpenURLFromTab",
+            "url": "https://github.com/advisories/GHSA-hq2x-r82h-9wj4",
+            "severity": "high",
+            "cwe": [
+              "CWE-346",
+              "CWE-693"
+            ],
+            "cvss": {
+              "score": 8.2,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N"
+            },
+            "range": "<41.10.4"
+          },
+          {
+            "source": 1239977,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Windows opened from a sandboxed top-level document do not inherit its sandbox restrictions",
+            "url": "https://github.com/advisories/GHSA-gr2m-v5gq-v685",
+            "severity": "high",
+            "cwe": [
+              "CWE-266",
+              "CWE-693"
+            ],
+            "cvss": {
+              "score": 8.2,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N"
+            },
+            "range": "<41.10.6"
+          },
+          {
+            "source": 1239981,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: File and HTTP protocol handlers allow cross-origin reads without corsEnabled",
+            "url": "https://github.com/advisories/GHSA-j84w-jfhq-vhvj",
+            "severity": "high",
+            "cwe": [
+              "CWE-346"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N"
+            },
+            "range": "<41.10.6"
+          },
+          {
+            "source": 1239985,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: <webview> can enable Node.js integration in Web Workers despite embedder restrictions",
+            "url": "https://github.com/advisories/GHSA-9qh4-3jw8-366w",
+            "severity": "high",
+            "cwe": [
+              "CWE-269",
+              "CWE-1188"
+            ],
+            "cvss": {
+              "score": 8.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H"
+            },
+            "range": "<41.10.6"
+          },
+          {
+            "source": 1240060,
+            "name": "electron",
+            "dependency": "electron",
+            "title": "Electron: Local race condition in Squirrel.Mac update installation on macOS",
+            "url": "https://github.com/advisories/GHSA-vv43-5jgx-7qv8",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-367"
+            ],
+            "cvss": {
+              "score": 6.7,
+              "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H"
+            },
+            "range": "<39.8.10"
+          },
+          "extract-zip"
+        ],
+        "effects": [],
+        "range": "<=41.10.5 || 42.0.0-alpha.1 - 42.3.3 || 43.0.0-alpha.1 - 43.0.0-beta.8",
+        "nodes": [
+          "node_modules/electron"
+        ],
+        "fixAvailable": {
+          "name": "electron",
+          "version": "41.7.1",
+          "isSemVerMajor": true
+        }
+      },
+      "electron-builder": {
+        "name": "electron-builder",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "app-builder-lib",
+          "builder-util",
+          "builder-util-runtime",
+          "dmg-builder"
+        ],
+        "effects": [],
+        "range": "19.25.0 || 19.28.0 - 26.14.0",
+        "nodes": [
+          "node_modules/electron-builder"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "electron-builder-squirrel-windows": {
+        "name": "electron-builder-squirrel-windows",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "app-builder-lib",
+          "builder-util"
+        ],
+        "effects": [],
+        "range": "19.28.0 - 26.14.0",
+        "nodes": [
+          "node_modules/electron-builder-squirrel-windows"
+        ],
+        "fixAvailable": true
+      },
+      "electron-publish": {
+        "name": "electron-publish",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "builder-util",
+          "builder-util-runtime"
+        ],
+        "effects": [],
+        "range": "19.28.0 - 25.0.6 || 25.1.2 - 26.14.0",
+        "nodes": [
+          "node_modules/electron-publish"
+        ],
+        "fixAvailable": true
+      },
+      "exceljs": {
+        "name": "exceljs",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "uuid"
+        ],
+        "effects": [],
+        "range": ">=3.5.0",
+        "nodes": [
+          "node_modules/exceljs"
+        ],
+        "fixAvailable": {
+          "name": "exceljs",
+          "version": "3.4.0",
+          "isSemVerMajor": true
+        }
+      },
+      "extract-zip": {
+        "name": "extract-zip",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1139346,
+            "name": "extract-zip",
+            "dependency": "extract-zip",
+            "title": "extract-zip unvalidated symlink path traversal",
+            "url": "https://github.com/advisories/GHSA-jmr9-qjv8-65gv",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+            },
+            "range": "<=2.0.1"
+          },
+          {
+            "source": 1193685,
+            "name": "extract-zip",
+            "dependency": "extract-zip",
+            "title": "extract-zip allows arbitrary file writes through symlink archive entries",
+            "url": "https://github.com/advisories/GHSA-7pqw-9j4j-h8q3",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:H"
+            },
+            "range": "<=2.0.1"
+          }
+        ],
+        "effects": [
+          "electron"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/extract-zip"
+        ],
+        "fixAvailable": {
+          "name": "electron",
+          "version": "41.7.1",
+          "isSemVerMajor": true
+        }
+      },
+      "langium": {
+        "name": "langium",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          "chevrotain"
+        ],
+        "effects": [
+          "@mermaid-js/parser"
+        ],
+        "range": "2.1.0 - 4.1.3",
+        "nodes": [
+          "node_modules/langium"
+        ],
+        "fixAvailable": true
+      },
+      "lodash-es": {
+        "name": "lodash-es",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1115805,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "lodash vulnerable to Code Injection via `_.template` imports key names",
+            "url": "https://github.com/advisories/GHSA-r5fr-rjxr-66jc",
+            "severity": "high",
+            "cwe": [
+              "CWE-94"
+            ],
+            "cvss": {
+              "score": 8.1,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            },
+            "range": ">=4.0.0 <=4.17.23"
+          },
+          {
+            "source": 1115809,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+            "url": "https://github.com/advisories/GHSA-f23m-r3pf-42rh",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+            },
+            "range": "<=4.17.23"
+          },
+          {
+            "source": 1120368,
+            "name": "lodash-es",
+            "dependency": "lodash-es",
+            "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
+            "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-1321"
+            ],
+            "cvss": {
+              "score": 6.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+            },
+            "range": ">=4.0.0 <=4.17.22"
+          }
+        ],
+        "effects": [
+          "@chevrotain/cst-dts-gen",
+          "@chevrotain/gast",
+          "chevrotain"
+        ],
+        "range": "<=4.17.23",
+        "nodes": [
+          "node_modules/@chevrotain/cst-dts-gen/node_modules/lodash-es",
+          "node_modules/@chevrotain/gast/node_modules/lodash-es",
+          "node_modules/chevrotain/node_modules/lodash-es"
+        ],
+        "fixAvailable": true
+      },
+      "make-fetch-happen": {
+        "name": "make-fetch-happen",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "cacache"
+        ],
+        "effects": [
+          "node-gyp"
+        ],
+        "range": "7.1.1 - 14.0.0",
+        "nodes": [
+          "node_modules/make-fetch-happen"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "nanoid": {
+        "name": "nanoid",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1109563,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "Predictable results in nanoid generation when given non-integer values",
+            "url": "https://github.com/advisories/GHSA-mwcw-c2x4-8c55",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 4.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+            },
+            "range": "<3.3.8"
+          },
+          {
+            "source": 1109564,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "Predictable results in nanoid generation when given non-integer values",
+            "url": "https://github.com/advisories/GHSA-mwcw-c2x4-8c55",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 4.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+            },
+            "range": ">=4.0.0 <5.0.9"
+          },
+          {
+            "source": 1138810,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: non-secure generators can loop indefinitely with negative size",
+            "url": "https://github.com/advisories/GHSA-28wg-ghj8-5hjv",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=4.0.0 <5.1.16"
+          },
+          {
+            "source": 1138811,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: non-secure generators can loop indefinitely with negative size",
+            "url": "https://github.com/advisories/GHSA-28wg-ghj8-5hjv",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<3.3.16"
+          },
+          {
+            "source": 1139427,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: custom generators can loop indefinitely when size is zero",
+            "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<3.3.18"
+          },
+          {
+            "source": 1139455,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: custom generators can loop indefinitely when size is zero",
+            "url": "https://github.com/advisories/GHSA-2v37-7h3g-55p8",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": ">=4.0.0 <5.1.6"
+          },
+          {
+            "source": 1153188,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: Integer Overflow or Wraparound",
+            "url": "https://github.com/advisories/GHSA-xwg4-73v4-xw9w",
+            "severity": "high",
+            "cwe": [
+              "CWE-190"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": ">=4.0.0 <5.1.11"
+          },
+          {
+            "source": 1153189,
+            "name": "nanoid",
+            "dependency": "nanoid",
+            "title": "nanoid: Integer Overflow or Wraparound",
+            "url": "https://github.com/advisories/GHSA-xwg4-73v4-xw9w",
+            "severity": "high",
+            "cwe": [
+              "CWE-190"
+            ],
+            "cvss": {
+              "score": 7.4,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N"
+            },
+            "range": "<3.3.12"
+          }
+        ],
+        "effects": [
+          "@excalidraw/excalidraw",
+          "@excalidraw/mermaid-to-excalidraw"
+        ],
+        "range": "<=3.3.17 || 4.0.0 - 5.1.15",
+        "nodes": [
+          "node_modules/@excalidraw/excalidraw/node_modules/nanoid",
+          "node_modules/@excalidraw/mermaid-to-excalidraw/node_modules/nanoid"
+        ],
+        "fixAvailable": {
+          "name": "@excalidraw/excalidraw",
+          "version": "0.17.6",
+          "isSemVerMajor": true
+        }
+      },
+      "node-gyp": {
+        "name": "node-gyp",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "make-fetch-happen",
+          "tar"
+        ],
+        "effects": [
+          "@electron/rebuild"
+        ],
+        "range": "<=10.3.1",
+        "nodes": [
+          "node_modules/node-gyp"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "tar": {
+        "name": "tar",
+        "severity": "critical",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1112659,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+            "url": "https://github.com/advisories/GHSA-34x7-hfp2-rc4v",
+            "severity": "high",
+            "cwe": [
+              "CWE-22",
+              "CWE-59"
+            ],
+            "cvss": {
+              "score": 8.2,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N"
+            },
+            "range": "<7.5.7"
+          },
+          {
+            "source": 1113300,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+            "url": "https://github.com/advisories/GHSA-8qq5-rm4j-mr97",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=7.5.2"
+          },
+          {
+            "source": 1113375,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+            "url": "https://github.com/advisories/GHSA-83g3-92jg-28cx",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 7.1,
+              "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+            },
+            "range": "<7.5.8"
+          },
+          {
+            "source": 1114200,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+            "url": "https://github.com/advisories/GHSA-qffp-2rhf-9h96",
+            "severity": "high",
+            "cwe": [
+              "CWE-22",
+              "CWE-59"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=7.5.9"
+          },
+          {
+            "source": 1114302,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+            "url": "https://github.com/advisories/GHSA-9ppj-qmqm-q256",
+            "severity": "high",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=7.5.10"
+          },
+          {
+            "source": 1114680,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+            "url": "https://github.com/advisories/GHSA-r6q2-hw4h-h46w",
+            "severity": "high",
+            "cwe": [
+              "CWE-176",
+              "CWE-367"
+            ],
+            "cvss": {
+              "score": 8.8,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:H/A:L"
+            },
+            "range": "<=7.5.3"
+          },
+          {
+            "source": 1120782,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling)",
+            "url": "https://github.com/advisories/GHSA-vmf3-w455-68vh",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-436"
+            ],
+            "cvss": {
+              "score": 0,
+              "vectorString": null
+            },
+            "range": "<=7.5.15"
+          },
+          {
+            "source": 1123939,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar: Process crash via PAX numeric path type confusion",
+            "url": "https://github.com/advisories/GHSA-w8wr-v893-vjvp",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-704"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": "<=7.5.17"
+          },
+          {
+            "source": 1123940,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar: Decompression/parse DoS via unlimited input",
+            "url": "https://github.com/advisories/GHSA-23hp-3jrh-7fpw",
+            "severity": "critical",
+            "cwe": [
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=7.5.18"
+          },
+          {
+            "source": 1123941,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar: Negative tar entry size causes infinite loop in archive replace",
+            "url": "https://github.com/advisories/GHSA-8x88-c5mf-7j5w",
+            "severity": "high",
+            "cwe": [
+              "CWE-835"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=7.5.17"
+          },
+          {
+            "source": 1123942,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records",
+            "url": "https://github.com/advisories/GHSA-gvwx-54wh-qm9j",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-248"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": "<=7.5.16"
+          },
+          {
+            "source": 1145647,
+            "name": "tar",
+            "dependency": "tar",
+            "title": "node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection",
+            "url": "https://github.com/advisories/GHSA-r292-9mhp-454m",
+            "severity": "high",
+            "cwe": [
+              "CWE-400",
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=7.5.20"
+          }
+        ],
+        "effects": [
+          "@electron/rebuild",
+          "app-builder-lib",
+          "cacache",
+          "node-gyp"
+        ],
+        "range": "<=7.5.20",
+        "nodes": [
+          "node_modules/tar"
+        ],
+        "fixAvailable": {
+          "name": "electron-builder",
+          "version": "26.15.3",
+          "isSemVerMajor": true
+        }
+      },
+      "uuid": {
+        "name": "uuid",
+        "severity": "moderate",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1119441,
+            "name": "uuid",
+            "dependency": "uuid",
+            "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+            "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-787",
+              "CWE-1285"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<11.1.1"
+          }
+        ],
+        "effects": [
+          "exceljs"
+        ],
+        "range": "<11.1.1",
+        "nodes": [
+          "node_modules/exceljs/node_modules/uuid"
+        ],
+        "fixAvailable": {
+          "name": "exceljs",
+          "version": "3.4.0",
+          "isSemVerMajor": true
+        }
+      },
+      "vitest": {
+        "name": "vitest",
+        "severity": "moderate",
+        "isDirect": true,
+        "via": [
+          "@vitest/mocker",
+          {
+            "source": 1193683,
+            "name": "vitest",
+            "dependency": "vitest",
+            "title": "Vitest: Path Traversal / Arbitrary File Read via @vitest/mocker Redirect Mock",
+            "url": "https://github.com/advisories/GHSA-82fw-gwwq-j7x9",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-22"
+            ],
+            "cvss": {
+              "score": 5.9,
+              "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+            },
+            "range": ">=2.1.0 <4.1.11"
+          }
+        ],
+        "effects": [
+          "@vitest/coverage-v8"
+        ],
+        "range": "2.1.0-beta.1 - 4.1.10",
+        "nodes": [
+          "node_modules/vitest"
+        ],
+        "fixAvailable": {
+          "name": "vitest",
+          "version": "4.1.11",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 12,
+        "high": 15,
+        "critical": 1,
+        "total": 28
+      },
+      "dependencies": {
+        "prod": 428,
+        "dev": 633,
+        "optional": 163,
+        "peer": 30,
+        "peerOptional": 0,
+        "total": 1075
+      }
+    }
+  },
+  "pip_audit": {
+    "dependencies": [
+      {
+        "name": "chromadb",
+        "version": "1.1.1",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-311",
+            "fix_versions": [],
+            "aliases": [
+              "CVE-2026-45829",
+              "GHSA-f4j7-r4q5-qw2c"
+            ],
+            "description": "A pre-authentication, code injection vulnerability in version 1.0.0 or later of the ChromaDB Python project allows an unauthenticated attacker to run arbitrary code on the server by sending a malicious model repository and trust_remote_code set to true in the\u00a0/api/v2/tenants/{tenant}/databases/{db}/collections endpoint."
+          },
+          {
+            "id": "PYSEC-2026-311",
+            "fix_versions": [],
+            "aliases": [
+              "CVE-2026-45829",
+              "GHSA-f4j7-r4q5-qw2c"
+            ],
+            "description": "A pre-authentication, code injection vulnerability in version 1.0.0 or later of the ChromaDB Python project allows an unauthenticated attacker to run arbitrary code on the server by sending a malicious model repository and trust_remote_code set to true in the\u00a0/api/v2/tenants/{tenant}/databases/{db}/collections endpoint."
+          },
+          {
+            "id": "PYSEC-2026-3814",
+            "fix_versions": [],
+            "aliases": [
+              "GHSA-36p7-vc44-83pf",
+              "CVE-2026-45833"
+            ],
+            "description": "A code injection vulnerability in version 0.4.17 or later of the ChromaDB Python project allows an authenticated attacker to run arbitrary code on the server by sending a malicious model repository and trust_remote_code set to true in the\u00a0/api/v2/tenants/default_tenant/databases/default_database/collections/{collection_id} if they have the UPDATE_COLLECTION permission."
+          },
+          {
+            "id": "PYSEC-2026-3815",
+            "fix_versions": [],
+            "aliases": [
+              "CVE-2026-45831",
+              "GHSA-xph7-9rjv-w5fr"
+            ],
+            "description": "The SimpleRBACAuthorizationProvider authorization provider in versions 0.5.0 or later of the ChromaDB Python project evaluates whether a user holds a given permission but never checks which tenant, database, or collection that permission applies to allowing users to perform cross tenant actions."
+          },
+          {
+            "id": "PYSEC-2026-3813",
+            "fix_versions": [],
+            "aliases": [
+              "GHSA-2wm9-hf6c-p5cr",
+              "CVE-2026-45830"
+            ],
+            "description": "A lack of authorization validation in version 0.4.17 or later of the ChromaDB Python project allows any authenticated users to arbitrarily read, write, update, or delete data in any tenant's collection regardless of which tenant they belong to."
+          }
+        ]
+      },
+      {
+        "name": "llama-index-core",
+        "version": "0.14.25",
+        "vulns": []
+      },
+      {
+        "name": "llama-index-vector-stores-chroma",
+        "version": "0.5.5",
+        "vulns": []
+      },
+      {
+        "name": "aiohttp",
+        "version": "3.14.3",
+        "vulns": []
+      },
+      {
+        "name": "banks",
+        "version": "2.5.1",
+        "vulns": []
+      },
+      {
+        "name": "dirtyjson",
+        "version": "1.0.8",
+        "vulns": []
+      },
+      {
+        "name": "filetype",
+        "version": "1.2.0",
+        "vulns": []
+      },
+      {
+        "name": "llama-index-workflows",
+        "version": "2.25.0",
+        "vulns": []
+      },
+      {
+        "name": "multidict",
+        "version": "6.9.1",
+        "vulns": []
+      },
+      {
+        "name": "nest-asyncio",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "posthog",
+        "version": "5.4.0",
+        "vulns": []
+      },
+      {
+        "name": "requests",
+        "version": "2.34.2",
+        "vulns": []
+      },
+      {
+        "name": "charset-normalizer",
+        "version": "3.5.2",
+        "vulns": []
+      },
+      {
+        "name": "idna",
+        "version": "3.20",
+        "vulns": []
+      },
+      {
+        "name": "tenacity",
+        "version": "9.1.4",
+        "vulns": []
+      },
+      {
+        "name": "tqdm",
+        "version": "4.70.1",
+        "vulns": []
+      },
+      {
+        "name": "urllib3",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "yarl",
+        "version": "1.25.1",
+        "vulns": []
+      },
+      {
+        "name": "pytest",
+        "version": "9.1.1",
+        "vulns": []
+      },
+      {
+        "name": "pluggy",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "fastapi",
+        "version": "0.142.2",
+        "vulns": []
+      },
+      {
+        "name": "uvicorn",
+        "version": "0.54.0",
+        "vulns": []
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.15.1",
+        "vulns": []
+      },
+      {
+        "name": "httpx",
+        "version": "0.28.1",
+        "vulns": []
+      },
+      {
+        "name": "httpcore",
+        "version": "1.0.9",
+        "vulns": []
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.3",
+        "vulns": []
+      },
+      {
+        "name": "onnxruntime",
+        "version": "1.30.0",
+        "vulns": []
+      },
+      {
+        "name": "tokenizers",
+        "version": "0.23.2",
+        "vulns": []
+      },
+      {
+        "name": "huggingface-hub",
+        "version": "1.33.0",
+        "vulns": []
+      },
+      {
+        "name": "click",
+        "version": "8.5.0",
+        "vulns": []
+      },
+      {
+        "name": "hf-xet",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "pypdf",
+        "version": "6.19.0",
+        "vulns": []
+      },
+      {
+        "name": "cryptography",
+        "version": "50.0.2",
+        "vulns": []
+      },
+      {
+        "name": "aiohappyeyeballs",
+        "version": "2.7.1",
+        "vulns": []
+      },
+      {
+        "name": "aiosignal",
+        "version": "1.4.0",
+        "vulns": []
+      },
+      {
+        "name": "annotated-doc",
+        "version": "0.0.5",
+        "vulns": []
+      },
+      {
+        "name": "attrs",
+        "version": "26.1.0",
+        "vulns": []
+      },
+      {
+        "name": "backoff",
+        "version": "2.2.1",
+        "vulns": []
+      },
+      {
+        "name": "bcrypt",
+        "version": "5.0.0",
+        "vulns": []
+      },
+      {
+        "name": "build",
+        "version": "1.6.1",
+        "vulns": []
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "vulns": []
+      },
+      {
+        "name": "cffi",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "deprecated",
+        "version": "3.0.0",
+        "vulns": []
+      },
+      {
+        "name": "wrapt",
+        "version": "2.5.0",
+        "vulns": []
+      },
+      {
+        "name": "distro",
+        "version": "1.9.0",
+        "vulns": []
+      },
+      {
+        "name": "filelock",
+        "version": "4.0.8",
+        "vulns": []
+      },
+      {
+        "name": "frozenlist",
+        "version": "1.8.0",
+        "vulns": []
+      },
+      {
+        "name": "fsspec",
+        "version": "2026.9.0",
+        "vulns": []
+      },
+      {
+        "name": "grpcio",
+        "version": "1.84.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "vulns": []
+      },
+      {
+        "name": "h11",
+        "version": "0.16.0",
+        "vulns": []
+      },
+      {
+        "name": "iniconfig",
+        "version": "2.3.0",
+        "vulns": []
+      },
+      {
+        "name": "jsonschema",
+        "version": "4.26.0",
+        "vulns": []
+      },
+      {
+        "name": "jsonschema-specifications",
+        "version": "2025.9.1",
+        "vulns": []
+      },
+      {
+        "name": "kubernetes",
+        "version": "36.0.3",
+        "vulns": []
+      },
+      {
+        "name": "durationpy",
+        "version": "0.11",
+        "vulns": []
+      },
+      {
+        "name": "llama-index-instrumentation",
+        "version": "0.6.0",
+        "vulns": []
+      },
+      {
+        "name": "mmh3",
+        "version": "5.3.1",
+        "vulns": []
+      },
+      {
+        "name": "networkx",
+        "version": "3.7",
+        "vulns": []
+      },
+      {
+        "name": "nltk",
+        "version": "3.10.3",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-3740",
+            "fix_versions": [],
+            "aliases": [
+              "GHSA-8mgp-746c-j5xp",
+              "CVE-2026-81726"
+            ],
+            "description": "### Summary  Several model-artifact APIs still treat caller-controlled model paths as ordinary filenames even when NLTK path security is enforced. The same outside-root paths are rejected by guarded helpers, but these public read and write flows still use raw file APIs.  ### Details  - **Vulnerability type:** File sandbox bypass - **Affected component:** `TransitionParser.train`, `TransitionParser.parse`, `AveragedPerceptron.save`, `AveragedPerceptron.load`, `PerceptronTagger.save_to_json`, `save_maxent_params` - **Affected versions:** Published `3.9.4` and current source `v3.10.0-rc2` both reproduced. - **Patched versions:** Not yet patched - **Root cause:** Model import and export helpers use built-in `open()` on caller-controlled paths instead of pathsec-aware helpers.  `TransitionParser.train()` writes outside allowed roots, `TransitionParser.parse()` reads outside allowed roots, `AveragedPerceptron` bypasses the sandbox in both directions, and adjacent read-side helpers in the same family already show the intended guarded behavior. I confirmed outside-root reads and writes while `pathsec.open()` or the guarded sibling helpers rejected the same paths.  ### PoC  **Preconditions** - The application enables `pathsec` enforcement and lets untrusted workflows choose model import or export paths.  **Steps** 1. Enable `pathsec.ENFORCE=True` and restrict allowed roots to a dedicated sandbox directory. 2. Use public model import or export APIs with paths that point outside that root. 3. Observe the same paths are rejected by negative-control guarded helpers such as `pathsec.open()`, `PerceptronTagger.load_from_json()`, or `load_maxent_params()`. 4. Observe the vulnerable APIs still read or write outside-root files successfully.  **Minimal reproducible excerpt**  ```text transition_train_exists True transition_parse_loader_read_bytes 13 averaged_load_keys ['bias'] maxent_save wrote ['alwayson.tab', 'labels.txt'] ```  ### Impact  Consumers that rely on `pathsec` for local containment can be tricked into reading or overwriting files outside approved roots through normal model persistence and loading APIs.  ### Remediation  Route all model-path file access through `nltk.pathsec.open()` or existing pathsec-aware helpers, and add regression tests that pair each vulnerable API with a negative control on the same path."
+          }
+        ]
+      },
+      {
+        "name": "opentelemetry-api",
+        "version": "1.45.0",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-exporter-otlp-proto-grpc",
+        "version": "1.45.0",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-exporter-otlp-common",
+        "version": "0.66b0",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-exporter-otlp-proto-common",
+        "version": "1.45.0",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-proto",
+        "version": "1.45.0",
+        "vulns": []
+      },
+      {
+        "name": "googleapis-common-protos",
+        "version": "1.75.5",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-sdk",
+        "version": "1.45.0",
+        "vulns": []
+      },
+      {
+        "name": "opentelemetry-semantic-conventions",
+        "version": "0.66b0",
+        "vulns": []
+      },
+      {
+        "name": "protobuf",
+        "version": "7.36.2",
+        "vulns": []
+      },
+      {
+        "name": "orjson",
+        "version": "3.12.0",
+        "vulns": []
+      },
+      {
+        "name": "overrides",
+        "version": "7.7.0",
+        "vulns": []
+      },
+      {
+        "name": "pillow",
+        "version": "12.3.0",
+        "vulns": []
+      },
+      {
+        "name": "propcache",
+        "version": "0.5.4",
+        "vulns": []
+      },
+      {
+        "name": "pybase64",
+        "version": "1.5.0",
+        "vulns": []
+      },
+      {
+        "name": "pydantic",
+        "version": "2.13.5",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-core",
+        "version": "2.46.5",
+        "vulns": []
+      },
+      {
+        "name": "annotated-types",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "pygments",
+        "version": "2.21.0",
+        "vulns": []
+      },
+      {
+        "name": "pypika",
+        "version": "0.51.1",
+        "vulns": []
+      },
+      {
+        "name": "python-dateutil",
+        "version": "2.9.0.post0",
+        "vulns": []
+      },
+      {
+        "name": "pyyaml",
+        "version": "6.0.3",
+        "vulns": []
+      },
+      {
+        "name": "referencing",
+        "version": "0.37.0",
+        "vulns": []
+      },
+      {
+        "name": "regex",
+        "version": "2026.9.29",
+        "vulns": []
+      },
+      {
+        "name": "rich",
+        "version": "15.0.0",
+        "vulns": []
+      },
+      {
+        "name": "markdown-it-py",
+        "version": "4.2.0",
+        "vulns": []
+      },
+      {
+        "name": "mdurl",
+        "version": "0.1.2",
+        "vulns": []
+      },
+      {
+        "name": "rpds-py",
+        "version": "2026.6.3",
+        "vulns": []
+      },
+      {
+        "name": "six",
+        "version": "1.17.0",
+        "vulns": []
+      },
+      {
+        "name": "sqlalchemy",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "greenlet",
+        "version": "3.5.6",
+        "vulns": []
+      },
+      {
+        "name": "starlette",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "anyio",
+        "version": "4.15.1",
+        "vulns": []
+      },
+      {
+        "name": "tiktoken",
+        "version": "0.14.0",
+        "vulns": []
+      },
+      {
+        "name": "tinytag",
+        "version": "2.3.2",
+        "vulns": []
+      },
+      {
+        "name": "typer",
+        "version": "0.27.2",
+        "vulns": []
+      },
+      {
+        "name": "shellingham",
+        "version": "1.5.4",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspect",
+        "version": "0.9.0",
+        "vulns": []
+      },
+      {
+        "name": "mypy-extensions",
+        "version": "1.1.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspection",
+        "version": "0.4.4",
+        "vulns": []
+      },
+      {
+        "name": "httptools",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "python-dotenv",
+        "version": "1.2.4",
+        "vulns": []
+      },
+      {
+        "name": "uvloop",
+        "version": "0.23.0",
+        "vulns": []
+      },
+      {
+        "name": "watchfiles",
+        "version": "1.3.0",
+        "vulns": []
+      },
+      {
+        "name": "websocket-client",
+        "version": "1.9.2",
+        "vulns": []
+      },
+      {
+        "name": "websockets",
+        "version": "17.1",
+        "vulns": []
+      },
+      {
+        "name": "aiosqlite",
+        "version": "0.22.1",
+        "vulns": []
+      },
+      {
+        "name": "dataclasses-json",
+        "version": "0.6.7",
+        "vulns": []
+      },
+      {
+        "name": "marshmallow",
+        "version": "3.26.2",
+        "vulns": []
+      },
+      {
+        "name": "defusedxml",
+        "version": "0.7.1",
+        "vulns": []
+      },
+      {
+        "name": "flatbuffers",
+        "version": "25.12.19",
+        "vulns": []
+      },
+      {
+        "name": "griffe",
+        "version": "2.3.0",
+        "vulns": []
+      },
+      {
+        "name": "griffecli",
+        "version": "2.3.0",
+        "vulns": []
+      },
+      {
+        "name": "griffelib",
+        "version": "2.3.0",
+        "vulns": []
+      },
+      {
+        "name": "colorama",
+        "version": "0.4.6",
+        "vulns": []
+      },
+      {
+        "name": "importlib-resources",
+        "version": "7.1.0",
+        "vulns": []
+      },
+      {
+        "name": "jinja2",
+        "version": "3.1.6",
+        "vulns": []
+      },
+      {
+        "name": "markupsafe",
+        "version": "3.0.3",
+        "vulns": []
+      },
+      {
+        "name": "joblib",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "cloudpickle",
+        "version": "3.1.2",
+        "vulns": []
+      },
+      {
+        "name": "platformdirs",
+        "version": "4.12.2",
+        "vulns": []
+      },
+      {
+        "name": "pycparser",
+        "version": "3.0",
+        "vulns": []
+      },
+      {
+        "name": "pyproject-hooks",
+        "version": "1.3.3",
+        "vulns": []
+      },
+      {
+        "name": "requests-oauthlib",
+        "version": "2.0.0",
+        "vulns": []
+      },
+      {
+        "name": "oauthlib",
+        "version": "4.0.0",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "pip_licenses": [
+    {
+      "License": "Apache-2.0",
+      "Name": "CacheControl",
+      "Version": "0.14.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "Deprecated",
+      "Version": "3.0.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "Jinja2",
+      "Version": "3.1.6"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "MarkupSafe",
+      "Version": "3.0.3"
+    },
+    {
+      "License": "MIT",
+      "Name": "PyJWT",
+      "Version": "2.15.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "PyPika",
+      "Version": "0.51.1"
+    },
+    {
+      "License": "MIT License",
+      "Name": "PyYAML",
+      "Version": "6.0.3"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "Pygments",
+      "Version": "2.21.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "SQLAlchemy",
+      "Version": "2.1.1"
+    },
+    {
+      "License": "Python Software Foundation License",
+      "Name": "aiohappyeyeballs",
+      "Version": "2.7.1"
+    },
+    {
+      "License": "Apache-2.0 AND MIT",
+      "Name": "aiohttp",
+      "Version": "3.14.3"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "aiosignal",
+      "Version": "1.4.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "aiosqlite",
+      "Version": "0.22.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "annotated-doc",
+      "Version": "0.0.5"
+    },
+    {
+      "License": "MIT",
+      "Name": "annotated-types",
+      "Version": "0.8.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "anyio",
+      "Version": "4.15.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "attrs",
+      "Version": "26.1.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "backoff",
+      "Version": "2.2.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "banks",
+      "Version": "2.5.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "bcrypt",
+      "Version": "5.0.0"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "boolean.py",
+      "Version": "5.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "build",
+      "Version": "1.6.1"
+    },
+    {
+      "License": "Mozilla Public License 2.0 (MPL 2.0)",
+      "Name": "certifi",
+      "Version": "2026.7.22"
+    },
+    {
+      "License": "MIT-0",
+      "Name": "cffi",
+      "Version": "2.1.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "charset-normalizer",
+      "Version": "3.5.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "chromadb",
+      "Version": "1.1.1"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "click",
+      "Version": "8.5.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "cloudpickle",
+      "Version": "3.1.2"
+    },
+    {
+      "License": "BSD License",
+      "Name": "colorama",
+      "Version": "0.4.6"
+    },
+    {
+      "License": "Apache-2.0 OR BSD-3-Clause",
+      "Name": "cryptography",
+      "Version": "50.0.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "cyclonedx-python-lib",
+      "Version": "11.12.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "dataclasses-json",
+      "Version": "0.6.7"
+    },
+    {
+      "License": "Python Software Foundation License",
+      "Name": "defusedxml",
+      "Version": "0.7.1"
+    },
+    {
+      "License": "Academic Free License (AFL); MIT License",
+      "Name": "dirtyjson",
+      "Version": "1.0.8"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "distro",
+      "Version": "1.9.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "durationpy",
+      "Version": "0.11"
+    },
+    {
+      "License": "MIT",
+      "Name": "fastapi",
+      "Version": "0.142.2"
+    },
+    {
+      "License": "MIT",
+      "Name": "filelock",
+      "Version": "4.0.8"
+    },
+    {
+      "License": "MIT License",
+      "Name": "filetype",
+      "Version": "1.2.0"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "flatbuffers",
+      "Version": "25.12.19"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "frozenlist",
+      "Version": "1.8.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "fsspec",
+      "Version": "2026.9.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "googleapis-common-protos",
+      "Version": "1.75.5"
+    },
+    {
+      "License": "MIT AND PSF-2.0",
+      "Name": "greenlet",
+      "Version": "3.5.6"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffe",
+      "Version": "2.3.0"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffecli",
+      "Version": "2.3.0"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffelib",
+      "Version": "2.3.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "grpcio",
+      "Version": "1.84.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "h11",
+      "Version": "0.16.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "hf-xet",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "httpcore",
+      "Version": "1.0.9"
+    },
+    {
+      "License": "MIT",
+      "Name": "httptools",
+      "Version": "0.8.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "httpx",
+      "Version": "0.28.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "huggingface_hub",
+      "Version": "1.33.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "idna",
+      "Version": "3.20"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "importlib_resources",
+      "Version": "7.1.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "iniconfig",
+      "Version": "2.3.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "joblib",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "jsonschema",
+      "Version": "4.26.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "jsonschema-specifications",
+      "Version": "2025.9.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "kubernetes",
+      "Version": "36.0.3"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "license-expression",
+      "Version": "30.4.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-core",
+      "Version": "0.14.25"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-instrumentation",
+      "Version": "0.6.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-vector-stores-chroma",
+      "Version": "0.5.5"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-workflows",
+      "Version": "2.25.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "markdown-it-py",
+      "Version": "4.2.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "marshmallow",
+      "Version": "3.26.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "mdurl",
+      "Version": "0.1.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "mmh3",
+      "Version": "5.3.1"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "msgpack",
+      "Version": "1.2.3"
+    },
+    {
+      "License": "Apache License 2.0",
+      "Name": "multidict",
+      "Version": "6.9.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "mypy_extensions",
+      "Version": "1.1.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "nest-asyncio",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "networkx",
+      "Version": "3.7"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "nltk",
+      "Version": "3.10.3"
+    },
+    {
+      "License": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "Name": "numpy",
+      "Version": "2.5.3"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "oauthlib",
+      "Version": "4.0.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "onnxruntime",
+      "Version": "1.30.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-api",
+      "Version": "1.45.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-exporter-otlp-common",
+      "Version": "0.66b0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-exporter-otlp-proto-common",
+      "Version": "1.45.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-exporter-otlp-proto-grpc",
+      "Version": "1.45.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-proto",
+      "Version": "1.45.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-sdk",
+      "Version": "1.45.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-semantic-conventions",
+      "Version": "0.66b0"
+    },
+    {
+      "License": "MPL-2.0 AND (Apache-2.0 OR MIT)",
+      "Name": "orjson",
+      "Version": "3.12.0"
+    },
+    {
+      "License": "Apache License, Version 2.0",
+      "Name": "overrides",
+      "Version": "7.7.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "packageurl-python",
+      "Version": "0.17.6"
+    },
+    {
+      "License": "Apache-2.0 OR BSD-2-Clause",
+      "Name": "packaging",
+      "Version": "26.3"
+    },
+    {
+      "License": "MIT-CMU",
+      "Name": "pillow",
+      "Version": "12.3.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pip-requirements-parser",
+      "Version": "32.0.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "pip_api",
+      "Version": "0.0.35"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "pip_audit",
+      "Version": "2.10.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "platformdirs",
+      "Version": "4.12.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "pluggy",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "posthog",
+      "Version": "5.4.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "propcache",
+      "Version": "0.5.4"
+    },
+    {
+      "License": "3-Clause BSD License",
+      "Name": "protobuf",
+      "Version": "7.36.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "py-serializable",
+      "Version": "2.1.0"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "pybase64",
+      "Version": "1.5.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "pycparser",
+      "Version": "3.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pydantic",
+      "Version": "2.13.5"
+    },
+    {
+      "License": "MIT",
+      "Name": "pydantic_core",
+      "Version": "2.46.5"
+    },
+    {
+      "License": "MIT",
+      "Name": "pyparsing",
+      "Version": "3.3.3"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "pypdf",
+      "Version": "6.19.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pyproject_hooks",
+      "Version": "1.3.3"
+    },
+    {
+      "License": "MIT",
+      "Name": "pytest",
+      "Version": "9.1.1"
+    },
+    {
+      "License": "Apache Software License; BSD License",
+      "Name": "python-dateutil",
+      "Version": "2.9.0.post0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "python-dotenv",
+      "Version": "1.2.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "referencing",
+      "Version": "0.37.0"
+    },
+    {
+      "License": "Apache-2.0 AND CNRI-Python",
+      "Name": "regex",
+      "Version": "2026.9.29"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "requests",
+      "Version": "2.34.2"
+    },
+    {
+      "License": "BSD License",
+      "Name": "requests-oauthlib",
+      "Version": "2.0.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "rich",
+      "Version": "15.0.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "rpds-py",
+      "Version": "2026.6.3"
+    },
+    {
+      "License": "ISC License (ISCL)",
+      "Name": "shellingham",
+      "Version": "1.5.4"
+    },
+    {
+      "License": "MIT License",
+      "Name": "six",
+      "Version": "1.17.0"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "sortedcontainers",
+      "Version": "2.4.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "starlette",
+      "Version": "1.7.0"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "tenacity",
+      "Version": "9.1.4"
+    },
+    {
+      "License": "MIT License\n\nCopyright (c) 2022 OpenAI, Shantanu Jain\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+      "Name": "tiktoken",
+      "Version": "0.14.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "tinytag",
+      "Version": "2.3.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "tokenizers",
+      "Version": "0.23.2"
+    },
+    {
+      "License": "MIT",
+      "Name": "tomli",
+      "Version": "2.4.1"
+    },
+    {
+      "License": "MIT License",
+      "Name": "tomli_w",
+      "Version": "1.2.0"
+    },
+    {
+      "License": "MPL-2.0 AND MIT",
+      "Name": "tqdm",
+      "Version": "4.70.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "typer",
+      "Version": "0.27.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "typing-inspect",
+      "Version": "0.9.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "typing-inspection",
+      "Version": "0.4.4"
+    },
+    {
+      "License": "PSF-2.0",
+      "Name": "typing_extensions",
+      "Version": "4.16.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "urllib3",
+      "Version": "2.8.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "uvicorn",
+      "Version": "0.54.0"
+    },
+    {
+      "License": "Apache Software License; MIT License",
+      "Name": "uvloop",
+      "Version": "0.23.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "watchfiles",
+      "Version": "1.3.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "websocket-client",
+      "Version": "1.9.2"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "websockets",
+      "Version": "17.1"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "wrapt",
+      "Version": "2.5.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "yarl",
+      "Version": "1.25.1"
+    }
+  ]
+}
