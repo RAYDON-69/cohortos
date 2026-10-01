@@ -132,7 +132,8 @@ class CallDeskService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("call_desk_outcomes", row)
+            _nid = self.data_layer.create("call_desk_outcomes", row)
+            row["id"] = str(_nid)
         return {
             "id": row["id"],
             "outcome": outcome,

@@ -178,3 +178,19 @@ def test_broadcast_rejects_insecure_urls():
             svc.create_session(
                 batch_id="b1", title="X", mode="broadcast", broadcast_url=bad, actor_role="teacher"
             )
+
+
+def test_whiteboard_scene_roundtrip_encrypted():
+    svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    s = svc.create_session(batch_id="b1", title="WB", actor_role="teacher")
+    svc.save_whiteboard_scene(s["id"], '{"elements":[1]}', actor_role="teacher")
+    loaded = svc.load_whiteboard_scene(s["id"])
+    assert "elements" in loaded["scene"]
+
+
+def test_recording_host_allowlist():
+    svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    ok = svc.allowed_recording_url("https://www.youtube.com/watch?v=abc")
+    assert ok.startswith("https://")
+    with pytest.raises(ValueError):
+        svc.allowed_recording_url("https://evil.example/x")

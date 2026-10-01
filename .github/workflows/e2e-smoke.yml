@@ -105,6 +105,7 @@ jobs:
           fi
 
       - name: Serve frontend + run CORE smoke
+        id: core
         env:
           COHORTOS_API_BASE: http://127.0.0.1:8741
           CI: "true"
@@ -206,48 +207,80 @@ jobs:
           echo "::warning::EXTENDED smoke failed — CORE gate still green. See ci-reports branch for details."
           echo "### EXTENDED failed (workflow continues)" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit failure report to ci-reports branch
-        if: failure() || steps.extended.outcome == 'failure'
+
+
+      - name: Publish definitive e2e signal JSON to ci-reports
+        if: always()
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          REPORT_DIR=/tmp/ci-report
-          mkdir -p "$REPORT_DIR"
           RUN_ID="${{ github.run_id }}"
-          OUT="e2e-${RUN_ID}.txt"
-          {
-            echo "run_id=$RUN_ID"
-            echo "sha=${{ github.sha }}"
-            echo "ref=${{ github.ref }}"
-            echo "failing_step=extended_or_core"
-            echo "core_outcome=${{ steps.extended.outcome }}"
-            echo "feature_flags=COHORTOS_TEST_EXPOSE_OTP=1 COHORTOS_SKIP_MODEL_DOWNLOAD=1"
-            echo "--- api health ---"
-            curl -s -o /dev/null -w "health %{http_code}\n" http://127.0.0.1:8741/health || echo "health down"
-            echo "--- last 150 playwright ---"
-            tail -n 150 /tmp/cohortos-playwright-extended.txt 2>/dev/null || true
-            tail -n 150 /tmp/cohortos-playwright-output.txt 2>/dev/null || true
-            echo "--- vite log tail ---"
-            tail -n 40 /tmp/vite.log 2>/dev/null || true
-            echo "--- api log tail ---"
-            tail -n 40 /tmp/api.log 2>/dev/null || true
-          } > "$REPORT_DIR/$OUT"
+          ATTEMPT="${{ github.run_attempt }}"
+          OUT="e2e-${RUN_ID}-${ATTEMPT}.json"
+          CORE_OUT="${{ steps.core.outcome }}"
+          EXT_OUT="${{ steps.extended.outcome }}"
+          CORE_LOG=/tmp/cohortos-playwright-output.txt
+          EXT_LOG=/tmp/cohortos-playwright-extended.txt
+          export RUN_ID ATTEMPT OUT CORE_OUT EXT_OUT
+          RUN_ID="$RUN_ID" ATTEMPT="$ATTEMPT" OUT="$OUT" CORE_OUT="$CORE_OUT" EXT_OUT="$EXT_OUT" python3 - <<'PY'
+          import json, os, datetime, re, pathlib
+          def counts(path):
+              p = pathlib.Path(path)
+              if not p.exists():
+                  return {"passed": 0, "failed": 0, "skipped": 0, "raw_tail": ""}
+              text = p.read_text(errors="ignore")
+              return {
+                  "passed": len(re.findall(r"✓|passed", text)),
+                  "failed": len(re.findall(r"✘|failed", text)),
+                  "skipped": len(re.findall(r"skipped", text)),
+                  "raw_tail": "\n".join(text.splitlines()[-40:]),
+              }
+          fail_lines = []
+          for path in ("/tmp/cohortos-playwright-extended.txt", "/tmp/cohortos-playwright-output.txt"):
+              p = pathlib.Path(path)
+              if p.exists():
+                  for line in p.read_text(errors="ignore").splitlines():
+                      if "Error:" in line or "✘" in line:
+                          fail_lines.append(line.strip()[:300])
+          doc = {
+              "sha": os.environ.get("GITHUB_SHA", ""),
+              "run_id": os.environ.get("RUN_ID", ""),
+              "run_attempt": os.environ.get("ATTEMPT", ""),
+              "core_outcome": os.environ.get("CORE_OUT", ""),
+              "extended_outcome": os.environ.get("EXT_OUT", ""),
+              "core_counts": counts("/tmp/cohortos-playwright-output.txt"),
+              "extended_counts": counts("/tmp/cohortos-playwright-extended.txt"),
+              "flags": {
+                  "COHORTOS_TEST_EXPOSE_OTP": "1",
+                  "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+                  "continue_on_error_extended": True,
+              },
+              "failing_snippets": fail_lines[:30],
+              "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+          }
+          out = os.environ.get("OUT", "e2e-unknown.json")
+          pathlib.Path("/tmp").joinpath(out).write_text(json.dumps(doc, indent=2))
+          print(json.dumps(doc, indent=2)[:800])
+          PY
           git config user.name "cohortos-ci"
           git config user.email "ci@cohortos.local"
-          git fetch origin ci-reports 2>/dev/null || true
-          git checkout -B ci-reports origin/ci-reports 2>/dev/null || git checkout -B ci-reports
-          mkdir -p ci-reports
-          cp "$REPORT_DIR/$OUT" "ci-reports/$OUT"
-          git add "ci-reports/$OUT"
-          git commit -m "ci-report e2e run $RUN_ID" || echo "no changes"
-          git push origin ci-reports 2>/dev/null || {
-            # first push
-            git push -u origin ci-reports
-          }
-          echo "Report pushed: ci-reports/$OUT"
-          echo "Report path: ci-reports/$OUT" >> "$GITHUB_STEP_SUMMARY"
+          for i in 1 2 3; do
+            git fetch origin ci-reports 2>/dev/null || true
+            git checkout -B ci-reports origin/ci-reports 2>/dev/null || git checkout -B ci-reports
+            mkdir -p ci-reports
+            cp "/tmp/$OUT" "ci-reports/$OUT"
+            git add "ci-reports/$OUT"
+            git commit -m "e2e signal $RUN_ID attempt $ATTEMPT" || true
+            if git push origin ci-reports; then
+              echo "Pushed ci-reports/$OUT"
+              echo "### Signal \`ci-reports/$OUT\` core=$CORE_OUT extended=$EXT_OUT" >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+            git pull --rebase origin ci-reports || true
+            sleep 2
+          done
 
 
       - name: Upload playwright text log (always; tiny — survives quota better)

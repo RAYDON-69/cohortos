@@ -142,7 +142,8 @@ class VoiceAssistService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("voice_call_scripts", row)
+            _nid = self.data_layer.create("voice_call_scripts", row)
+            row["id"] = str(_nid)
         self._audit("voice.script_generate", actor_id, {"script_id": sid, "purpose": purpose})
         return {"script_id": sid, "script": script, "purpose": purpose, "phone_hint": phone[-4:] if phone else ""}
 
@@ -185,7 +186,8 @@ class VoiceAssistService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("voice_call_summaries", row)
+            _nid = self.data_layer.create("voice_call_summaries", row)
+            row["id"] = str(_nid)
         self._audit("voice.call_summarize", actor_id, {"summary_id": sid, "purpose": purpose})
         return {"summary_id": sid, "summary": summary}
 
@@ -221,7 +223,8 @@ class VoiceAssistService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("voice_call_requests", row)
+            _nid = self.data_layer.create("voice_call_requests", row)
+            row["id"] = str(_nid)
         self._audit(
             "voice.human_call_request",
             actor_id,

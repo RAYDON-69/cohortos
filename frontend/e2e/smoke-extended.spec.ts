@@ -215,6 +215,28 @@ test("extended — voice, class, broadcast, call desk", async ({ page, request }
   });
   if (!out.ok()) throw new Error(`outcome ${out.status()} ${await out.text()}`);
 
+  // Demo seed + remove
+  const demo = await request.post(`${API}/t/${tenantId}/demo/load`, { headers });
+  if (!demo.ok()) throw new Error(`demo/load ${demo.status()} ${await demo.text()}`);
+  const demoJ = await demo.json();
+  if (demoJ.marker !== "DEMO_COHORTOS") throw new Error("demo marker missing");
+
+  const wb = await request.put(`${API}/t/${tenantId}/classes/sessions/${classCreated.id}/whiteboard`, {
+    headers,
+    data: { scene: JSON.stringify({ elements: [{ id: "e1" }] }) },
+  });
+  if (!wb.ok()) throw new Error(`whiteboard save ${wb.status()} ${await wb.text()}`);
+  const wbg = await request.get(`${API}/t/${tenantId}/classes/sessions/${classCreated.id}/whiteboard`, { headers });
+  if (!wbg.ok()) throw new Error(`whiteboard load ${wbg.status()}`);
+
+  const bak = await request.post(`${API}/t/${tenantId}/backup`, { headers });
+  if (!bak.ok()) throw new Error(`backup ${bak.status()}`);
+  const bakJ = await bak.json();
+  if (!bakJ.checksum_sha256) throw new Error("backup checksum missing");
+
+  const rm = await request.post(`${API}/t/${tenantId}/demo/remove`, { headers });
+  if (!rm.ok()) throw new Error(`demo/remove ${rm.status()}`);
+
   // Empty-DB-safe page mounts
   for (const route of ["/classes", "/call-desk", "/voice"]) {
     await page.goto(h(route));

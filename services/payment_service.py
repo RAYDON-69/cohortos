@@ -585,7 +585,7 @@ class PaymentService:
                 self.data_layer.update('payments', uuid.UUID(stub['id']), stub)
             else:
                 # create expects to set id — inject
-                self.data_layer.create('payments', stub)
+                _nid = self.data_layer.create('payments', stub); stub['id'] = str(_nid)
         except Exception:
             pass
 
