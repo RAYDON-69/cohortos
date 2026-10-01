@@ -1236,3 +1236,9 @@ localStorage keys in journeys vs STORAGE_KEYS + missing wait for hydrate hook.
 safe_http replaces all urlopen; chromadb embedded-only allowlist + tests.
 EXTENDED if: always(); workers=1 sequential journeys.
 
+
+## Phase 34 — Fuzz flags, npm HIGH overrides, chaos + readiness (2026-10-01)
+- schemathesis --max-examples=50 (was invalid --hypothesis-max-examples)
+- overrides lodash-es/nanoid for excalidraw HIGH
+- chaos drills, diagnostics redaction, load smoke, readiness.yml scorecard
+

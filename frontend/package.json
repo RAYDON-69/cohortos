@@ -150,6 +150,12 @@
   },
   "overrides": {
     "glob": "^10.4.5",
-    "tar": "^6.2.1"
+    "tar": "^6.2.1",
+    "lodash-es": "^4.17.21",
+    "nanoid": "^3.3.8",
+    "@excalidraw/excalidraw": {
+      "nanoid": "^3.3.8",
+      "lodash-es": "^4.17.21"
+    }
   }
 }
