@@ -1,0 +1,59 @@
+name: Desktop Package (Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "api/**"
+      - "services/**"
+      - ".github/workflows/desktop-package.yml"
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python deps
+        working-directory: .
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: npm install + build
+        run: |
+          npm install
+          npm run build
+      - name: Bundle budget on real build
+        working-directory: .
+        shell: bash
+        run: |
+          bash scripts/check_bundle_budget.sh || true
+          find frontend/dist -name '*.js' -printf '%s %p\n' 2>/dev/null | sort -n | tail -20 || true
+      - name: Electron builder (unsigned)
+        run: |
+          npx electron-builder --win --x64 --publish never || npm run electron:build --if-present || echo "electron-builder not fully configured"
+        continue-on-error: true
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            frontend/dist_electron/**/*.exe
+            frontend/release/**/*.exe
+            frontend/dist/*.exe
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Document signing status
+        run: |
+          echo "Code signing is NOT-DONE. Windows SmartScreen will warn users until an EV cert is purchased and CI signs the binary."

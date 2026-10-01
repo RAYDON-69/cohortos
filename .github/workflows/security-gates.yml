@@ -1,0 +1,87 @@
+name: Security and License Gates
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  licenses-and-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python deps + license tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-licenses pip-audit
+
+      - name: pip license gate (reject GPL/AGPL/SSPL)
+        run: |
+          pip-licenses --format=json --output-file /tmp/pip-licenses.json || true
+          python scripts/license_gate.py --pip-json /tmp/pip-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
+
+      - name: pip-audit high
+        run: pip-audit -r requirements.txt --severity-level high || pip-audit -r requirements.txt
+
+      - name: npm install + license checker
+        working-directory: frontend
+        run: |
+          npm install
+          npx --yes license-checker --production --json > /tmp/npm-licenses.json || true
+          cd .. && python scripts/license_gate.py --npm-json /tmp/npm-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
+
+      - name: npm audit high
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Generate docs/LICENSES.md snippet
+        run: python scripts/license_gate.py --write-md docs/LICENSES.md --pip-json /tmp/pip-licenses.json --npm-json /tmp/npm-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt || true
+
+      - name: Secret scan (gitleaks-style patterns)
+        run: python scripts/secret_scan.py
+
+  headers-and-rate-limit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+          cd frontend && npm install
+      - name: Start API
+        env:
+          COHORTOS_JWT_SECRET: e2e-test-secret-not-for-prod
+          COHORTOS_AUTH_DB: /tmp/sec-auth.db
+          COHORTOS_CLOUD_DB: /tmp/sec-cloud.db
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+        run: |
+          nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8741/health && break; sleep 1; done
+      - name: Rate-limit auth/OTP
+        run: python scripts/rate_limit_probe.py --base http://127.0.0.1:8741
+      - name: Serve frontend + CSP/security headers
+        working-directory: frontend
+        run: |
+          npx vite --host 127.0.0.1 --port 5173 > /tmp/vite.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
+          python ../scripts/security_headers_probe.py --url http://127.0.0.1:5173/

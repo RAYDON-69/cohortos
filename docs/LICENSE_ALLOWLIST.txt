@@ -1,0 +1,2 @@
+# Reviewed exceptions (name substring or SPDX). Empty = strict.
+# Format: one per line. Lines starting with # ignored.

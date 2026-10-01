@@ -69,5 +69,5 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 
 ## E2E gate policy (P26c)
 - **CORE** (`frontend/e2e/smoke.spec.ts`): required. Must stay green on every main push.
-- **EXTENDED** (`frontend/e2e/smoke-extended.spec.ts`): separate step with `continue-on-error: true` until stable; failures write `ci-reports/e2e-<run_id>.txt` on the `ci-reports` branch (readable via Contents API). Once green twice in a row, promote to required.
+- **EXTENDED** (`frontend/e2e/smoke-extended.spec.ts`): **required** (continue-on-error removed after 3 green runs on main). Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome`, `extended_outcome`, and `main_sha`.
 - Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome` and `extended_outcome` from `steps.<id>.outcome` (definitive JSON signal).

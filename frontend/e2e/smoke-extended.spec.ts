@@ -179,6 +179,37 @@ test("extended — voice, class, broadcast, call desk", async ({ page, request }
     throw new Error(`broadcast join should return stream URL: ${JSON.stringify(bj)}`);
   }
 
+  // Poll + raise-hand
+  const rh = await request.post(`${API}/t/${tenantId}/classes/sessions/${classCreated.id}/raise-hand`, {
+    headers,
+    data: { student_id: "stu1", name: "রহিম" },
+  });
+  if (!rh.ok()) throw new Error(`raise-hand ${rh.status()} ${await rh.text()}`);
+  const poll = await request.post(`${API}/t/${tenantId}/classes/sessions/${classCreated.id}/polls`, {
+    headers,
+    data: { question: "আজকের টপিক বুঝেছেন?", options: ["হ্যাঁ", "না"] },
+  });
+  if (!poll.ok()) throw new Error(`poll ${poll.status()} ${await poll.text()}`);
+
+  // Device tier LITE vs FULL
+  const lite = await request.post(`${API}/t/${tenantId}/classes/device-tier`, {
+    headers,
+    data: { deviceMemory: 4, hardwareConcurrency: 2, downlink: 1, effectiveType: "2g" },
+  });
+  if (!lite.ok()) throw new Error(`device-tier ${lite.status()}`);
+  const liteJ = await lite.json();
+  if (liteJ.tier !== "lite" || liteJ.whiteboard !== false) {
+    throw new Error(`expected LITE without whiteboard: ${JSON.stringify(liteJ)}`);
+  }
+  const full = await request.post(`${API}/t/${tenantId}/classes/device-tier`, {
+    headers,
+    data: { deviceMemory: 16, hardwareConcurrency: 8, downlink: 50 },
+  });
+  const fullJ = await full.json();
+  if (fullJ.tier !== "full" || fullJ.whiteboard !== true) {
+    throw new Error(`expected FULL with whiteboard: ${JSON.stringify(fullJ)}`);
+  }
+
   // Timetable + absentees + call desk
   const tt = await request.post(`${API}/t/${tenantId}/classes/timetable/generate`, {
     headers,
