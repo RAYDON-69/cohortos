@@ -80,7 +80,7 @@
     {
       "area": "load p95",
       "status": "FAIL",
-      "detail": "{'n': 50, 'errors': 50, 'error_rate': 1.0, 'p50_ms': 0.21440999999811083, 'p95_ms': 319.58675600000674, 'p99_ms': 329.1623900000076, 'budget_p95_ms': 800, 'pass': False}"
+      "detail": "{'n': 50, 'errors': 50, 'error_rate': 1.0, 'p50_ms': 2.2227040000046827, 'p95_ms': 304.82970500000306, 'p99_ms': 305.6160539999979, 'budget_p95_ms': 800, 'pass': False}"
     },
     {
       "area": "installer size",
