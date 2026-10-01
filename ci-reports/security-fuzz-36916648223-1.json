@@ -1,0 +1,7 @@
+{
+  "log_tail": "Usage: schemathesis run [OPTIONS] LOCATION\nTry 'schemathesis run --help' for help.\n\nError: No such option '--hypothesis-max-examples'. Did you mean '--max-examples'?\n",
+  "fail_snippets": [
+    "Error"
+  ],
+  "fail_count": 1
+}
