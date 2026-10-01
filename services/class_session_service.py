@@ -103,6 +103,8 @@ class ClassSessionService:
         actor_id: str = "",
         actor_role: str = "teacher",
         idempotency_key: str = "",
+        mode: str = "interactive",
+        broadcast_url: str = "",
     ) -> Dict[str, Any]:
         if not role_can_write(actor_role):
             raise PermissionError(f"role_denied:{actor_role}")
@@ -121,8 +123,14 @@ class ClassSessionService:
             if conflict:
                 raise ValueError(f"teacher_double_booked:{conflict.get('id')}")
 
+        mode_n = (mode or "interactive").strip().lower()
+        if mode_n not in ("interactive", "broadcast"):
+            mode_n = "interactive"
+        burl = (broadcast_url or "").strip()[:500]
+        if mode_n == "broadcast" and not burl:
+            raise ValueError("broadcast_url required for broadcast mode")
         sid = str(uuid.uuid4())
-        room = _room_name(self.tenant_id, sid)
+        room = _room_name(self.tenant_id, sid) if mode_n == "interactive" else f"broadcast-{sid[:8]}"
         row = {
             "id": sid,
             "tenant_id": self.tenant_id,
@@ -137,8 +145,14 @@ class ClassSessionService:
             "created_at": _now(),
             "ended_at": None,
             "idempotency_key": idempotency_key or "",
-            "recording_url": "",
-            "access_mode": "OPEN-ROOM" if self._open_room_mode() else "JWT",
+            "recording_url": burl if mode_n == "broadcast" else "",
+            "broadcast_url": burl,
+            "mode": mode_n,
+            "access_mode": (
+                "BROADCAST"
+                if mode_n == "broadcast"
+                else ("OPEN-ROOM" if self._open_room_mode() else "JWT")
+            ),
         }
         if self.data_layer:
             self.data_layer.create("class_sessions", row)
@@ -272,6 +286,25 @@ class ClassSessionService:
         row = self._get(session_id)
         if row.get("status") == "ended":
             raise PermissionError("session_ended")
+        if str(row.get("mode") or "interactive") == "broadcast":
+            burl = str(row.get("broadcast_url") or row.get("recording_url") or "")
+            attendance = None
+            if self.attendance_on_join and student_id:
+                attendance = self._mark_attendance_on_join(row, student_id)
+            return {
+                "session_id": session_id,
+                "room": row.get("room"),
+                "role": "participant",
+                "token": "",
+                "exp": 0,
+                "join_url": burl,
+                "provider": "broadcast",
+                "mode": "broadcast",
+                "jitsi_base": None,
+                "access_mode": "BROADCAST",
+                "access_mode_warning": None,
+                "attendance": attendance,
+            }
         role = "moderator" if role in ("moderator", "teacher", "owner", "desk") else "participant"
         exp = int(time.time()) + int(self.token_ttl_sec)
         payload = {

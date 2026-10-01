@@ -87,35 +87,96 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Serve frontend + run smoke
+      - name: Pre-flight curl frontend + API
+        run: |
+          echo "### Pre-flight" >> "$GITHUB_STEP_SUMMARY"
+          # Frontend may not be up yet — start it briefly for check after serve step;
+          # here only API (already running)
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8741/health || echo "000")
+          echo "API /health HTTP $code"
+          echo "- API /health: \`$code\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" != "200" ]; then
+            echo "::error file=api/main.py::API /health returned $code — backend layer failed"
+            exit 1
+          fi
+
+      - name: Serve frontend + run CORE smoke
         env:
           COHORTOS_API_BASE: http://127.0.0.1:8741
-          COHORTOS_WEB_BASE: http://127.0.0.1:5173
-          CI: "1"
+          CI: "true"
         run: |
           mkdir -p test-results/smoke-shots playwright-report
-          # Log OUTSIDE Playwright outputDir (test-results is wiped on run start)
+          : > /tmp/browser-console.txt
           LOG=/tmp/cohortos-playwright-output.txt
           : > "$LOG"
-          npx vite preview --host 127.0.0.1 --port 5173 &
+          npx vite --host 127.0.0.1 --port 5173 > /tmp/vite.log 2>&1 &
           echo $! > /tmp/vite.pid
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             if curl -sf http://127.0.0.1:5173 >/dev/null; then
               echo "Frontend up"
               break
             fi
             sleep 1
           done
-          curl -sf http://127.0.0.1:5173 >/dev/null || { echo "Frontend never became ready"; exit 1; }
+          fcode=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/ || echo "000")
+          echo "Frontend HTTP $fcode"
+          echo "- Frontend /: \`$fcode\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$fcode" != "200" ] && [ "$fcode" != "304" ]; then
+            echo "::error file=frontend::Frontend not ready HTTP $fcode"
+            tail -n 40 /tmp/vite.log || true
+            exit 1
+          fi
           set +e
           ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list > "$LOG" 2>&1
           PW_EXIT=$?
           cp "$LOG" test-results/playwright-output.txt 2>/dev/null || true
-          echo "===== playwright-output.txt (last 200 lines) ====="
-          tail -n 200 "$LOG" || true
-          echo "===== end playwright-output.txt ====="
+          echo "===== CORE playwright (last 80) ====="
+          tail -n 80 "$LOG" || true
+          if [ "$PW_EXIT" -ne 0 ]; then
+            while IFS= read -r line; do
+              echo "::error file=frontend/e2e/smoke.spec.ts::$line"
+            done < <(tail -n 80 "$LOG")
+            {
+              echo "### CORE smoke FAILED"
+              echo '```'
+              tail -n 80 "$LOG"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### CORE smoke passed" >> "$GITHUB_STEP_SUMMARY"
+          fi
           set -e
           exit $PW_EXIT
+
+      - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
+        if: success()
+        env:
+          COHORTOS_API_BASE: http://127.0.0.1:8741
+          CI: "true"
+        run: |
+          LOG=/tmp/cohortos-playwright-extended.txt
+          set +e
+          ./node_modules/.bin/playwright test e2e/smoke-extended.spec.ts --reporter=list > "$LOG" 2>&1
+          PW_EXIT=$?
+          cat "$LOG" >> test-results/playwright-output.txt 2>/dev/null || true
+          echo "===== EXTENDED playwright (last 80) ====="
+          tail -n 80 "$LOG" || true
+          if [ "$PW_EXIT" -ne 0 ]; then
+            while IFS= read -r line; do
+              echo "::error file=frontend/e2e/smoke-extended.spec.ts::$line"
+            done < <(tail -n 80 "$LOG")
+            {
+              echo "### EXTENDED smoke FAILED"
+              echo '```'
+              tail -n 80 "$LOG"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### EXTENDED smoke passed" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          set -e
+          exit $PW_EXIT
+
 
       - name: Print playwright log to job console
         if: always()
