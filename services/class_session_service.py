@@ -1,3 +1,4 @@
+
 """
 P25/P26 Online class workspace — Jitsi Meet + classroom tools.
 
@@ -44,6 +45,33 @@ def sanitize_notice(body: str) -> str:
     """Strip tags to mitigate XSS in notices/polls/Q&A."""
     t = re.sub(r"<[^>]+>", "", body or "")
     return html.escape(t)[:2000]
+
+
+def _validate_broadcast_url(url: str) -> str:
+    """Reject javascript:, data:, http:, and credentialed URLs."""
+    u = (url or "").strip()
+    if not u:
+        raise ValueError("broadcast_url required")
+    low = u.lower()
+    if low.startswith("javascript:") or low.startswith("data:") or low.startswith("vbscript:"):
+        raise ValueError("broadcast_url_scheme_forbidden")
+    if low.startswith("http://"):
+        raise ValueError("broadcast_url_must_be_https")
+    if not low.startswith("https://"):
+        raise ValueError("broadcast_url_must_be_https")
+    # block embedded credentials https://user:pass@host
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(u)
+        if parsed.username or parsed.password:
+            raise ValueError("broadcast_url_credentials_forbidden")
+        if not parsed.netloc:
+            raise ValueError("broadcast_url_invalid")
+    except ValueError:
+        raise
+    except Exception as e:
+        raise ValueError(f"broadcast_url_invalid:{e}") from e
+    return u[:500]
 
 
 class ClassSessionService:
@@ -126,9 +154,11 @@ class ClassSessionService:
         mode_n = (mode or "interactive").strip().lower()
         if mode_n not in ("interactive", "broadcast"):
             mode_n = "interactive"
-        burl = (broadcast_url or "").strip()[:500]
-        if mode_n == "broadcast" and not burl:
-            raise ValueError("broadcast_url required for broadcast mode")
+        burl = ""
+        if mode_n == "broadcast":
+            burl = _validate_broadcast_url(broadcast_url)
+        elif broadcast_url:
+            burl = _validate_broadcast_url(broadcast_url)
         sid = str(uuid.uuid4())
         room = _room_name(self.tenant_id, sid) if mode_n == "interactive" else f"broadcast-{sid[:8]}"
         row = {
@@ -155,7 +185,10 @@ class ClassSessionService:
             ),
         }
         if self.data_layer:
-            self.data_layer.create("class_sessions", row)
+            # DataAccessLayer.create() assigns its own UUID and overwrites payload["id"].
+            # Return the persisted id so join/list never 404 on a stale client id.
+            new_id = self.data_layer.create("class_sessions", row)
+            row["id"] = str(new_id)
         return dict(row)
 
     def _find_by_idempotency(self, key: str) -> Optional[Dict[str, Any]]:

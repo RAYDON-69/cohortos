@@ -145,3 +145,36 @@ def test_broadcast_requires_url():
     svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
     with pytest.raises(ValueError, match="broadcast_url"):
         svc.create_session(batch_id="b1", title="X", mode="broadcast", actor_role="teacher")
+
+
+def test_create_returns_persisted_id_joinable():
+    """Regression: DataAccessLayer overwrites id — join must use returned id."""
+    class RealishDL(FakeDL):
+        def create(self, table, row):
+            import uuid
+            rid = uuid.uuid4()
+            stored = dict(row)
+            stored["id"] = str(rid)
+            self.store.setdefault(table, []).append(stored)
+            return rid
+
+    svc = ClassSessionService(data_layer=RealishDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    s = svc.create_session(batch_id="b1", title="X", actor_role="teacher")
+    # join must succeed with returned id
+    link = svc.join_link(s["id"], role="participant", display_name="S")
+    assert link["session_id"] == s["id"]
+    assert s["id"] in [r["id"] for r in svc.list_sessions()]
+
+
+def test_broadcast_rejects_insecure_urls():
+    svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    for bad in [
+        "http://youtube.com/x",
+        "javascript:alert(1)",
+        "data:text/html,hi",
+        "https://user:pass@evil.com/x",
+    ]:
+        with pytest.raises(ValueError):
+            svc.create_session(
+                batch_id="b1", title="X", mode="broadcast", broadcast_url=bad, actor_role="teacher"
+            )
