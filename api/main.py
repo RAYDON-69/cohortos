@@ -8,6 +8,7 @@ Signatures match the tested service methods exactly.
 from __future__ import annotations
 
 import os
+import tempfile
 import time
 from pathlib import Path
 import uuid
@@ -450,6 +451,11 @@ def create_api_app(
     auth_db: str = ":memory:",
     founder_token: Optional[str] = None,
 ) -> FastAPI:
+    _env = (os.environ.get("COHORTOS_ENV") or os.environ.get("ENV") or "").lower()
+    if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1" and _env in ("production", "prod", "desktop"):
+        raise SystemExit(
+            "FATAL: COHORTOS_RATE_LIMIT_DISABLED=1 is forbidden when COHORTOS_ENV is production/desktop"
+        )
     if jwt_secret is None:
         jwt_secret = require_jwt_secret()
     if founder_token is None:
@@ -2596,7 +2602,7 @@ def create_api_app(
         store = build_storage_provider(section)
         if not store.is_configured():
             from services.storage_service import LocalFsStorageProvider
-            root = section.get("root") or "/tmp/cohortos-storage"
+            root = section.get("root") or os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage")
             store = LocalFsStorageProvider(root)
         filename = str(body.get("filename") or "file.bin")
         # Path-traversal safe: basename only, no .. or separators
@@ -2643,7 +2649,7 @@ def create_api_app(
         section = cm.config.get_section("storage") or {}
         from services.storage_service import build_storage_provider, LocalFsStorageProvider
         import os as _os
-        _default_root = section.get("root") or _os.environ.get("COHORTOS_STORAGE_ROOT") or "/tmp/cohortos-storage"
+        _default_root = section.get("root") or _os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage")
         try:
             store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
             if not store.is_configured() or not store.exists(remote_id):

@@ -273,23 +273,24 @@ jobs:
           pathlib.Path("/tmp").joinpath(out).write_text(json.dumps(doc, indent=2))
           print(json.dumps(doc, indent=2)[:800])
           PY
-          git config user.name "cohortos-ci"
-          git config user.email "ci@cohortos.local"
-          for i in 1 2 3; do
-            git fetch origin ci-reports 2>/dev/null || true
-            git checkout -B ci-reports origin/ci-reports 2>/dev/null || git checkout -B ci-reports
-            mkdir -p ci-reports
-            cp "/tmp/$OUT" "ci-reports/$OUT"
-            git add "ci-reports/$OUT"
-            git commit -m "e2e signal $RUN_ID attempt $ATTEMPT" || true
-            if git push origin ci-reports; then
-              echo "Pushed ci-reports/$OUT"
-              echo "### Signal \`ci-reports/$OUT\` core=$CORE_OUT extended=$EXT_OUT" >> "$GITHUB_STEP_SUMMARY"
-              break
-            fi
-            git pull --rebase origin ci-reports || true
-            sleep 2
-          done
+          python3 - <<'PY'
+          import json, pathlib, os, re
+          out = pathlib.Path("/tmp") / os.environ.get("OUT", "e2e-unknown.json")
+          doc = json.loads(out.read_text()) if out.exists() else {}
+          tests = []
+          for logp in ("/tmp/cohortos-playwright-output.txt", "/tmp/cohortos-playwright-extended.txt"):
+              p = pathlib.Path(logp)
+              if not p.exists():
+                  continue
+              for line in p.read_text(errors="ignore").splitlines():
+                  if "e2e/" in line and any(x in line for x in ("✓", "✘", "passed", "failed", "Error")):
+                      tests.append(line.strip()[:240])
+          doc["per_test_lines"] = tests[:80]
+          out.write_text(json.dumps(doc, indent=2))
+          print("tests_captured", len(tests))
+          PY
+          python scripts/publish_ci_report.py "/tmp/$OUT" "$OUT"
+          echo "### Signal ci-reports/$OUT core=$CORE_OUT extended=$EXT_OUT" >> "$GITHUB_STEP_SUMMARY"
 
 
       - name: Upload playwright text log (always; tiny — survives quota better)

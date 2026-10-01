@@ -1211,3 +1211,12 @@ Quoted CI errors:
 CORE fail quote: support@cohortos.app not visible because assert ran on admissions page.
 Rate limit: CI COHORTOS_RATE_LIMIT_DISABLED=1; prod unit proves 429 still.
 
+
+## Phase 31 — Green security gates + trustworthy signals (2026-10-01)
+- ci-reports: Contents API publisher; fail if not verified (git push race was silent)
+- rate_limit_probe: print exceptions; wait for API; prove 429
+- npm audit: production-only (--omit=dev); electron stack is DEV-ONLY warning
+- Bandit: /tmp via tempfile; LLM https-only
+- auth-matrix + schemathesis jobs; CodeQL gated on vars.CODEQL_ENABLED
+- RATE_LIMIT_DISABLED refused in production/desktop
+

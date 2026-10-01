@@ -15,6 +15,15 @@ import hashlib
 import re
 
 
+
+def _safe_https_url(url: str) -> str:
+    """Only allow https:// for outbound LLM calls (Bandit B310)."""
+    u = (url or "").strip()
+    if not u.lower().startswith("https://"):
+        raise ValueError(f"LLM base URL must be https: {u[:80]}")
+    return u
+
+
 class LLMError(Exception):
     """Base LLM failure."""
 
@@ -392,7 +401,7 @@ class NvidiaNimProvider(LLMProvider):
             "stream": False,
         }).encode()
         req = urllib.request.Request(
-            f"{self.base_url}/chat/completions",
+            f"{_safe_https_url(self.base_url)}/chat/completions",
             data=body,
             headers={
                 "Authorization": f"Bearer {self.api_key}",
