@@ -1,0 +1,12 @@
+{
+  "run_id": "proof-fail",
+  "core_outcome": "success",
+  "extended_outcome": "failure",
+  "extended_counts": {
+    "passed": 0,
+    "failed": 1
+  },
+  "failing_snippets": [
+    "Error: forced assertion"
+  ]
+}

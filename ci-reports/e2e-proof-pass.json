@@ -1,0 +1,10 @@
+{
+  "run_id": "proof-pass",
+  "core_outcome": "success",
+  "extended_outcome": "success",
+  "extended_counts": {
+    "passed": 1,
+    "failed": 0
+  },
+  "failing_snippets": []
+}
