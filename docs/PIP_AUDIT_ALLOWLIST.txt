@@ -1,0 +1,7 @@
+# id | reason | expires YYYY-MM-DD
+# Only when no fixed version exists upstream.
+PYSEC-2026-311 | chromadb path issues; no fix version from pip-audit; isolate network | 2026-12-31
+PYSEC-2026-3814 | chromadb; no fix version listed | 2026-12-31
+PYSEC-2026-3815 | chromadb; no fix version listed | 2026-12-31
+PYSEC-2026-3813 | chromadb; no fix version listed | 2026-12-31
+PYSEC-2026-3740 | nltk pathsec; no fix version listed; not used for untrusted model paths | 2026-12-31

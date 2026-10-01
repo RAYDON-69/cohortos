@@ -1,6 +1,7 @@
+import { lazy, Suspense } from "react";
 import { StudentJoinScreen } from "./screens/classes/StudentJoin";
-import { CallDeskScreen } from "./screens/calldesk/CallDesk";
-import { ClassWorkspaceScreen } from "./screens/classes/ClassWorkspace";
+const CallDeskScreen = lazy(() => import("./screens/calldesk/CallDesk").then(m => ({ default: m.CallDeskScreen })));
+const ClassWorkspaceScreen = lazy(() => import("./screens/classes/ClassWorkspace").then(m => ({ default: m.ClassWorkspaceScreen })));
 import { useEffect } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PageTransition } from "./components/PageTransition";
@@ -19,7 +20,7 @@ import { FeesThisMonthScreen } from "./screens/fees/FeesThisMonth";
 import { GreenWhiteNagListScreen } from "./screens/fees/GreenWhiteNagList";
 import { ExamEntryScreen } from "./screens/exams/ExamEntry";
 import { ExamAnalyticsScreen } from "./screens/exams/ExamAnalytics";
-import { VoiceAssistScreen } from "./screens/voice/VoiceAssist";
+const VoiceAssistScreen = lazy(() => import("./screens/voice/VoiceAssist").then(m => ({ default: m.VoiceAssistScreen })));
 import { VaultManagementScreen } from "./screens/vault/VaultManagement";
 import { StaffRolesScreen } from "./screens/settings/StaffRoles";
 import { ModeSettingsScreen } from "./screens/settings/ModeSettings";
@@ -64,7 +65,7 @@ export default function App() {
   return (
     <ErrorBoundary>
     <PageTransition>
-    <Routes>
+    <Suspense fallback={<div>Loading…</div>}><Routes>
       <Route path="/login" element={<StaffLogin />} />
       <Route path="/setup" element={<RequireAuth><CentreSetupWizardScreen /></RequireAuth>} />
       <Route path="/attendance" element={<RequireAuth><TodayAttendanceScreen /></RequireAuth>} />
@@ -114,7 +115,7 @@ export default function App() {
               <Route path="/classes" element={<RequireAuth><ClassWorkspaceScreen /></RequireAuth>} />
                   <Route path="/call-desk" element={<RequireAuth><CallDeskScreen /></RequireAuth>} />
                   <Route path="/join/:tenantId/:sessionId" element={<StudentJoinScreen />} />
-        </Routes>
+        </Routes></Suspense>
     </PageTransition>
     </ErrorBoundary>
   );

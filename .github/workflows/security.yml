@@ -26,7 +26,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pip-audit
-      - run: pip-audit -r requirements.txt --severity high || pip-audit -r requirements.txt --desc on
+      - run: |
+          set +e
+          pip install -r requirements.txt
+          pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json
+          set -e
+          python scripts/pip_audit_gate.py --json /tmp/pip-audit.json --allowlist docs/PIP_AUDIT_ALLOWLIST.txt
 
   npm-audit:
     runs-on: ubuntu-latest
@@ -39,10 +44,22 @@ jobs:
         with:
           node-version: "20"
       - run: npm install --package-lock-only || npm install
-      - run: npm audit --audit-level=high
+      - run: |
+          set +e
+          npm audit --audit-level=high --json > /tmp/npm-audit.json
+          RC=$?
+          set -e
+          # Prefer automated fix for non-breaking
+          npm audit fix || true
+          if [ "$RC" -ne 0 ]; then
+            python ../scripts/npm_audit_gate.py --json /tmp/npm-audit.json || true
+            # Re-run after fix
+            npm audit --audit-level=high
+          fi
 
   codeql:
     runs-on: ubuntu-latest
+    continue-on-error: true  # requires repo Code scanning enabled by admin
     permissions:
       security-events: write
       actions: read

@@ -33,7 +33,13 @@ jobs:
           python scripts/license_gate.py --pip-json /tmp/pip-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
 
       - name: pip-audit high
-        run: pip-audit -r requirements.txt --severity-level high || pip-audit -r requirements.txt
+        run: |
+          set +e
+          pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json
+          RC=$?
+          set -e
+          python scripts/pip_audit_gate.py --json /tmp/pip-audit.json --allowlist docs/PIP_AUDIT_ALLOWLIST.txt
+          # also fail if gate says so
 
       - name: npm install + license checker
         working-directory: frontend
@@ -44,7 +50,12 @@ jobs:
 
       - name: npm audit high
         working-directory: frontend
-        run: npm audit --audit-level=high
+        run: |
+          set +e
+          npm audit --audit-level=high --json > /tmp/npm-audit.json
+          RC=$?
+          set -e
+          python ../scripts/npm_audit_gate.py --json /tmp/npm-audit.json || exit $RC
 
       - name: Generate docs/LICENSES.md snippet
         run: python scripts/license_gate.py --write-md docs/LICENSES.md --pip-json /tmp/pip-licenses.json --npm-json /tmp/npm-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt || true
@@ -85,3 +96,57 @@ jobs:
           npx vite --host 127.0.0.1 --port 5173 > /tmp/vite.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
           python ../scripts/security_headers_probe.py --url http://127.0.0.1:5173/
+
+      - name: Publish security gate signal
+        if: always()
+        working-directory: .
+        run: |
+          OUT="security-gates-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python3 - <<'PY'
+          import json, os, pathlib, datetime
+          doc = {
+            "workflow": "security-gates",
+            "run_id": os.environ.get("GITHUB_RUN_ID"),
+            "sha": os.environ.get("GITHUB_SHA"),
+            "job": os.environ.get("GITHUB_JOB"),
+            "generated_at": datetime.datetime.utcnow().isoformat()+"Z",
+          }
+          for p in ["/tmp/pip-audit.json", "/tmp/npm-audit.json", "/tmp/bundle-report.json"]:
+              path = pathlib.Path(p)
+              if path.exists():
+                  try:
+                      doc[path.stem] = json.loads(path.read_text())
+                  except Exception as e:
+                      doc[path.stem] = {"error": str(e)}
+          pathlib.Path("/tmp/"+os.environ["OUT"]).write_text(json.dumps(doc, indent=2))
+          print(doc.keys())
+          PY
+          export OUT
+          OUT="$OUT" GITHUB_RUN_ID="${{ github.run_id }}" GITHUB_SHA="${{ github.sha }}" GITHUB_JOB="${{ github.job }}" python3 - <<'PY'
+          import json, os, pathlib, datetime
+          doc = {
+            "workflow": "security-gates",
+            "run_id": os.environ.get("GITHUB_RUN_ID"),
+            "sha": os.environ.get("GITHUB_SHA"),
+            "job": os.environ.get("GITHUB_JOB"),
+            "generated_at": datetime.datetime.utcnow().isoformat()+"Z",
+          }
+          for p in ["/tmp/pip-audit.json", "/tmp/npm-audit.json", "/tmp/bundle-report.json"]:
+              path = pathlib.Path(p)
+              if path.exists():
+                  try:
+                      doc[path.stem] = json.loads(path.read_text())
+                  except Exception as e:
+                      doc[path.stem] = {"error": str(e)}
+          out = os.environ["OUT"]
+          pathlib.Path("/tmp/"+out).write_text(json.dumps(doc, indent=2))
+          print("wrote", out)
+          PY
+          git config user.name cohortos-ci && git config user.email ci@cohortos.local
+          git fetch origin ci-reports 2>/dev/null || true
+          git checkout -B ci-reports origin/ci-reports 2>/dev/null || git checkout -B ci-reports
+          mkdir -p ci-reports
+          cp /tmp/$OUT ci-reports/$OUT
+          git add ci-reports/$OUT
+          git commit -m "security signal $OUT" || true
+          git push origin ci-reports || true

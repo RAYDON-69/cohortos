@@ -1198,3 +1198,11 @@ Branch: phase28-gates-coverage-pilot
 - desktop-package.yml Windows artifact (unsigned — SmartScreen)
 - docs/PILOT_RUNBOOK.md BN+EN
 
+
+## Phase 29 — Fix red gates (2026-10-01)
+Quoted CI errors:
+- bundle_js_bytes=1648930 budget=1500000 (all JS summed)
+- OTP endpoint not responding: [0,0,0,0,0] (API not ready)
+- pip-audit: pytest PYSEC-2026-1845 fix 9.0.3; chromadb/nltk no fix; llama-index fix 0.13
+- CodeQL: code scanning not enabled
+
