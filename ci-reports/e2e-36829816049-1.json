@@ -1,0 +1,26 @@
+{
+  "sha": "bbe422bb8492157fef5b4e2fd0ca165db709b500",
+  "run_id": "36829816049",
+  "run_attempt": "1",
+  "core_outcome": "success",
+  "extended_outcome": "success",
+  "core_counts": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 1 test using 1 worker\n\n  \u2713  1 e2e/smoke.spec.ts:39:1 \u203a desk smoke \u2014 login through support (12.5s)\n\n  1 passed (13.6s)"
+  },
+  "extended_counts": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 1 test using 1 worker\n\n  \u2713  1 e2e/smoke-extended.spec.ts:63:1 \u203a extended \u2014 voice, class, broadcast, call desk (2.7s)\n\n  1 passed (3.9s)"
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": true
+  },
+  "failing_snippets": [],
+  "generated_at": "2026-10-01T07:23:30.420811Z"
+}
