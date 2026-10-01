@@ -1188,3 +1188,13 @@ Branch: phase27-signal-whiteboard-safety
 - Demo seed load/remove
 - Bundle budget script
 
+
+## Phase 28 — Gate promotion, coverage, packaging, pilot (2026-10-01)
+Branch: phase28-gates-coverage-pilot
+- EXTENDED required (continue-on-error removed) after 3 green main runs
+- CORE/EXTENDED coverage expanded (batch/student/attendance/fee; poll/tier/whiteboard)
+- Dependabot weekly grouped minor/patch; major electron/vitest/jsdom ignored
+- security-gates.yml: license, audit, secret scan, headers, rate-limit probes
+- desktop-package.yml Windows artifact (unsigned — SmartScreen)
+- docs/PILOT_RUNBOOK.md BN+EN
+

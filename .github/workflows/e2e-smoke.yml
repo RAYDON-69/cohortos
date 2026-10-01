@@ -91,6 +91,14 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Bundle budget check (linux build)
+        working-directory: frontend
+        run: |
+          npm run build
+          cd .. && bash scripts/check_bundle_budget.sh
+          echo "### Bundle budget" >> "$GITHUB_STEP_SUMMARY"
+          find frontend/dist -name '*.js' -printf '%s %p\n' | sort -n | tail -15 >> "$GITHUB_STEP_SUMMARY" || true
+
       - name: Pre-flight curl frontend + API
         run: |
           echo "### Pre-flight" >> "$GITHUB_STEP_SUMMARY"
@@ -156,7 +164,6 @@ jobs:
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()
         id: extended
-        continue-on-error: true
         env:
           COHORTOS_API_BASE: http://127.0.0.1:8741
           CI: "true"
@@ -210,7 +217,7 @@ jobs:
 
 
       - name: Publish definitive e2e signal JSON to ci-reports
-        if: always()
+        if: always() && (github.event_name != 'pull_request' || github.actor != 'dependabot[bot]')
         working-directory: .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -246,6 +253,7 @@ jobs:
                           fail_lines.append(line.strip()[:300])
           doc = {
               "sha": os.environ.get("GITHUB_SHA", ""),
+              "main_sha": os.environ.get("GITHUB_SHA", ""),
               "run_id": os.environ.get("RUN_ID", ""),
               "run_attempt": os.environ.get("ATTEMPT", ""),
               "core_outcome": os.environ.get("CORE_OUT", ""),
@@ -255,7 +263,7 @@ jobs:
               "flags": {
                   "COHORTOS_TEST_EXPOSE_OTP": "1",
                   "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
-                  "continue_on_error_extended": True,
+                  "continue_on_error_extended": False,
               },
               "failing_snippets": fail_lines[:30],
               "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
