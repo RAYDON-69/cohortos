@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import re
 import uuid
 from datetime import datetime, timezone
@@ -137,7 +138,7 @@ class RagService:
             storage_root
             or os.environ.get("COHORTOS_RAG_DIR")
             or os.environ.get("COHORTOS_STORAGE_ROOT")
-            or "/tmp/cohortos-rag"
+            or str(Path(tempfile.gettempdir()) / "cohortos-rag")
         )
         self.persist_dir = base / "chroma" / tid
         self.persist_dir.mkdir(parents=True, exist_ok=True)
@@ -232,7 +233,7 @@ class RagService:
         if path:
             parts.append(Path(path).name)
             try:
-                root = os.environ.get("COHORTOS_STORAGE_ROOT") or "/tmp/cohortos-storage"
+                root = os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage")
                 for c in (Path(path), Path(root) / path, Path(root) / Path(path).name):
                     if c.is_file() and c.stat().st_size < 5_000_000:
                         raw = c.read_bytes()

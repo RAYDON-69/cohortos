@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import tempfile
 import zipfile
 from datetime import datetime, timezone
 from io import BytesIO
@@ -27,7 +28,7 @@ def derive_fernet(secret: str) -> Fernet:
 class TenantBackupService:
     def __init__(self, data_layer=None, vault_root: Optional[str] = None, secret: Optional[str] = None):
         self.data_layer = data_layer
-        self.vault_root = Path(vault_root or os.environ.get("COHORTOS_STORAGE_ROOT") or "/tmp/cohortos-storage")
+        self.vault_root = Path(vault_root or os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage"))
         self.secret = secret or os.environ.get("COHORTOS_JWT_SECRET") or "dev-backup-secret"
 
     def _tables_snapshot(self) -> Dict[str, List[Dict[str, Any]]]:

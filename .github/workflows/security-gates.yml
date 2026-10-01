@@ -22,38 +22,43 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Install Python deps + license tools
+      - name: Install Python deps
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pip-licenses pip-audit
       - name: pip license gate
         run: |
-          pip-licenses --format=json --output-file /tmp/pip-licenses.json || true
+          set -euo pipefail
+          pip-licenses --format=json --output-file /tmp/pip-licenses.json
           python scripts/license_gate.py --pip-json /tmp/pip-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
       - name: pip-audit high
         run: |
-          set +e
-          pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json
-          set -e
+          set -euo pipefail
+          pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json || true
           python scripts/pip_audit_gate.py --json /tmp/pip-audit.json --allowlist docs/PIP_AUDIT_ALLOWLIST.txt
       - name: npm install + production audit
         working-directory: frontend
         run: |
+          set -euo pipefail
           npm install
-          set +e
-          npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit-prod.json
-          npm audit --audit-level=high --json > /tmp/npm-audit-all.json
-          set -e
+          npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit-prod.json || true
+          npm audit --audit-level=high --json > /tmp/npm-audit-all.json || true
           python ../scripts/npm_audit_gate.py --json /tmp/npm-audit-prod.json --dev-json /tmp/npm-audit-all.json
-          npm audit fix --omit=dev || true
-      - name: Publish licenses-audit signal
+      - name: Build audit signal JSON
+        if: always()
+        run: |
+          set -euo pipefail
+          python scripts/ci_build_audit_signal.py
+      - name: Publish signal
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           OUT="security-licenses-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          python3 -c "import json,pathlib,datetime; doc={'job':'licenses-and-audit','run_id':'${{ github.run_id }}','sha':'${{ github.sha }}'}; pathlib.Path('/tmp/$OUT').write_text(json.dumps(doc,indent=2))"
+          cp /tmp/audit-signal.json /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   headers-and-rate-limit:
@@ -69,6 +74,7 @@ jobs:
           node-version: "20"
       - name: Install deps
         run: |
+          set -euo pipefail
           pip install -r requirements.txt
           cd frontend && npm install
       - name: Start API (limiter ON)
@@ -81,6 +87,7 @@ jobs:
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_ENV: test
         run: |
+          set -euo pipefail
           nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
           for i in $(seq 1 60); do
@@ -90,10 +97,13 @@ jobs:
           done
           echo API failed; cat /tmp/api.log; exit 1
       - name: Rate-limit auth/OTP
-        run: python scripts/rate_limit_probe.py --base http://127.0.0.1:8741 --out /tmp/rate-limit-report.json
+        run: |
+          set -euo pipefail
+          python scripts/rate_limit_probe.py --base http://127.0.0.1:8741 --out /tmp/rate-limit-report.json
       - name: Headers probe
         working-directory: frontend
         run: |
+          set -euo pipefail
           npx vite --host 127.0.0.1 --port 5173 > /tmp/vite.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
           python ../scripts/security_headers_probe.py --url http://127.0.0.1:5173/
@@ -102,8 +112,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           OUT="security-ratelimit-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          cp /tmp/rate-limit-report.json /tmp/$OUT 2>/dev/null || echo '{"error":"no report"}' > /tmp/$OUT
+          cp /tmp/rate-limit-report.json /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   bandit-semgrep:
@@ -116,48 +127,66 @@ jobs:
           python-version: "3.12"
       - name: Bandit medium+
         run: |
+          set -euo pipefail
           pip install bandit
-          bandit -r services api -ll -f json -o /tmp/bandit.json
+          bandit -r services api -ll -f json -o /tmp/bandit.json || true
+          python scripts/ci_write_bandit_report.py /tmp/bandit.json /tmp/bandit-report.json
           bandit -r services api -ll
       - name: Semgrep
         run: |
+          set -euo pipefail
           pip install semgrep
-          semgrep --config=p/python --config=p/owasp-top-ten --error || true
+          semgrep --config=p/python --config=p/owasp-top-ten --json -o /tmp/semgrep.json || true
+          python scripts/ci_write_semgrep_report.py /tmp/semgrep.json /tmp/semgrep-report.json
+          # soft until noise tuned; fail only on ERROR severity if present
+          python -c "import json; d=json.load(open('/tmp/semgrep.json')); errs=[r for r in d.get('results',[]) if r.get('extra',{}).get('severity')=='ERROR']; print('semgrep_errors',len(errs)); raise SystemExit(1 if errs else 0)"
       - name: Publish bandit signal
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           OUT="security-bandit-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          cp /tmp/bandit.json /tmp/$OUT 2>/dev/null || echo '{}' > /tmp/$OUT
+          python scripts/ci_merge_json.py /tmp/bandit-report.json /tmp/semgrep-report.json /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   auth-matrix:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install
-        run: pip install -r requirements.txt && pip install pytest httpx
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install pytest httpx
       - name: Run matrix
         env:
           COHORTOS_JWT_SECRET: matrix-test-secret-not-for-prod-32chars
           COHORTOS_FOUNDER_TOKEN: founder-matrix-token
           COHORTOS_TEST_EXPOSE_OTP: "1"
-          COHORTOS_RATE_LIMIT_DISABLED: "1"
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_ENV: test
-        run: pytest tests/test_auth_matrix.py tests/test_security_sweep.py tests/test_rate_limit.py -q --tb=short | tee /tmp/auth-matrix.txt
+        run: |
+          set -euo pipefail
+          set +e
+          pytest tests/test_auth_matrix.py tests/test_security_sweep.py tests/test_rate_limit.py -q --tb=short | tee /tmp/auth-matrix.txt
+          echo $? > /tmp/pytest-rc
+          set -e
+          python scripts/ci_write_pytest_report.py /tmp/auth-matrix.txt /tmp/auth-matrix-signal.json
+          # Fail the job if pytest failed
+          test "$(cat /tmp/pytest-rc)" = "0"
       - name: Publish auth-matrix signal
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           OUT="security-authmatrix-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          python3 -c "import json,pathlib,datetime; t=pathlib.Path('/tmp/auth-matrix.txt').read_text(errors='ignore') if pathlib.Path('/tmp/auth-matrix.txt').exists() else ''; pathlib.Path('/tmp/$OUT').write_text(json.dumps({'log_tail':t[-4000:],'generated_at':datetime.datetime.utcnow().isoformat()+'Z'},indent=2))"
+          cp /tmp/auth-matrix-signal.json /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   schemathesis:
@@ -168,7 +197,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt schemathesis hypothesis
+      - run: |
+          set -euo pipefail
+          pip install -r requirements.txt schemathesis hypothesis
       - name: Start API
         env:
           COHORTOS_JWT_SECRET: fuzz-secret-not-for-prod-32charsxx
@@ -178,16 +209,26 @@ jobs:
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_ENV: test
         run: |
+          set -euo pipefail
           nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
           for i in $(seq 1 40); do curl -sf http://127.0.0.1:8741/health && break; sleep 1; done
-      - name: Fuzz health + openapi no 5xx
+      - name: Fuzz OpenAPI no 5xx
         run: |
-          schemathesis run http://127.0.0.1:8741/openapi.json -i /health --checks not_a_server_error --hypothesis-max-examples=50
+          set -euo pipefail
+          schemathesis run http://127.0.0.1:8741/openapi.json \
+            --checks not_a_server_error \
+            --hypothesis-max-examples=20 \
+            --max-failures=5 \
+            --request-timeout=10 \
+            --report-junit /tmp/schemathesis-junit.xml \
+            2>&1 | tee /tmp/schemathesis.log
+          python scripts/ci_write_fuzz_report.py /tmp/schemathesis.log /tmp/fuzz-report.json
       - name: Publish fuzz signal
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           OUT="security-fuzz-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          echo '{"status":"ran"}' > /tmp/$OUT
+          cp /tmp/fuzz-report.json /tmp/$OUT 2>/dev/null || echo '{"error":"no report"}' > /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT

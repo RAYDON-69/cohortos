@@ -25,18 +25,32 @@ export function StudentImportPanel() {
     const buf = await file.arrayBuffer();
     setRaw(buf);
     if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
-      const XLSX = await import("xlsx");
-      const wb = XLSX.read(buf, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const csv = XLSX.utils.sheet_to_csv(sheet);
-      const parsed = Papa.parse(csv, { header: true });
-      // client-side soft preview; server validates phones
-      setPreview({
-        total: parsed.data.length,
-        valid: parsed.data.length,
-        errors: [],
-        rows: parsed.data as Preview["rows"],
+      // exceljs replaces sheetjs/xlsx (stale high-severity advisories on npm xlsx)
+      const ExcelJS = (await import("exceljs")).default;
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(buf);
+      const sheet = wb.worksheets[0];
+      const rows: Preview["rows"] = [];
+      let headers: string[] = [];
+      sheet.eachRow((row, rowNumber) => {
+        const vals = row.values as Array<string | number | undefined>;
+        // exceljs is 1-indexed; values[0] is empty
+        const cells = vals.slice(1).map((v) => (v == null ? "" : String(v)));
+        if (rowNumber === 1) {
+          headers = cells.map((h) => h.toLowerCase());
+          return;
+        }
+        const obj: Record<string, string> = {};
+        headers.forEach((h, i) => {
+          obj[h] = cells[i] || "";
+        });
+        rows.push({
+          name: obj.name || obj["নাম"] || "",
+          phone: obj.phone || obj["মোবাইল"] || obj.mobile || "",
+          batch: obj.batch || obj["ব্যাচ"] || undefined,
+        });
       });
+      setPreview({ total: rows.length, valid: rows.length, errors: [], rows });
     } else {
       const text = new TextDecoder().decode(buf);
       Papa.parse(text, {
