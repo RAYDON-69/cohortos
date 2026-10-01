@@ -1,0 +1,31 @@
+{
+  "sha": "9fc3369bc733ff97fc07d253f3fc13f24c28b984",
+  "main_sha": "9fc3369bc733ff97fc07d253f3fc13f24c28b984",
+  "run_id": "36910612366",
+  "run_attempt": "1",
+  "core_outcome": "success",
+  "extended_outcome": "success",
+  "core_counts": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 1 test using 1 worker\n\nstudent API optional 404 {\"detail\":\"Not Found\"}\n  \u2713  1 e2e/smoke.spec.ts:39:1 \u203a desk smoke \u2014 login through support (13.8s)\n\n  1 passed (18.7s)"
+  },
+  "extended_counts": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 1 test using 1 worker\n\n  \u2713  1 e2e/smoke-extended.spec.ts:63:1 \u203a extended \u2014 voice, class, broadcast, call desk (5.5s)\n\n  1 passed (6.8s)"
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [],
+  "generated_at": "2026-10-01T18:59:25.399598Z",
+  "per_test_lines": [
+    "\u2713  1 e2e/smoke.spec.ts:39:1 \u203a desk smoke \u2014 login through support (13.8s)",
+    "\u2713  1 e2e/smoke-extended.spec.ts:63:1 \u203a extended \u2014 voice, class, broadcast, call desk (5.5s)"
+  ]
+}
