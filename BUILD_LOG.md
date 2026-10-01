@@ -1220,3 +1220,12 @@ Rate limit: CI COHORTOS_RATE_LIMIT_DISABLED=1; prod unit proves 429 still.
 - auth-matrix + schemathesis jobs; CodeQL gated on vars.CODEQL_ENABLED
 - RATE_LIMIT_DISABLED refused in production/desktop
 
+
+## Phase 32 — Honest security gates (2026-10-01)
+- Rate lockout false-pass: env leak from auth_matrix setdefault; fixed isolation
+- auth-matrix job fails if pytest non-zero; JSON has route counts + adversarial
+- Bandit: /tmp via tempfile; LLM https; nosec only with reason
+- xlsx → exceljs
+- CORE/EXTENDED journey specs (12+ each target)
+- security-gates fail-loud + real JSON via scripts (no multi-line python -c)
+

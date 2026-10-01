@@ -10,6 +10,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import tempfile
 import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -126,7 +127,7 @@ class GoogleDriveStorageProvider(StorageService):
         self.access_token = access_token or os.environ.get("COHORTOS_GDRIVE_ACCESS_TOKEN")
         self._mapping: Dict[str, str] = {}  # remote_id → drive_file_id
         self._local_cache = LocalFsStorageProvider(
-            os.environ.get("COHORTOS_GDRIVE_CACHE", "/tmp/cohortos-gdrive-cache")
+            os.environ.get("COHORTOS_GDRIVE_CACHE", str(Path(tempfile.gettempdir()) / "cohortos-gdrive-cache"))
         )
 
     def is_configured(self) -> bool:
@@ -169,7 +170,8 @@ class GoogleDriveStorageProvider(StorageService):
                 method="POST",
             )
             try:
-                with urllib.request.urlopen(req, timeout=60) as resp:
+                with urllib.request.urlopen(  # nosec B310 — URL from configured HTTPS provider endpoint
+            req, timeout=60) as resp:
                     out = json.loads(resp.read().decode())
                     file_id = out.get("id") or uuid.uuid4().hex
                     self._mapping[file_id] = f"drive:{file_id}"
@@ -218,7 +220,7 @@ def build_storage_provider(config: Optional[Dict[str, Any]] = None) -> StorageSe
     cfg = config or {}
     provider = (cfg.get("provider") or "google_drive").lower()
     if provider in ("local_fs", "local", "filesystem"):
-        root = cfg.get("root") or os.environ.get("COHORTOS_STORAGE_ROOT", "/tmp/cohortos-storage")
+        root = cfg.get("root") or os.environ.get("COHORTOS_STORAGE_ROOT", str(Path(tempfile.gettempdir()) / "cohortos-storage"))
         return LocalFsStorageProvider(root)
     return GoogleDriveStorageProvider(
         credentials_json=cfg.get("credentials_json"),

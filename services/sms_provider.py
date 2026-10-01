@@ -33,7 +33,8 @@ class TwilioSmsProvider(SmsProvider):
         token = f"{self.account_sid}:{self.auth_token}".encode()
         import base64
         req.add_header("Authorization", "Basic " + base64.b64encode(token).decode())
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(  # nosec B310 — URL from configured HTTPS provider endpoint
+            req, timeout=30) as resp:
             out = json.loads(resp.read().decode())
         return {"ok": True, "provider": "twilio", "sid": out.get("sid"), "status": out.get("status"), "raw": out}
 

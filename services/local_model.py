@@ -64,7 +64,7 @@ _progress: Dict[str, Any] = {
 
 
 def model_dir() -> Path:
-    d = Path(os.environ.get("COHORTOS_LOCAL_MODEL_DIR") or "/tmp/cohortos-models")
+    d = Path(os.environ.get("COHORTOS_LOCAL_MODEL_DIR") or str(Path(tempfile.gettempdir()) / "cohortos-models"))
     d.mkdir(parents=True, exist_ok=True)
     return d
 

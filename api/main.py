@@ -3437,7 +3437,7 @@ def create_api_app(
             # Offline seal: can only ADD lock, never unlock. Config is source of truth.
             # Hand-editing seal locked=false must not clear an active config lockout.
             try:
-                data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
+                data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or str(Path(tempfile.gettempdir()) / "cohortos-data"))
                 seal_path = data_dir / f"license_seal_{tenant_id}.json"
                 if seal_path.exists():
                     import json as _json
@@ -3503,7 +3503,7 @@ def create_api_app(
         payload = f"{seal['tenant_id']}|{int(bool(seal['locked']))}|{seal.get('reason') or ''}|{seal['updated_at']}".encode()
         seal["hmac"] = _hmac.new(mac_key, payload, hashlib.sha256).hexdigest()
         try:
-            data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or "/tmp/cohortos-data")
+            data_dir = Path(os.environ.get("COHORTOS_DATA_DIR") or str(Path(tempfile.gettempdir()) / "cohortos-data"))
             data_dir.mkdir(parents=True, exist_ok=True)
             seal_path = data_dir / f"license_seal_{tenant_id}.json"
             seal_path.write_text(__import__("json").dumps(seal), encoding="utf-8")

@@ -628,7 +628,7 @@ class DeepSeekProvider(LLMProvider):
             "max_tokens": request.max_tokens,
         }).encode()
         req = urllib.request.Request(
-            f"{self.base_url}/v1/chat/completions",
+            f"{_safe_https_url(self.base_url)}/v1/chat/completions",
             data=body,
             headers={
                 "Authorization": f"Bearer {self.api_key}",
