@@ -59,7 +59,9 @@ jobs:
 
   codeql:
     runs-on: ubuntu-latest
-    continue-on-error: true  # requires repo Code scanning enabled by admin
+    # Skip cleanly until Code scanning is enabled in repo settings (owner action).
+    # Gap covered by bandit + semgrep in security-gates.yml.
+    if: ${{ vars.CODEQL_ENABLED == 'true' }}
     permissions:
       security-events: write
       actions: read

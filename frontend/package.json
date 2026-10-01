@@ -147,5 +147,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/RAYDON-69/cohortos.git"
+  },
+  "overrides": {
+    "glob": "^10.4.5",
+    "tar": "^6.2.1"
   }
 }

@@ -1206,3 +1206,8 @@ Quoted CI errors:
 - pip-audit: pytest PYSEC-2026-1845 fix 9.0.3; chromadb/nltk no fix; llama-index fix 0.13
 - CodeQL: code scanning not enabled
 
+
+## Phase 30 — CORE support assert + security matrix (2026-10-01)
+CORE fail quote: support@cohortos.app not visible because assert ran on admissions page.
+Rate limit: CI COHORTOS_RATE_LIMIT_DISABLED=1; prod unit proves 429 still.
+

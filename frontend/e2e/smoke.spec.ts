@@ -283,7 +283,8 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await page.goto(h("/support"));
   await shot(page, "13-support");
   await expect(page.getByText(/Support|Contact|About/i).first()).toBeVisible({ timeout: 10000 });
-  
+  await expect(page.getByText("support@cohortos.app")).toBeVisible({ timeout: 10000 });
+
   // --- Real centre flow: batch, student, attendance, fee ---
   const batchName = `ব্যাচ E2E ${Date.now()}`;
   const batchRes = await request.post(`${API}/t/${tenantForApi}/admissions/batches`, {
@@ -343,6 +344,4 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await expect(page.getByText(/Admit|Admissions|Name|Student|ভর্তি|নাম/i).first()).toBeVisible({
     timeout: 10000,
   });
-
-  await expect(page.getByText("support@cohortos.app")).toBeVisible();
 });

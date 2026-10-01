@@ -17,7 +17,12 @@ class RateLimiter:
         self._lock = threading.Lock()
 
     def check(self, key: str) -> Tuple[bool, int, Optional[int]]:
-        """Returns (allowed, remaining, retry_after_sec)."""
+        """Returns (allowed, remaining, retry_after_sec).
+        Env COHORTOS_RATE_LIMIT_DISABLED=1 bypasses (CI/E2E only — OFF in production).
+        """
+        import os
+        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1":
+            return True, self.max_hits, None
         now = time.time()
         with self._lock:
             until = self._lockout_until.get(key, 0)
