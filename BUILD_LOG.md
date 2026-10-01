@@ -1229,3 +1229,10 @@ Rate limit: CI COHORTOS_RATE_LIMIT_DISABLED=1; prod unit proves 429 still.
 - CORE/EXTENDED journey specs (12+ each target)
 - security-gates fail-loud + real JSON via scripts (no multi-line python -c)
 
+
+## Phase 33 — Journeys hydrate + safe_http (2026-10-01)
+Quoted E2E: Login did not establish session / Attendance not visible — wrong
+localStorage keys in journeys vs STORAGE_KEYS + missing wait for hydrate hook.
+safe_http replaces all urlopen; chromadb embedded-only allowlist + tests.
+EXTENDED if: always(); workers=1 sequential journeys.
+

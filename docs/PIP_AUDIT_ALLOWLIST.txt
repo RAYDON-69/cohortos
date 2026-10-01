@@ -1,7 +1,11 @@
 # id | reason | expires YYYY-MM-DD
 # Only when no fixed version exists upstream.
-PYSEC-2026-311 | chromadb path issues; no fix version from pip-audit; isolate network | 2026-12-31
-PYSEC-2026-3814 | chromadb; no fix version listed | 2026-12-31
-PYSEC-2026-3815 | chromadb; no fix version listed | 2026-12-31
-PYSEC-2026-3813 | chromadb; no fix version listed | 2026-12-31
+# chromadb CVE-2026-45829 / PYSEC-2026-311: pre-auth RCE on Chroma SERVER /api/v2/.../collections.
+# CohortOS uses ONLY chromadb.PersistentClient (services/rag_service.py) — no HttpClient,
+# no `chroma run`, no CHROMA_SERVER. Proof: tests/test_chroma_embedded_only.py.
+PYSEC-2026-311 | chromadb embedded PersistentClient only; server endpoint unreachable | 2026-11-01
+CVE-2026-45829 | same as PYSEC-2026-311; embedded-only | 2026-11-01
+PYSEC-2026-3814 | chromadb; no fix version listed; embedded-only | 2026-11-01
+PYSEC-2026-3815 | chromadb; no fix version listed; embedded-only | 2026-11-01
+PYSEC-2026-3813 | chromadb; no fix version listed; embedded-only | 2026-11-01
 PYSEC-2026-3740 | nltk pathsec; no fix version listed; not used for untrusted model paths | 2026-12-31

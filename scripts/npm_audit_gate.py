@@ -11,21 +11,28 @@ def main():
         print("no npm audit json"); return 0
     data = json.loads(Path(args.json).read_text())
     vulns = data.get("vulnerabilities") or {}
-    high = []
+    high, mod = [], []
     for name, meta in vulns.items():
         sev = (meta.get("severity") or "").lower()
+        via = str(meta.get("via"))[:120]
+        fixed = ""
+        fa = meta.get("fixAvailable")
+        if isinstance(fa, dict):
+            fixed = fa.get("version") or ""
+        elif fa is True:
+            fixed = "available"
+        line = f"{name}:{sev}:via={via}:fixed_in={fixed}"
         if sev in ("high", "critical"):
-            high.append(f"{name}:{sev}")
-    if args.dev_json and Path(args.dev_json).exists():
-        dev = json.loads(Path(args.dev_json).read_text())
-        for name, meta in (dev.get("vulnerabilities") or {}).items():
-            sev = (meta.get("severity") or "").lower()
-            if sev in ("high", "critical") and name not in {h.split(":")[0] for h in high}:
-                print(f"DEV-ONLY warning: {name}:{sev}")
+            high.append(line)
+        elif sev == "moderate":
+            mod.append(line)
+    for m in mod[:30]:
+        print("MODERATE warning:", m)
     if high:
         print("npm production high/critical:\n" + "\n".join(high[:40]))
         sys.exit(1)
-    print("npm_audit_gate OK (production tree)")
+    print("npm_audit_gate OK (production tree; moderates as warnings only)")
     return 0
+
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -15,6 +15,7 @@ import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Optional, Tuple
+from services.safe_http import safe_urlopen
 
 
 class StorageError(Exception):
@@ -170,7 +171,7 @@ class GoogleDriveStorageProvider(StorageService):
                 method="POST",
             )
             try:
-                with urllib.request.urlopen(  # nosec B310 — URL from configured HTTPS provider endpoint
+                with safe_urlopen(  # nosec B310 — URL from configured HTTPS provider endpoint
             req, timeout=60) as resp:
                     out = json.loads(resp.read().decode())
                     file_id = out.get("id") or uuid.uuid4().hex

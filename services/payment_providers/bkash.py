@@ -8,6 +8,7 @@ import uuid
 from typing import Any, Dict, Optional
 from urllib import request, error
 
+from services.safe_http import safe_urlopen
 from services.payment_providers.base import (
     PaymentProvider,
     CheckoutSession,
@@ -64,7 +65,7 @@ class BkashProvider(PaymentProvider):
             },
         )
         try:
-            with request.urlopen(req, timeout=30) as resp:
+            with safe_urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
         except error.HTTPError as e:
             raise ProviderError(f"bKash grant token HTTP {e.code}: {e.read()[:200]}", "auth_failed") from e
@@ -132,7 +133,7 @@ class BkashProvider(PaymentProvider):
             },
         )
         try:
-            with request.urlopen(req, timeout=30) as resp:
+            with safe_urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
         except error.HTTPError as e:
             raise ProviderError(f"bKash create HTTP {e.code}: {e.read()[:300]}", "create_failed") from e
@@ -183,7 +184,7 @@ class BkashProvider(PaymentProvider):
             },
         )
         try:
-            with request.urlopen(req, timeout=30) as resp:
+            with safe_urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
         except error.HTTPError as e:
             raise ProviderError(f"bKash execute HTTP {e.code}: {e.read()[:300]}", "execute_failed") from e

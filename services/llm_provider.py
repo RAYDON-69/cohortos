@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 import hashlib
 import re
+from services.safe_http import safe_urlopen
 
 
 
@@ -341,7 +342,7 @@ class GroqProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=45) as resp:
+            with safe_urlopen(req, timeout=45) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
@@ -411,7 +412,7 @@ class NvidiaNimProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with safe_urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
@@ -473,7 +474,7 @@ class OpenAIProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with safe_urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
@@ -528,7 +529,7 @@ class AnthropicProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with safe_urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
@@ -585,7 +586,7 @@ class GeminiAPIProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with safe_urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
@@ -638,7 +639,7 @@ class DeepSeekProvider(LLMProvider):
             method="POST",
         )
         try:
-            with urllib.request.urlopen(req, timeout=90) as resp:
+            with safe_urlopen(req, timeout=90) as resp:
                 data = json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             err = e.read().decode(errors="replace")[:400]
