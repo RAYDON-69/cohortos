@@ -657,13 +657,38 @@ def create_api_app(
             "message": "Account created. Verify with OTP to continue.",
         }
 
+
+    def _client_ip(request: Request) -> str:
+        forwarded = request.headers.get("x-forwarded-for") or ""
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return (request.client.host if request.client else "unknown")
+
+    def _rate_limit_otp(request: Request, phone: str = ""):
+        from services.rate_limit import otp_ip_limiter, otp_phone_limiter
+        from fastapi.responses import JSONResponse
+        ip = _client_ip(request)
+        ok, _, retry = otp_ip_limiter.check(f"ip:{ip}")
+        if not ok:
+            return JSONResponse(status_code=429, content={"detail": "rate_limited"}, headers={"Retry-After": str(retry or 60)})
+        if phone:
+            ok2, _, retry2 = otp_phone_limiter.check(f"phone:{phone}")
+            if not ok2:
+                return JSONResponse(status_code=429, content={"detail": "rate_limited"}, headers={"Retry-After": str(retry2 or 60)})
+        return None
+
+
     @app.post("/auth/request-otp")
     def request_otp(body: OTPRequest, request: Request):
+        # rate limit applied after body parse via dependency pattern
         identity = body.phone or body.email or "unknown"
         try:
             registry.limiter.check("request-otp", identity, _client_ip(request))
         except RateLimitExceeded as e:
             raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
+        _blocked = _rate_limit_otp(request, identity if identity != "unknown" else "")
+        if _blocked is not None:
+            return _blocked
 
         tenant_id = body.tenant_id
         centres: list = []
@@ -3628,6 +3653,25 @@ def create_api_app(
             billing_cycle=body.get("billing_cycle") or "monthly",
         )
         return {"quote": quote}
+
+
+    @app.middleware("http")
+    async def auth_rate_limit_middleware(request: Request, call_next):
+        path = request.url.path or ""
+        if path.endswith("/auth/request-otp") or path.endswith("/auth/verify-otp"):
+            from services.rate_limit import otp_ip_limiter
+            from fastapi.responses import JSONResponse
+            ip = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip() or (
+                request.client.host if request.client else "unknown"
+            )
+            ok, _, retry = otp_ip_limiter.check(f"ip:{ip}:{path}")
+            if not ok:
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "rate_limited"},
+                    headers={"Retry-After": str(retry or 60)},
+                )
+        return await call_next(request)
 
     @app.get("/health")
     def health():

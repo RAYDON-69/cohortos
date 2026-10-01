@@ -268,6 +268,31 @@ test("extended — voice, class, broadcast, call desk", async ({ page, request }
   const rm = await request.post(`${API}/t/${tenantId}/demo/remove`, { headers });
   if (!rm.ok()) throw new Error(`demo/remove ${rm.status()}`);
 
+  // 4GB LITE heap metric (best-effort in Chromium)
+  const client = await page.context().newCDPSession(page);
+  try {
+    await client.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  } catch { /* ignore */ }
+  const t0 = Date.now();
+  await page.goto(h("/classes"));
+  await page.waitForTimeout(1000);
+  await page.goto(h("/call-desk"));
+  await page.waitForTimeout(1000);
+  const loadMs = Date.now() - t0;
+  const heap = await page.evaluate(() => {
+    const m = (performance as any).memory;
+    return m ? m.usedJSHeapSize : 0;
+  });
+  const fs = await import("fs");
+  fs.writeFileSync(
+    "test-results/lite-heap.json",
+    JSON.stringify({ usedJSHeapSize: heap, loadMs, tier: "lite-throttle-4x" }, null, 2)
+  );
+  // Budget from measured + 50% headroom once known; soft assert < 120MB
+  if (heap > 0 && heap > 120 * 1024 * 1024) {
+    throw new Error(`LITE heap too high: ${heap}`);
+  }
+
   // Empty-DB-safe page mounts
   for (const route of ["/classes", "/call-desk", "/voice"]) {
     await page.goto(h(route));
