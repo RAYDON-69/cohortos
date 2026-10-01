@@ -58,6 +58,7 @@ jobs:
           COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage
           COHORTOS_RAG_DIR: /tmp/cohortos-rag
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
         run: |
           # api.main has no module-level `app` — use the factory entry
           # (api_entry.py / INTEGRATION_NOTES.md: create_api_app_or_raise --factory)

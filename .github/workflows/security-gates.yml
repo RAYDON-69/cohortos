@@ -150,3 +150,23 @@ jobs:
           git add ci-reports/$OUT
           git commit -m "security signal $OUT" || true
           git push origin ci-reports || true
+
+
+  bandit-semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bandit
+        run: |
+          pip install bandit
+          bandit -r services api -ll -f json -o /tmp/bandit.json || true
+          bandit -r services api -ll
+      - name: Semgrep OWASP
+        run: |
+          pip install semgrep
+          semgrep --config=p/python --config=p/typescript --config=p/owasp-top-ten --error --json -o /tmp/semgrep.json || true
+          semgrep --config=p/python --config=p/owasp-top-ten --error || true
