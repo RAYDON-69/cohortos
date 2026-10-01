@@ -1,0 +1,8 @@
+run_id=proof-p26c
+sha=local
+ref=phase26c-extended-smoke-fix
+failing_step=proof_mechanism
+message=This proves the ci-reports branch write path. Real failures will use github.run_id.
+feature_flags=COHORTOS_TEST_EXPOSE_OTP=1
+--- sample ---
+Error: join 404 was root cause before id-persistence fix.
