@@ -1,0 +1,11 @@
+# Minimal pointer compose — pull official images; see docs/JITSI_SELFHOST.md
+# This file documents required env; full stack uses jitsi/docker-jitsi-meet upstream.
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    restart: unless-stopped

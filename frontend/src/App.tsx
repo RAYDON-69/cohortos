@@ -1,3 +1,5 @@
+import { StudentJoinScreen } from "./screens/classes/StudentJoin";
+import { CallDeskScreen } from "./screens/calldesk/CallDesk";
 import { ClassWorkspaceScreen } from "./screens/classes/ClassWorkspace";
 import { useEffect } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -110,6 +112,8 @@ export default function App() {
       <Route path="*" element={<Navigate to="/attendance" replace />} />
       <Route path="/voice" element={<RequireAuth><VoiceAssistScreen /></RequireAuth>} />
               <Route path="/classes" element={<RequireAuth><ClassWorkspaceScreen /></RequireAuth>} />
+                  <Route path="/call-desk" element={<RequireAuth><CallDeskScreen /></RequireAuth>} />
+                  <Route path="/join/:tenantId/:sessionId" element={<StudentJoinScreen />} />
         </Routes>
     </PageTransition>
     </ErrorBoundary>

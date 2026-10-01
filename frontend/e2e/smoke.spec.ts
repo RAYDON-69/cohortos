@@ -389,5 +389,51 @@ test("desk smoke — login through support", async ({ page, request }) => {
   await page.waitForTimeout(600);
   await shot(page, "15-class-workspace");
 
+
+  // P26: timetable → session → join → absentee notice → call desk outcome
+  const tt = await request.post(`${API}/t/${tenantForApi}/classes/timetable/generate`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { batch_id: "e2e-batch-1", weekday: 1, time: "16:00", weeks: 1, title: "E2E Timetable" },
+  });
+  if (!tt.ok()) throw new Error(`timetable ${tt.status()} ${await tt.text()}`);
+
+  const sessions = await request.get(`${API}/t/${tenantForApi}/classes/sessions?batch_id=e2e-batch-1`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  const sessList = (await sessions.json()).sessions || [];
+  const sid = sessList[0]?.id;
+  if (!sid) throw new Error("no session after timetable");
+
+  const join2 = await request.post(`${API}/t/${tenantForApi}/classes/sessions/${sid}/join`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { role: "participant", display_name: "Stu", student_id: "stu1" },
+  });
+  if (!join2.ok()) throw new Error(`join2 ${join2.status()}`);
+
+  const abs = await request.post(`${API}/t/${tenantForApi}/classes/sessions/${sid}/notify-absentees`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { present_ids: ["stu1"], roster_ids: ["stu1", "stu2"] },
+  });
+  if (!abs.ok()) throw new Error(`absentees ${abs.status()}`);
+  const absJ = await abs.json();
+  if ((absJ.absent_count || 0) < 1) throw new Error("expected absentee notice");
+
+  const q = await request.post(`${API}/t/${tenantForApi}/call-desk/queue`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { fee_dues: [{ name: "E2E", phone: "01711112222", detail: "due" }] },
+  });
+  if (!q.ok()) throw new Error(`call-desk queue ${q.status()}`);
+  const card = ((await q.json()).cards || [])[0];
+  if (!card) throw new Error("no call desk card");
+  const out = await request.post(`${API}/t/${tenantForApi}/call-desk/outcome`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    data: { card_id: card.id, outcome: "no_answer", human_action_id: "e2e-human-1", notes: "busy" },
+  });
+  if (!out.ok()) throw new Error(`outcome ${out.status()} ${await out.text()}`);
+
+  await page.goto(h("/call-desk"));
+  await page.waitForTimeout(500);
+  await shot(page, "16-call-desk");
+
   await expect(page.getByText("support@cohortos.app")).toBeVisible();
 });

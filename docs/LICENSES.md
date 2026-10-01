@@ -27,3 +27,4 @@ Generated as part of Phase 23. Update when adding dependencies.
 | Jitsi Meet | Apache-2.0 | Class media rooms (external host / self-host) |
 | PyJWT | MIT | Class join tokens |
 >>>>>>> origin/phase25-class-workspace-jitsi
+| Excalidraw | MIT | Optional whiteboard embed (planned iframe) |
