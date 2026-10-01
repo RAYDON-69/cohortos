@@ -24,6 +24,8 @@ export function ClassWorkspaceScreen() {
   const { tenantId } = useTenant();
   const [batchId, setBatchId] = useState("");
   const [title, setTitle] = useState("Class session");
+  const [mode, setMode] = useState<"interactive" | "broadcast">("broadcast");
+  const [broadcastUrl, setBroadcastUrl] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [joinUrl, setJoinUrl] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
@@ -56,7 +58,7 @@ export function ClassWorkspaceScreen() {
     try {
       await apiRequest(tenantPath(tenantId, "/classes/sessions"), {
         method: "POST",
-        body: { batch_id: batchId, title },
+        body: { batch_id: batchId, title, mode, broadcast_url: broadcastUrl },
       });
       setMsg("Session created");
       await load();
@@ -119,6 +121,27 @@ export function ClassWorkspaceScreen() {
           <FormField id="ctitle" label="Title">
             <TextInput id="ctitle" value={title} onChange={(e) => setTitle(e.target.value)} />
           </FormField>
+          <FormField id="cmode" label="Mode">
+            <select
+              id="cmode"
+              className="input"
+              value={mode}
+              onChange={(e) => setMode(e.target.value as "interactive" | "broadcast")}
+            >
+              <option value="broadcast">Broadcast (YouTube / FB Live — low cost)</option>
+              <option value="interactive">Interactive (Jitsi)</option>
+            </select>
+          </FormField>
+          {mode === "broadcast" && (
+            <FormField id="curl" label="Stream URL">
+              <TextInput
+                id="curl"
+                value={broadcastUrl}
+                onChange={(e) => setBroadcastUrl(e.target.value)}
+                placeholder="https://youtube.com/... or Facebook Live"
+              />
+            </FormField>
+          )}
           <Button variant="primary" onClick={() => void create()}>
             Create session
           </Button>

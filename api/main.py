@@ -1740,6 +1740,11 @@ def create_api_app(
                 starts_at=str(body.get("starts_at") or ""),
                 actor_id=str(claims.get("sub") or ""),
                 actor_role=role,
+                mode=str(body.get("mode") or "interactive"),
+                broadcast_url=str(body.get("broadcast_url") or ""),
+                teacher_id=str(body.get("teacher_id") or ""),
+                ends_at=str(body.get("ends_at") or ""),
+                idempotency_key=str(body.get("idempotency_key") or ""),
             )
         except (PermissionError, ValueError) as e:
             raise HTTPException(status_code=400 if isinstance(e, ValueError) else 403, detail=str(e))

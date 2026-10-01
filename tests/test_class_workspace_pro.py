@@ -123,3 +123,25 @@ def test_call_desk_no_autodial_outcome_requires_human():
     assert cards and cards[0]["tel_link"].startswith("tel:")
     with pytest.raises(PermissionError):
         desk.log_outcome(card_id=cards[0]["id"], outcome="reached", human_action_id="", actor_role="desk")
+
+
+def test_broadcast_mode_join_returns_stream_url():
+    svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    s = svc.create_session(
+        batch_id="b1",
+        title="Live FB",
+        mode="broadcast",
+        broadcast_url="https://www.youtube.com/watch?v=abc",
+        actor_role="teacher",
+    )
+    assert s["mode"] == "broadcast"
+    link = svc.join_link(s["id"], role="participant", display_name="S", student_id="s1")
+    assert link["mode"] == "broadcast"
+    assert "youtube" in link["join_url"]
+    assert link["provider"] == "broadcast"
+
+
+def test_broadcast_requires_url():
+    svc = ClassSessionService(data_layer=FakeDL(), tenant_id="t", jwt_secret="secret-32chars-minimum-value!!")
+    with pytest.raises(ValueError, match="broadcast_url"):
+        svc.create_session(batch_id="b1", title="X", mode="broadcast", actor_role="teacher")
