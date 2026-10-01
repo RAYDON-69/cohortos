@@ -141,7 +141,7 @@ jobs:
             exit 1
           fi
           set +e
-          ./node_modules/.bin/playwright test e2e/smoke.spec.ts e2e/smoke-journeys.spec.ts --reporter=list > "$LOG" 2>&1
+          ./node_modules/.bin/playwright test e2e/smoke.spec.ts --reporter=list --workers=1 && ./node_modules/.bin/playwright test e2e/smoke-journeys.spec.ts --reporter=list --workers=1 > "$LOG" 2>&1
           PW_EXIT=$?
           cp "$LOG" test-results/playwright-output.txt 2>/dev/null || true
           echo "===== CORE playwright (last 80) ====="

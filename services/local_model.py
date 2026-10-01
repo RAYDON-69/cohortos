@@ -24,6 +24,7 @@ import threading
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
+from services.safe_http import safe_urlopen
 
 # Pinned revisions + SHA-256 (update when changing quant/revision)
 MODEL_REGISTRY: Dict[str, Dict[str, str]] = {
@@ -210,7 +211,7 @@ def ensure_model(
 
     try:
         req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=120) as resp, open(tmp, mode) as out:
+        with safe_urlopen(req, timeout=120) as resp, open(tmp, mode) as out:
             while True:
                 if _progress.get("cancel"):
                     raise InterruptedError("download canceled")

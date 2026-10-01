@@ -8,6 +8,7 @@ from typing import Any, Dict
 from urllib import request, error
 from urllib.parse import urlencode
 
+from services.safe_http import safe_urlopen
 from services.payment_providers.base import (
     PaymentProvider,
     CheckoutSession,
@@ -87,7 +88,7 @@ class StripeProvider(PaymentProvider):
             },
         )
         try:
-            with request.urlopen(req, timeout=30) as resp:
+            with safe_urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
         except error.HTTPError as e:
             raise ProviderError(f"Stripe session HTTP {e.code}: {e.read()[:300]}", "create_failed") from e
@@ -125,7 +126,7 @@ class StripeProvider(PaymentProvider):
             headers={"Authorization": f"Bearer {self.secret}"},
         )
         try:
-            with request.urlopen(req, timeout=30) as resp:
+            with safe_urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
         except error.HTTPError as e:
             raise ProviderError(f"Stripe retrieve HTTP {e.code}: {e.read()[:300]}", "query_failed") from e
