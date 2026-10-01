@@ -1161,3 +1161,11 @@ Desktop-release already publishes to GitHub Release assets (Phase 14). E2E job u
 3. Free any remaining Actions artifact quota if other workflows still upload large binaries (E2E is intentionally light).
 4. Prefer: merge `phase15-auth-e2e-hardening` → main and trigger `E2E Smoke` workflow_dispatch; paste screenshot artifact links here for PROVEN upgrade.
 
+
+## Phase 26 — Class Workspace Pro + Call Desk (2026-10-01)
+Branch: phase26-class-workspace-pro
+- Merged phase24 voice + phase25 jitsi base
+- Timetable idempotent generation, classroom tools, device tiers, call desk queue
+- Jitsi self-host kit under deploy/jitsi + docs/JITSI_SELFHOST.md
+- Unit tests: voice + class + pro stress suite
+

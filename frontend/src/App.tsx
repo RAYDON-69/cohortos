@@ -1,3 +1,6 @@
+import { StudentJoinScreen } from "./screens/classes/StudentJoin";
+import { CallDeskScreen } from "./screens/calldesk/CallDesk";
+import { ClassWorkspaceScreen } from "./screens/classes/ClassWorkspace";
 import { useEffect } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PageTransition } from "./components/PageTransition";
@@ -16,6 +19,7 @@ import { FeesThisMonthScreen } from "./screens/fees/FeesThisMonth";
 import { GreenWhiteNagListScreen } from "./screens/fees/GreenWhiteNagList";
 import { ExamEntryScreen } from "./screens/exams/ExamEntry";
 import { ExamAnalyticsScreen } from "./screens/exams/ExamAnalytics";
+import { VoiceAssistScreen } from "./screens/voice/VoiceAssist";
 import { VaultManagementScreen } from "./screens/vault/VaultManagement";
 import { StaffRolesScreen } from "./screens/settings/StaffRoles";
 import { ModeSettingsScreen } from "./screens/settings/ModeSettings";
@@ -106,7 +110,11 @@ export default function App() {
       <Route path="/founder/pricing" element={<RequireAuth><PricingScreen /></RequireAuth>} />
       <Route path="/" element={<Navigate to="/attendance" replace />} />
       <Route path="*" element={<Navigate to="/attendance" replace />} />
-    </Routes>
+      <Route path="/voice" element={<RequireAuth><VoiceAssistScreen /></RequireAuth>} />
+              <Route path="/classes" element={<RequireAuth><ClassWorkspaceScreen /></RequireAuth>} />
+                  <Route path="/call-desk" element={<RequireAuth><CallDeskScreen /></RequireAuth>} />
+                  <Route path="/join/:tenantId/:sessionId" element={<StudentJoinScreen />} />
+        </Routes>
     </PageTransition>
     </ErrorBoundary>
   );

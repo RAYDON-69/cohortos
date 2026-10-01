@@ -1633,6 +1633,343 @@ def create_api_app(
         return import_students(body, admission=getattr(cm, "admission", None))
 
 
+
+
+    # ── P24 Voice assist (assisted mode only — no autodial) ─────────────
+    def _voice_assist(cm):
+        from services.voice_assist_service import VoiceAssistService
+        keys = {}
+        try:
+            keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
+        except Exception:
+            pass
+        def _llm(prompt: str) -> str:
+            try:
+                from services.agent_safety import cloud_llm_allowed
+                from services.llm_provider import build_llm_provider, LLMRequest
+                if cloud_llm_allowed(keys) and keys.get("api_key"):
+                    prov = build_llm_provider(str(keys.get("provider") or "mock"), str(keys.get("api_key") or ""))
+                    return (prov.complete(LLMRequest(prompt=prompt, tier="cheap")).text or "").strip()
+            except Exception:
+                pass
+            return ""
+        return VoiceAssistService(
+            data_layer=getattr(cm, "data_layer", None),
+            audit_service=getattr(cm, "audit", None),
+            llm_complete=_llm,
+            config_section=keys,
+        )
+
+    @app.post("/t/{tenant_id}/voice/script")
+    def voice_generate_script(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).generate_script(
+                student_name=str(body.get("student_name") or ""),
+                phone=str(body.get("phone") or ""),
+                purpose=str(body.get("purpose") or "fee_reminder"),
+                amount_bdt=body.get("amount_bdt"),
+                language=str(body.get("language") or "bn"),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+                extra_context=str(body.get("extra_context") or ""),
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    @app.post("/t/{tenant_id}/voice/summarize")
+    def voice_summarize(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).summarize_call(
+                call_notes=str(body.get("call_notes") or body.get("notes") or ""),
+                student_name=str(body.get("student_name") or ""),
+                purpose=str(body.get("purpose") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    @app.get("/t/{tenant_id}/voice/summaries")
+    def voice_list_summaries(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        return {"summaries": _voice_assist(cm).list_summaries()}
+
+    @app.post("/t/{tenant_id}/voice/request-call")
+    def voice_request_call(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _voice_assist(cm).request_human_call(
+                to_phone=str(body.get("phone") or body.get("to") or ""),
+                script_id=str(body.get("script_id") or ""),
+                script_text=str(body.get("script") or ""),
+                human_action_id=str(body.get("human_action_id") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+
+    # ── P25/P26 Class workspace (Jitsi) ─────────────────────────────────
+    def _class_svc(cm, tenant_id: str):
+        from services.class_session_service import ClassSessionService
+        secret = os.environ.get("COHORTOS_JITSI_JWT_SECRET") or os.environ.get("COHORTOS_JWT_SECRET") or "cohortos-jitsi-dev-secret-change-me"
+        return ClassSessionService(
+            data_layer=getattr(cm, "data_layer", None),
+            tenant_id=tenant_id,
+            jwt_secret=secret,
+        )
+
+    @app.post("/t/{tenant_id}/classes/sessions")
+    def create_class_session(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).create_session(
+                batch_id=str(body.get("batch_id") or ""),
+                title=str(body.get("title") or "Class"),
+                starts_at=str(body.get("starts_at") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except (PermissionError, ValueError) as e:
+            raise HTTPException(status_code=400 if isinstance(e, ValueError) else 403, detail=str(e))
+
+    @app.get("/t/{tenant_id}/classes/sessions")
+    def list_class_sessions(tenant_id: str, batch_id: Optional[str] = None, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        return {"sessions": _class_svc(cm, tenant_id).list_sessions(batch_id=batch_id)}
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/join")
+    def join_class_session(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str(body.get("role") or claims.get("role") or "participant")
+        try:
+            return _class_svc(cm, tenant_id).join_link(
+                session_id,
+                role=role,
+                display_name=str(body.get("display_name") or claims.get("name") or "Guest"),
+                actor_id=str(claims.get("sub") or ""),
+            )
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/end")
+    def end_class_session(tenant_id: str, session_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).end_session(session_id, actor_id=str(claims.get("sub") or ""), actor_role=role)
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/notices")
+    def post_class_notice(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).post_notice(
+                session_id, body=str(body.get("body") or ""), actor_id=str(claims.get("sub") or ""), actor_role=role
+            )
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.get("/t/{tenant_id}/classes/sessions/{session_id}/notices")
+    def list_class_notices(tenant_id: str, session_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        try:
+            return {"notices": _class_svc(cm, tenant_id).list_notices(session_id)}
+        except KeyError:
+            raise HTTPException(status_code=404, detail="session_not_found")
+
+
+
+    @app.post("/t/{tenant_id}/classes/timetable/generate")
+    def generate_timetable_sessions(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            sessions = _class_svc(cm, tenant_id).generate_from_timetable(
+                batch_id=str(body.get("batch_id") or ""),
+                weekday=int(body.get("weekday") or 0),
+                time_hhmm=str(body.get("time") or "10:00"),
+                duration_min=int(body.get("duration_min") or 90),
+                weeks=int(body.get("weeks") or 4),
+                title=str(body.get("title") or "Scheduled class"),
+                teacher_id=str(body.get("teacher_id") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+            return {"sessions": sessions, "count": len(sessions)}
+        except (PermissionError, ValueError) as e:
+            raise HTTPException(status_code=400 if isinstance(e, ValueError) else 403, detail=str(e))
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/polls")
+    def create_class_poll(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).create_poll(
+                session_id,
+                question=str(body.get("question") or ""),
+                options=list(body.get("options") or []),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+            )
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/qa")
+    def class_qa(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        try:
+            return _class_svc(cm, tenant_id).enqueue_qa(
+                session_id, text=str(body.get("text") or ""), student_id=str(body.get("student_id") or claims.get("sub") or "")
+            )
+        except KeyError:
+            raise HTTPException(status_code=404, detail="session_not_found")
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/raise-hand")
+    def class_raise_hand(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        try:
+            return _class_svc(cm, tenant_id).raise_hand(
+                session_id, student_id=str(body.get("student_id") or claims.get("sub") or ""), name=str(body.get("name") or "")
+            )
+        except KeyError:
+            raise HTTPException(status_code=404, detail="session_not_found")
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/recording")
+    def class_recording(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).set_recording_url(
+                session_id, str(body.get("url") or ""), actor_id=str(claims.get("sub") or ""), actor_role=role
+            )
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.post("/t/{tenant_id}/classes/sessions/{session_id}/notify-absentees")
+    def class_notify_absentees(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        return _class_svc(cm, tenant_id).notify_absentees(
+            session_id,
+            present_ids=list(body.get("present_ids") or []),
+            roster_ids=list(body.get("roster_ids") or []),
+            actor_id=str(claims.get("sub") or ""),
+        )
+
+    @app.post("/t/{tenant_id}/classes/device-tier")
+    def class_device_tier(tenant_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.device_tier import select_tier
+        return select_tier(
+            device_memory_gb=body.get("deviceMemory"),
+            hardware_concurrency=body.get("hardwareConcurrency"),
+            downlink_mbps=body.get("downlink"),
+            effective_type=body.get("effectiveType"),
+            user_override=body.get("override"),
+        )
+
+    # Public-ish student join via token query (still requires valid join JWT issued by authenticated desk/student)
+    @app.get("/join/{tenant_id}/{session_id}")
+    def public_join_page_meta(tenant_id: str, session_id: str, token: Optional[str] = None):
+        """Metadata for lightweight mobile join page — validates token tenant/session."""
+        from services.class_session_service import verify_join_token
+        secret = os.environ.get("COHORTOS_JITSI_JWT_SECRET") or os.environ.get("COHORTOS_JWT_SECRET") or "cohortos-jitsi-dev-secret-change-me"
+        if not token:
+            raise HTTPException(status_code=401, detail="token required")
+        try:
+            claims = verify_join_token(token, expected_tenant_id=tenant_id, jwt_secret=secret)
+        except PermissionError as e:
+            raise HTTPException(status_code=403, detail=str(e))
+        if str(claims.get("session_id")) != str(session_id):
+            raise HTTPException(status_code=403, detail="session_mismatch")
+        cm = registry.get_app(tenant_id)
+        try:
+            link = _class_svc(cm, tenant_id).join_link(
+                session_id,
+                role=str(claims.get("role") or "participant"),
+                display_name=str(claims.get("name") or "Student"),
+                actor_id=str(claims.get("sub") or ""),
+                student_id=str(claims.get("student_id") or ""),
+            )
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {
+            "title_bn": "ক্লাসে যোগ দিন",
+            "title_en": "Join class",
+            "button_bn": "এক ট্যাপে যোগ দিন",
+            "join_url": link["join_url"],
+            "access_mode": link.get("access_mode"),
+            "access_mode_warning": link.get("access_mode_warning"),
+        }
+
+    @app.post("/t/{tenant_id}/call-desk/queue")
+    def call_desk_queue(tenant_id: str, body: Dict[str, Any] = Body(default={}), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.call_desk_service import CallDeskService
+        cm = registry.get_app(tenant_id)
+        desk = CallDeskService(data_layer=getattr(cm, "data_layer", None), voice_assist=_voice_assist(cm))
+        cards = desk.build_queue(
+            absences=body.get("absences") or [],
+            fee_dues=body.get("fee_dues") or [],
+            exam_flags=body.get("exam_flags") or [],
+            admission_leads=body.get("admission_leads") or [],
+        )
+        return {"cards": cards}
+
+    @app.post("/t/{tenant_id}/call-desk/script")
+    def call_desk_script(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.call_desk_service import CallDeskService
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        desk = CallDeskService(data_layer=getattr(cm, "data_layer", None), voice_assist=_voice_assist(cm))
+        return desk.script_for_card(body.get("card") or body, language=str(body.get("language") or "bn"), actor_id=str(claims.get("sub") or ""), actor_role=role)
+
+    @app.post("/t/{tenant_id}/call-desk/outcome")
+    def call_desk_outcome(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.call_desk_service import CallDeskService
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        desk = CallDeskService(data_layer=getattr(cm, "data_layer", None), voice_assist=_voice_assist(cm))
+        try:
+            return desk.log_outcome(
+                card_id=str(body.get("card_id") or ""),
+                outcome=str(body.get("outcome") or ""),
+                notes=str(body.get("notes") or ""),
+                promised_date=str(body.get("promised_date") or ""),
+                actor_id=str(claims.get("sub") or ""),
+                actor_role=role,
+                human_action_id=str(body.get("human_action_id") or ""),
+            )
+        except (PermissionError, ValueError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 400, detail=str(e))
+
+
     @app.get("/t/{tenant_id}/automations/rules")
     def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)
