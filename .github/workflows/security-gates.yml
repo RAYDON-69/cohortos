@@ -199,7 +199,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -r requirements.txt schemathesis hypothesis
+          pip install -r requirements.txt 'schemathesis>=3.39,<4' hypothesis
       - name: Start API
         env:
           COHORTOS_JWT_SECRET: fuzz-secret-not-for-prod-32charsxx
@@ -215,22 +215,30 @@ jobs:
       - name: Fuzz OpenAPI no 5xx
         run: |
           set -euo pipefail
+          schemathesis --version
+          schemathesis run --help | head -n 40
+          # Seed tenant-A admin session for authenticated ops
+          python scripts/ci_seed_fuzz_auth.py --base http://127.0.0.1:8741 --out /tmp/fuzz-auth.json
+          TOKEN=$(python -c "import json; print(json.load(open('/tmp/fuzz-auth.json')).get('access_token',''))")
           set +e
+          # Pin CLI flags to current schemathesis (max-examples, not hypothesis-max-examples)
           schemathesis run http://127.0.0.1:8741/openapi.json \
             --checks not_a_server_error \
-            --hypothesis-max-examples=20 \
-            --max-failures=5 \
+            --max-examples=50 \
+            --max-failures=20 \
             --request-timeout=10 \
+            -H "Authorization: Bearer ${TOKEN}" \
             2>&1 | tee /tmp/schemathesis.log
           RC=${PIPESTATUS[0]}
           set -e
           echo "schemathesis_exit=$RC"
           head -n 100 /tmp/schemathesis.log || true
           python scripts/ci_write_fuzz_report.py /tmp/schemathesis.log /tmp/fuzz-report.json
-          # Always have a report
           test -f /tmp/fuzz-report.json
-          # Soft-fail for now until 500s are drained — still publish; fail if no /health
-          grep -q health /tmp/schemathesis.log || curl -sf http://127.0.0.1:8741/health
+          # Fail job if fuzzer never ran (flag errors)
+          if grep -qi "No such option" /tmp/schemathesis.log; then exit 1; fi
+          # Fail on 5xx findings in report
+          python -c "import json; d=json.load(open('/tmp/fuzz-report.json')); print(d.get('fail_count',0)); raise SystemExit(1 if d.get('has_5xx') else 0)"
       - name: Publish fuzz signal
         if: always()
         env:

@@ -1,0 +1,62 @@
+name: Release Readiness
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  chaos-and-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Chaos + diagnostics + upgrade unit drills
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: readiness-secret-not-for-prod-xxxx
+          COHORTOS_FOUNDER_TOKEN: founder-ready
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+        run: |
+          set -euo pipefail
+          pytest tests/test_chaos_data_safety.py tests/test_diagnostics_bundle.py tests/test_upgrade_migrations.py tests/test_safe_http.py tests/test_chroma_embedded_only.py -q --tb=short | tee /tmp/chaos.log
+      - name: Start API + load smoke
+        env:
+          COHORTOS_JWT_SECRET: readiness-secret-not-for-prod-xxxx
+          COHORTOS_FOUNDER_TOKEN: founder-ready
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_ENV: test
+        run: |
+          set -euo pipefail
+          nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 40); do curl -sf http://127.0.0.1:8741/health && break; sleep 1; done
+          LOAD_N=50 python scripts/load_smoke.py || true
+      - name: Scorecard
+        if: always()
+        run: |
+          set -euo pipefail
+          python scripts/ci_readiness_scorecard.py || true
+          test -f docs/READINESS.md
+      - name: Publish readiness signal
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          OUT="readiness-${{ github.sha }}.json"
+          cp /tmp/readiness.json /tmp/$OUT 2>/dev/null || echo '{"overall":"NO-GO"}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
