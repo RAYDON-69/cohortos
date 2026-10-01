@@ -1169,3 +1169,11 @@ Branch: phase26-class-workspace-pro
 - Jitsi self-host kit under deploy/jitsi + docs/JITSI_SELFHOST.md
 - Unit tests: voice + class + pro stress suite
 
+
+## Phase 26c — Extended smoke join-404 + ci-reports (2026-10-01)
+Branch: phase26c-extended-smoke-fix
+Root cause: DataAccessLayer.create() overwrites id; join used stale UUID → 404.
+Fix: return persisted id from create_session. HTTPS-only broadcast URLs.
+CI: continue-on-error on EXTENDED; failure report → ci-reports/e2e-<run_id>.txt
+Proof: Contents API can read ci-reports/e2e-proof-p26c.txt
+

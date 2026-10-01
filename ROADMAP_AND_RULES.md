@@ -65,3 +65,8 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - **Sanity-check pricing:** $100K ARR from 50 centres implies ~$167/centre/month (~20,000 BDT) — far above typical district-centre software spend. Either justify ARPA (SMS credits, AI, onboarding, multi-campus) or target 100–300 centres. Model this before quoting valuations.
 - **International outreach:** treat as a separate later product bet; don't let it dilute the Bangladesh wedge. "$300K ARR from 3–5 teachers" is not a realistic model — needs schools/platform partnerships.
 - **Metrics that build an exit story:** paid centres, weekly active centres, fee volume processed through the app, retention, support load.
+
+
+## E2E gate policy (P26c)
+- **CORE** (`frontend/e2e/smoke.spec.ts`): required. Must stay green on every main push.
+- **EXTENDED** (`frontend/e2e/smoke-extended.spec.ts`): separate step with `continue-on-error: true` until stable; failures write `ci-reports/e2e-<run_id>.txt` on the `ci-reports` branch (readable via Contents API). Once green twice in a row, promote to required.

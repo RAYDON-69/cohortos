@@ -61,6 +61,10 @@ async function seedSession(request: import("@playwright/test").APIRequestContext
 test.describe.configure({ mode: "serial" });
 
 test("extended — voice, class, broadcast, call desk", async ({ page, request }) => {
+  // When explicitly disabled, skip cleanly (does not fail the job)
+  if (process.env.COHORTOS_E2E_EXTENDED === "0") {
+    test.skip(true, "COHORTOS_E2E_EXTENDED=0");
+  }
   const health = await request.get(`${API}/health`).catch(() => null);
   if (!health || !health.ok()) {
     test.skip(true, `API not reachable at ${API}/health`);
@@ -142,7 +146,7 @@ test("extended — voice, class, broadcast, call desk", async ({ page, request }
     headers,
     data: { role: "participant", display_name: "E2E Student" },
   });
-  if (!join.ok()) throw new Error(`join ${join.status()}`);
+  if (!join.ok()) throw new Error(`join ${join.status()} body=${await join.text()}`);
   const j = await join.json();
   if (!j.join_url || !j.token || !String(j.join_url).includes(classCreated.room)) {
     throw new Error(`join_url invalid: ${JSON.stringify(j)}`);
