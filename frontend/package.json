@@ -36,7 +36,7 @@
     "photoswipe": "^5.4.4",
     "papaparse": "^5.4.1",
     "xlsx": "^0.18.5",
-    "@excalidraw/excalidraw": "^0.17.6"
+    "@excalidraw/excalidraw": "^0.18.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
