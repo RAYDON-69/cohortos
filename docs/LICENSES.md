@@ -21,4 +21,9 @@
 | Qwen2.5-1.5B GGUF | Apache-2.0 | Preferred for acquirer diligence |
 
 Generated as part of Phase 23. Update when adding dependencies.
+<<<<<<< HEAD
 | cryptography | Apache-2.0 / BSD | Field encryption for voice PII |
+=======
+| Jitsi Meet | Apache-2.0 | Class media rooms (external host / self-host) |
+| PyJWT | MIT | Class join tokens |
+>>>>>>> origin/phase25-class-workspace-jitsi

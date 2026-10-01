@@ -1,3 +1,4 @@
+import { ClassWorkspaceScreen } from "./screens/classes/ClassWorkspace";
 import { useEffect } from "react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PageTransition } from "./components/PageTransition";
@@ -108,6 +109,7 @@ export default function App() {
       <Route path="/" element={<Navigate to="/attendance" replace />} />
       <Route path="*" element={<Navigate to="/attendance" replace />} />
       <Route path="/voice" element={<RequireAuth><VoiceAssistScreen /></RequireAuth>} />
+              <Route path="/classes" element={<RequireAuth><ClassWorkspaceScreen /></RequireAuth>} />
         </Routes>
     </PageTransition>
     </ErrorBoundary>
