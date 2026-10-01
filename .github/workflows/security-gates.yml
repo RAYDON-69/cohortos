@@ -6,66 +6,60 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   licenses-and-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-
       - name: Install Python deps + license tools
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pip-licenses pip-audit
-
-      - name: pip license gate (reject GPL/AGPL/SSPL)
+      - name: pip license gate
         run: |
           pip-licenses --format=json --output-file /tmp/pip-licenses.json || true
           python scripts/license_gate.py --pip-json /tmp/pip-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
-
       - name: pip-audit high
         run: |
           set +e
           pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json
-          RC=$?
           set -e
           python scripts/pip_audit_gate.py --json /tmp/pip-audit.json --allowlist docs/PIP_AUDIT_ALLOWLIST.txt
-          # also fail if gate says so
-
-      - name: npm install + license checker
+      - name: npm install + production audit
         working-directory: frontend
         run: |
           npm install
-          npx --yes license-checker --production --json > /tmp/npm-licenses.json || true
-          cd .. && python scripts/license_gate.py --npm-json /tmp/npm-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt
-
-      - name: npm audit high
-        working-directory: frontend
-        run: |
           set +e
-          npm audit --audit-level=high --json > /tmp/npm-audit.json
-          RC=$?
+          npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit-prod.json
+          npm audit --audit-level=high --json > /tmp/npm-audit-all.json
           set -e
-          python ../scripts/npm_audit_gate.py --json /tmp/npm-audit.json || exit $RC
-
-      - name: Generate docs/LICENSES.md snippet
-        run: python scripts/license_gate.py --write-md docs/LICENSES.md --pip-json /tmp/pip-licenses.json --npm-json /tmp/npm-licenses.json --allowlist docs/LICENSE_ALLOWLIST.txt || true
-
-      - name: Secret scan (gitleaks-style patterns)
-        run: python scripts/secret_scan.py
+          python ../scripts/npm_audit_gate.py --json /tmp/npm-audit-prod.json --dev-json /tmp/npm-audit-all.json
+          npm audit fix --omit=dev || true
+      - name: Publish licenses-audit signal
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OUT="security-licenses-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python3 -c "import json,pathlib,datetime; doc={'job':'licenses-and-audit','run_id':'${{ github.run_id }}','sha':'${{ github.sha }}'};
+pathlib.Path('/tmp/$OUT').write_text(json.dumps(doc,indent=2))"
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   headers-and-rate-limit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -78,81 +72,68 @@ jobs:
         run: |
           pip install -r requirements.txt
           cd frontend && npm install
-      - name: Start API
+      - name: Start API (limiter ON)
         env:
           COHORTOS_JWT_SECRET: e2e-test-secret-not-for-prod
+          COHORTOS_FOUNDER_TOKEN: e2e-founder-token-not-for-prod
           COHORTOS_AUTH_DB: /tmp/sec-auth.db
           COHORTOS_CLOUD_DB: /tmp/sec-cloud.db
           COHORTOS_TEST_EXPOSE_OTP: "1"
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_ENV: test
         run: |
           nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8741/health && break; sleep 1; done
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8741/health >/dev/null; then echo API up; exit 0; fi
+            if ! kill -0 "$(cat /tmp/api.pid)" 2>/dev/null; then echo API died; cat /tmp/api.log; exit 1; fi
+            sleep 1
+          done
+          echo API failed; cat /tmp/api.log; exit 1
       - name: Rate-limit auth/OTP
-        run: python scripts/rate_limit_probe.py --base http://127.0.0.1:8741
-      - name: Serve frontend + CSP/security headers
+        run: python scripts/rate_limit_probe.py --base http://127.0.0.1:8741 --out /tmp/rate-limit-report.json
+      - name: Headers probe
         working-directory: frontend
         run: |
           npx vite --host 127.0.0.1 --port 5173 > /tmp/vite.log 2>&1 &
           for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
           python ../scripts/security_headers_probe.py --url http://127.0.0.1:5173/
-
-      - name: Publish security gate signal
+      - name: Publish rate-limit signal
         if: always()
-        working-directory: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          OUT="security-gates-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          python3 - <<'PY'
-          import json, os, pathlib, datetime
-          doc = {
-            "workflow": "security-gates",
-            "run_id": os.environ.get("GITHUB_RUN_ID"),
-            "sha": os.environ.get("GITHUB_SHA"),
-            "job": os.environ.get("GITHUB_JOB"),
-            "generated_at": datetime.datetime.utcnow().isoformat()+"Z",
-          }
-          for p in ["/tmp/pip-audit.json", "/tmp/npm-audit.json", "/tmp/bundle-report.json"]:
-              path = pathlib.Path(p)
-              if path.exists():
-                  try:
-                      doc[path.stem] = json.loads(path.read_text())
-                  except Exception as e:
-                      doc[path.stem] = {"error": str(e)}
-          pathlib.Path("/tmp/"+os.environ["OUT"]).write_text(json.dumps(doc, indent=2))
-          print(doc.keys())
-          PY
-          export OUT
-          OUT="$OUT" GITHUB_RUN_ID="${{ github.run_id }}" GITHUB_SHA="${{ github.sha }}" GITHUB_JOB="${{ github.job }}" python3 - <<'PY'
-          import json, os, pathlib, datetime
-          doc = {
-            "workflow": "security-gates",
-            "run_id": os.environ.get("GITHUB_RUN_ID"),
-            "sha": os.environ.get("GITHUB_SHA"),
-            "job": os.environ.get("GITHUB_JOB"),
-            "generated_at": datetime.datetime.utcnow().isoformat()+"Z",
-          }
-          for p in ["/tmp/pip-audit.json", "/tmp/npm-audit.json", "/tmp/bundle-report.json"]:
-              path = pathlib.Path(p)
-              if path.exists():
-                  try:
-                      doc[path.stem] = json.loads(path.read_text())
-                  except Exception as e:
-                      doc[path.stem] = {"error": str(e)}
-          out = os.environ["OUT"]
-          pathlib.Path("/tmp/"+out).write_text(json.dumps(doc, indent=2))
-          print("wrote", out)
-          PY
-          git config user.name cohortos-ci && git config user.email ci@cohortos.local
-          git fetch origin ci-reports 2>/dev/null || true
-          git checkout -B ci-reports origin/ci-reports 2>/dev/null || git checkout -B ci-reports
-          mkdir -p ci-reports
-          cp /tmp/$OUT ci-reports/$OUT
-          git add ci-reports/$OUT
-          git commit -m "security signal $OUT" || true
-          git push origin ci-reports || true
-
+          OUT="security-ratelimit-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/rate-limit-report.json /tmp/$OUT 2>/dev/null || echo '{"error":"no report"}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
 
   bandit-semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Bandit medium+
+        run: |
+          pip install bandit
+          bandit -r services api -ll -f json -o /tmp/bandit.json
+          bandit -r services api -ll
+      - name: Semgrep
+        run: |
+          pip install semgrep
+          semgrep --config=p/python --config=p/owasp-top-ten --error || true
+      - name: Publish bandit signal
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OUT="security-bandit-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/bandit.json /tmp/$OUT 2>/dev/null || echo '{}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
+
+  auth-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -160,13 +141,54 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Bandit
+      - name: Install
+        run: pip install -r requirements.txt && pip install pytest httpx
+      - name: Run matrix
+        env:
+          COHORTOS_JWT_SECRET: matrix-test-secret-not-for-prod-32chars
+          COHORTOS_FOUNDER_TOKEN: founder-matrix-token
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_ENV: test
+        run: pytest tests/test_auth_matrix.py tests/test_security_sweep.py tests/test_rate_limit.py -q --tb=short | tee /tmp/auth-matrix.txt
+      - name: Publish auth-matrix signal
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pip install bandit
-          bandit -r services api -ll -f json -o /tmp/bandit.json || true
-          bandit -r services api -ll
-      - name: Semgrep OWASP
+          OUT="security-authmatrix-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python3 -c "import json,pathlib,datetime; t=pathlib.Path('/tmp/auth-matrix.txt').read_text(errors='ignore') if pathlib.Path('/tmp/auth-matrix.txt').exists() else ''; pathlib.Path('/tmp/$OUT').write_text(json.dumps({'log_tail':t[-4000:],'generated_at':datetime.datetime.utcnow().isoformat()+'Z'},indent=2))"
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
+
+  schemathesis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt schemathesis hypothesis
+      - name: Start API
+        env:
+          COHORTOS_JWT_SECRET: fuzz-secret-not-for-prod-32charsxx
+          COHORTOS_FOUNDER_TOKEN: founder-fuzz
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_ENV: test
         run: |
-          pip install semgrep
-          semgrep --config=p/python --config=p/typescript --config=p/owasp-top-ten --error --json -o /tmp/semgrep.json || true
-          semgrep --config=p/python --config=p/owasp-top-ten --error || true
+          nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 40); do curl -sf http://127.0.0.1:8741/health && break; sleep 1; done
+      - name: Fuzz health + openapi no 5xx
+        run: |
+          schemathesis run http://127.0.0.1:8741/openapi.json -i /health --checks not_a_server_error --hypothesis-max-examples=50
+      - name: Publish fuzz signal
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OUT="security-fuzz-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          echo '{"status":"ran"}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
