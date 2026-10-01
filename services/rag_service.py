@@ -430,7 +430,8 @@ class RagService:
             "created_at": _now(),
         }
         try:
-            self.data_layer.create("ai_chat_turns", row)
+            _nid = self.data_layer.create("ai_chat_turns", row)
+            row["id"] = str(_nid)
         except Exception:
             mem = self.persist_dir / "chat_memory.jsonl"
             mem.parent.mkdir(parents=True, exist_ok=True)

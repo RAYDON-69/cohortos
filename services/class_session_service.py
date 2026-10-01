@@ -395,7 +395,8 @@ class ClassSessionService:
             "tenant_id": self.tenant_id,
         }
         if self.data_layer:
-            self.data_layer.create("class_join_attendance", row)
+            _nid = self.data_layer.create("class_join_attendance", row)
+            row["id"] = str(_nid)
         return row
 
     def post_notice(self, session_id: str, *, body: str, actor_id: str = "", actor_role: str = "teacher") -> Dict[str, Any]:
@@ -412,7 +413,8 @@ class ClassSessionService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("class_session_notices", row)
+            _nid = self.data_layer.create("class_session_notices", row)
+            row["id"] = str(_nid)
         return {"id": nid, "body": row["body"], "created_at": row["created_at"]}
 
     def list_notices(self, session_id: str, limit: int = 50) -> List[Dict[str, Any]]:
@@ -441,7 +443,8 @@ class ClassSessionService:
             "status": "raised",
         }
         if self.data_layer:
-            self.data_layer.create("class_raise_hand", row)
+            _nid = self.data_layer.create("class_raise_hand", row)
+            row["id"] = str(_nid)
         return row
 
     def create_poll(self, session_id: str, *, question: str, options: List[str], actor_id: str = "", actor_role: str = "teacher") -> Dict[str, Any]:
@@ -458,7 +461,8 @@ class ClassSessionService:
             "created_at": _now(),
         }
         if self.data_layer:
-            self.data_layer.create("class_polls", row)
+            _nid = self.data_layer.create("class_polls", row)
+            row["id"] = str(_nid)
         return row
 
     def vote_poll(self, poll_id: str, *, option_index: int, voter_id: str) -> Dict[str, Any]:
@@ -485,7 +489,8 @@ class ClassSessionService:
             "status": "queued",
         }
         if self.data_layer:
-            self.data_layer.create("class_qa_queue", row)
+            _nid = self.data_layer.create("class_qa_queue", row)
+            row["id"] = str(_nid)
         return row
 
     def notify_absentees(self, session_id: str, *, present_ids: List[str], roster_ids: List[str], actor_id: str = "") -> Dict[str, Any]:
@@ -503,6 +508,59 @@ class ClassSessionService:
             )
             notices.append({"student_id": sid, "notice_id": n["id"]})
         return {"absent_count": len(absent), "notices": notices}
+
+
+    def save_whiteboard_scene(self, session_id: str, scene_json: str, *, actor_id: str = "", actor_role: str = "teacher") -> Dict[str, Any]:
+        if not role_can_write(actor_role):
+            raise PermissionError(f"role_denied:{actor_role}")
+        self._get(session_id)
+        try:
+            from services.voice_assist_service import encrypt_field
+            enc = encrypt_field(scene_json or "{}")
+        except Exception:
+            enc = scene_json or "{}"
+        row = {
+            "id": str(uuid.uuid4()),
+            "session_id": session_id,
+            "tenant_id": self.tenant_id,
+            "scene_enc": enc,
+            "updated_at": _now(),
+            "actor_id": actor_id,
+        }
+        if self.data_layer:
+            _nid = self.data_layer.create("class_whiteboard_scenes", row)
+            row["id"] = str(_nid)
+        return {"session_id": session_id, "id": row["id"], "updated_at": row["updated_at"]}
+
+    def load_whiteboard_scene(self, session_id: str) -> Dict[str, Any]:
+        self._get(session_id)
+        scene = "{}"
+        if self.data_layer:
+            rows = [
+                r for r in (self.data_layer.get_all("class_whiteboard_scenes") or [])
+                if str(r.get("session_id")) == str(session_id)
+            ]
+            rows.sort(key=lambda x: str(x.get("updated_at") or ""))
+            if rows:
+                try:
+                    from services.voice_assist_service import decrypt_field
+                    scene = decrypt_field(rows[-1].get("scene_enc") or "")
+                except Exception:
+                    scene = rows[-1].get("scene_enc") or "{}"
+        return {"session_id": session_id, "scene": scene}
+
+    def allowed_recording_url(self, url: str) -> str:
+        u = _validate_broadcast_url(url)
+        from urllib.parse import urlparse
+        host = (urlparse(u).hostname or "").lower()
+        allowed = (
+            host.endswith("youtube.com") or host.endswith("youtu.be")
+            or host.endswith("drive.google.com") or host.endswith("docs.google.com")
+            or host.endswith("vimeo.com") or host.endswith("facebook.com") or host.endswith("fb.watch")
+        )
+        if not allowed:
+            raise ValueError(f"recording_host_not_allowed:{host}")
+        return u
 
 
 def verify_join_token(

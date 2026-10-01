@@ -1975,6 +1975,67 @@ def create_api_app(
             raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 400, detail=str(e))
 
 
+
+    @app.post("/t/{tenant_id}/demo/load")
+    def demo_load(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.demo_seed import DemoSeedService
+        cm = registry.get_app(tenant_id)
+        return DemoSeedService(getattr(cm, "data_layer", None)).load_demo(tenant_id)
+
+    @app.post("/t/{tenant_id}/demo/remove")
+    def demo_remove(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.demo_seed import DemoSeedService
+        cm = registry.get_app(tenant_id)
+        return DemoSeedService(getattr(cm, "data_layer", None)).remove_demo(tenant_id)
+
+    @app.post("/t/{tenant_id}/backup")
+    def tenant_backup(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.tenant_backup import TenantBackupService
+        cm = registry.get_app(tenant_id)
+        return TenantBackupService(getattr(cm, "data_layer", None)).create_backup(tenant_id)
+
+    @app.post("/t/{tenant_id}/backup/restore")
+    def tenant_restore(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.tenant_backup import TenantBackupService
+        cm = registry.get_app(tenant_id)
+        try:
+            return TenantBackupService(getattr(cm, "data_layer", None)).restore_backup(body)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+    @app.get("/t/{tenant_id}/export/pdpa")
+    def tenant_pdpa_export(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        from services.tenant_backup import TenantBackupService
+        cm = registry.get_app(tenant_id)
+        return TenantBackupService(getattr(cm, "data_layer", None)).export_pdpa(tenant_id)
+
+    @app.put("/t/{tenant_id}/classes/sessions/{session_id}/whiteboard")
+    def save_whiteboard(tenant_id: str, session_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        role = str((claims.get("roles") or ["desk"])[0] if isinstance(claims.get("roles"), list) else claims.get("role") or "desk")
+        try:
+            return _class_svc(cm, tenant_id).save_whiteboard_scene(
+                session_id, scene_json=str(body.get("scene") or "{}"), actor_id=str(claims.get("sub") or ""), actor_role=role
+            )
+        except (PermissionError, KeyError) as e:
+            raise HTTPException(status_code=403 if isinstance(e, PermissionError) else 404, detail=str(e))
+
+    @app.get("/t/{tenant_id}/classes/sessions/{session_id}/whiteboard")
+    def load_whiteboard(tenant_id: str, session_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        _require_tenant(claims, tenant_id)
+        cm = registry.get_app(tenant_id)
+        try:
+            return _class_svc(cm, tenant_id).load_whiteboard_scene(session_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="session_not_found")
+
+
     @app.get("/t/{tenant_id}/automations/rules")
     def list_automation_rules(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
         _require_tenant(claims, tenant_id)

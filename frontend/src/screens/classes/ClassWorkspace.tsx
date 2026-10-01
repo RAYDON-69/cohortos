@@ -26,6 +26,7 @@ export function ClassWorkspaceScreen() {
   const [title, setTitle] = useState("Class session");
   const [mode, setMode] = useState<"interactive" | "broadcast">("broadcast");
   const [broadcastUrl, setBroadcastUrl] = useState("");
+  const [recordingUrl, setRecordingUrl] = useState("");
   const [sessions, setSessions] = useState<Session[]>([]);
   const [joinUrl, setJoinUrl] = useState<string | null>(null);
   const [notice, setNotice] = useState("");

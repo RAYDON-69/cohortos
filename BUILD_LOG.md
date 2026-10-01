@@ -1177,3 +1177,14 @@ Fix: return persisted id from create_session. HTTPS-only broadcast URLs.
 CI: continue-on-error on EXTENDED; failure report → ci-reports/e2e-<run_id>.txt
 Proof: Contents API can read ci-reports/e2e-proof-p26c.txt
 
+
+## Phase 27 — Definitive CI signal + whiteboard + safety (2026-10-01)
+Branch: phase27-signal-whiteboard-safety
+- always() JSON signal to ci-reports (core_outcome + extended_outcome)
+- create() id audit + guard test
+- Excalidraw whiteboard API (FULL tier UI lazy)
+- Manual recording allow-list; Jibri NOT-DONE
+- Tenant encrypted backup/restore + PDPA export
+- Demo seed load/remove
+- Bundle budget script
+
