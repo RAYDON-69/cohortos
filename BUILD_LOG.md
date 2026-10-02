@@ -1253,3 +1253,16 @@ Quoted failures:
 - diagnostics: GET /t/{id}/diagnostics/export + Support Download button
 - migrations: 3 historical cut-points replayed (v_attendance_era, v_exams_content, v_ai_accounts)
 - G1 TRACEABILITY.md; G3 fee hypothesis; G4 locale BD; G5 a11y phone viewport; G6 offline queue; G7 subscription honest NOT-DONE; G8 allowlist canary <=7d FAIL
+
+## Phase 36 — Green scorecard honestly + commercial holes (2026-10-02)
+Branch: phase36-green-scorecard
+Quoted:
+- lodash-es HIGH: override pinned ^4.17.21 (vulnerable); fixed ^4.18.1
+- fuzz no report: seed under set -e before set +e; Start API never failed; seed always writes report
+- scorecard FAIL on green jobs: wrong keys (failed vs failed_count; bandit nested; proved_429 vs pass)
+C1 licence Ed25519 + grace + read-only + clock highwater
+C2 no auto-updater documented + signing cost table
+C3 Fernet MultiFernet rotation + test
+C4 VectorStore ABC + Memory adapter + ADR-003
+C5 offsite backup folder + wipe/restore counts
+mutmut workflow; axe hard local; refund + parent notice tests

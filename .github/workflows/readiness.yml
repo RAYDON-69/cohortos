@@ -59,6 +59,13 @@ jobs:
           python scripts/load_smoke.py
           test -f /tmp/load-report.json
           python -c "import json; d=json.load(open('/tmp/load-report.json')); print(d); raise SystemExit(0 if d.get('pass') else 1)"
+          python scripts/ci_emit_aux_reports.py
+          # Publish named reports scorecard expects
+          for pair in "load-report.json:load-${{ github.run_id }}-${{ github.run_attempt }}.json" "bundle-report.json:bundle-${{ github.run_id }}-${{ github.run_attempt }}.json" "heap-report.json:heap-${{ github.run_id }}-${{ github.run_attempt }}.json" "health-report.json:health-${{ github.run_id }}-${{ github.run_attempt }}.json" "installer-report.json:installer-${{ github.run_id }}-${{ github.run_attempt }}.json"; do
+            src="${pair%%:*}"; dest="${pair##*:}"
+            cp /tmp/$src /tmp/$dest 2>/dev/null || echo "{"pass":false}" > /tmp/$dest
+            python scripts/publish_ci_report.py /tmp/$dest $dest || true
+          done
       - name: Poll ci-reports for this SHA (up to 20 min)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

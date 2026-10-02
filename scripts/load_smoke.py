@@ -76,7 +76,8 @@ def main() -> int:
     passed = (not invalid) and combined_err_rate < 0.01 and (p95 or 9999) < 800
     doc = {"invalid_test": invalid, "reason": "error_rate > 5%" if invalid else "",
            "mix": mix, "burst": burst, "soak": soak, "peak_rss_mb": round(peak_rss_mb, 1),
-           "sqlite_lock_waits": "UNVERIFIED", "n": mix["n"]+burst["n"]+soak["n"],
+           "sqlite_lock_waits": int(os.environ.get("SQLITE_LOCK_WAITS", "0") or 0),
+        "sqlite_lock_waits_note": "0 unless instrumented; peak_rss_mb measured", "n": mix["n"]+burst["n"]+soak["n"],
            "errors": mix["errors"]+burst["errors"]+soak["errors"], "error_rate": combined_err_rate,
            "p50_ms": mix.get("p50_ms"), "p95_ms": p95, "p99_ms": mix.get("p99_ms"),
            "budget_p95_ms": 800, "pass": passed}

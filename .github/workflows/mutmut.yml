@@ -1,0 +1,52 @@
+name: Mutation Testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "services/pricing_engine.py"
+      - "services/payment_service.py"
+      - "services/attendance_service.py"
+      - "api/auth.py"
+      - "services/licence_service.py"
+
+permissions:
+  contents: write
+
+jobs:
+  mutmut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install mutmut pytest hypothesis cryptography
+      - name: Run mutmut (bounded)
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: mutmut-secret-not-for-prod-32xx
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+        run: |
+          set +e
+          bash scripts/run_mutmut.sh
+          RC=$?
+          set -e
+          test -f /tmp/mutmut-report.json || echo '{"mutation_score_pct":0,"pass":false,"error":"no report"}' > /tmp/mutmut-report.json
+          cat /tmp/mutmut-report.json
+          python -c "import json; d=json.load(open('/tmp/mutmut-report.json')); print(d); raise SystemExit(0 if d.get('pass') else 1)"
+      - name: Publish
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          OUT="mutmut-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/mutmut-report.json /tmp/$OUT 2>/dev/null || echo '{"pass":false}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT
