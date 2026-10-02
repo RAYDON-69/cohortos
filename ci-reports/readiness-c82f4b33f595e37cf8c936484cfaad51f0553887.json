@@ -1,0 +1,96 @@
+{
+  "sha": "91cbb055af0ee60bde8c7f5c9b50284e2d374284",
+  "overall": "NO-GO",
+  "rows": [
+    {
+      "area": "CORE journeys",
+      "status": "PASS",
+      "detail": "e2e-proof-pass.json"
+    },
+    {
+      "area": "EXTENDED journeys",
+      "status": "PASS",
+      "detail": "e2e-proof-pass.json"
+    },
+    {
+      "area": "auth matrix",
+      "status": "FAIL",
+      "detail": "security-authmatrix-36959098378-1.json"
+    },
+    {
+      "area": "fuzz",
+      "status": "FAIL",
+      "detail": "security-fuzz-36959098378-1.json"
+    },
+    {
+      "area": "bandit",
+      "status": "FAIL",
+      "detail": "security-bandit-36959098378-1.json"
+    },
+    {
+      "area": "semgrep",
+      "status": "MISSING",
+      "detail": "no security-semgrep-*"
+    },
+    {
+      "area": "rate limit",
+      "status": "FAIL",
+      "detail": "security-ratelimit-36959098378-1.json"
+    },
+    {
+      "area": "npm prod",
+      "status": "FAIL",
+      "detail": "security-licenses-36959098378-1.json"
+    },
+    {
+      "area": "pip-audit",
+      "status": "PASS",
+      "detail": "allowlist_days_left=30; canary_fail_at_lte_7"
+    },
+    {
+      "area": "licenses",
+      "status": "PASS",
+      "detail": "security-licenses-36959098378-1.json"
+    },
+    {
+      "area": "secrets",
+      "status": "PASS",
+      "detail": "security-licenses-36959098378-1.json"
+    },
+    {
+      "area": "load p95",
+      "status": "MISSING",
+      "detail": "no /tmp/load-report.json"
+    },
+    {
+      "area": "bundle budget",
+      "status": "MISSING",
+      "detail": "no report yet"
+    },
+    {
+      "area": "LITE heap",
+      "status": "MISSING",
+      "detail": "no report yet"
+    },
+    {
+      "area": "chaos drills",
+      "status": "PASS",
+      "detail": "chaos.log"
+    },
+    {
+      "area": "upgrade drills",
+      "status": "PASS",
+      "detail": "chaos.log"
+    },
+    {
+      "area": "installer size",
+      "status": "MISSING",
+      "detail": "no report yet"
+    },
+    {
+      "area": "/health",
+      "status": "MISSING",
+      "detail": "no report yet"
+    }
+  ]
+}
