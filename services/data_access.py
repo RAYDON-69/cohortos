@@ -3,6 +3,8 @@ Unified data access service for CohortOS
 """
 
 from typing import Dict, List, Optional, Type, Any
+
+LOCK_WAIT_COUNT = {"n": 0}
 import uuid
 from datetime import datetime, timezone
 
