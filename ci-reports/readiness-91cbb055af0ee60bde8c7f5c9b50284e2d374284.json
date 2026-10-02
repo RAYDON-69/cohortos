@@ -15,17 +15,17 @@
     {
       "area": "auth matrix",
       "status": "FAIL",
-      "detail": "security-authmatrix-36959098378-1.json"
+      "detail": "security-authmatrix-36977310829-1.json"
     },
     {
       "area": "fuzz",
       "status": "FAIL",
-      "detail": "security-fuzz-36959098378-1.json"
+      "detail": "security-fuzz-36977310829-1.json"
     },
     {
       "area": "bandit",
       "status": "FAIL",
-      "detail": "security-bandit-36959098378-1.json"
+      "detail": "security-bandit-36977310829-1.json"
     },
     {
       "area": "semgrep",
@@ -35,12 +35,12 @@
     {
       "area": "rate limit",
       "status": "FAIL",
-      "detail": "security-ratelimit-36959098378-1.json"
+      "detail": "security-ratelimit-36977310829-1.json"
     },
     {
       "area": "npm prod",
       "status": "FAIL",
-      "detail": "security-licenses-36959098378-1.json"
+      "detail": "security-licenses-36977310829-1.json"
     },
     {
       "area": "pip-audit",
@@ -50,12 +50,12 @@
     {
       "area": "licenses",
       "status": "PASS",
-      "detail": "security-licenses-36959098378-1.json"
+      "detail": "security-licenses-36977310829-1.json"
     },
     {
       "area": "secrets",
       "status": "PASS",
-      "detail": "security-licenses-36959098378-1.json"
+      "detail": "security-licenses-36977310829-1.json"
     },
     {
       "area": "load p95",
