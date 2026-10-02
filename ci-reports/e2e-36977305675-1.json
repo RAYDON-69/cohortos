@@ -1,0 +1,54 @@
+{
+  "sha": "91cbb055af0ee60bde8c7f5c9b50284e2d374284",
+  "main_sha": "91cbb055af0ee60bde8c7f5c9b50284e2d374284",
+  "run_id": "36977305675",
+  "run_attempt": "1",
+  "core_outcome": "success",
+  "extended_outcome": "success",
+  "core_counts": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 12 tests using 1 worker\n\n  \u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)\n  \u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.8s)\n  \u2713   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (1.8s)\n  \u2713   4 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (1.7s)\n  \u2713   5 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (1.7s)\n  \u2713   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (1.8s)\n  \u2713   7 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (1.7s)\n  \u2713   8 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (229ms)\n  \u2713   9 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (215ms)\n  \u2713  10 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (1.8s)\n  \u2713  11 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (1.8s)\n  \u2713  12 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (1.7s)\n\n  12 passed (20.1s)"
+  },
+  "extended_counts": {
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 13 tests using 1 worker\n\n  \u2713   1 e2e/smoke-extended-journeys.spec.ts:26:1 \u203a ext: create class session + join URL shape (313ms)\n  \u2713   2 e2e/smoke-extended-journeys.spec.ts:43:1 \u203a ext: device tier LITE hides whiteboard (230ms)\n  \u2713   3 e2e/smoke-extended-journeys.spec.ts:57:1 \u203a ext: device tier FULL allows whiteboard (236ms)\n  \u2713   4 e2e/smoke-extended-journeys.spec.ts:71:1 \u203a ext: demo load and remove (247ms)\n  \u2713   5 e2e/smoke-extended-journeys.spec.ts:82:1 \u203a ext: encrypted backup has checksum (225ms)\n  \u2713   6 e2e/smoke-extended-journeys.spec.ts:92:1 \u203a ext: broadcast rejects non-https (232ms)\n  \u2713   7 e2e/smoke-extended-journeys.spec.ts:102:1 \u203a ext: call desk queue reachable (228ms)\n  \u2713   8 e2e/smoke-extended-journeys.spec.ts:110:1 \u203a ext: raise-hand on session (218ms)\n  \u2713   9 e2e/smoke-extended-journeys.spec.ts:131:1 \u203a ext: whiteboard scene roundtrip (235ms)\n  \u2713  10 e2e/smoke-extended-journeys.spec.ts:155:1 \u203a ext: poll create Bangla (241ms)\n  \u2713  11 e2e/smoke-extended-journeys.spec.ts:176:1 \u203a ext: notify absentees endpoint (234ms)\n  \u2713  12 e2e/smoke-extended-journeys.spec.ts:197:1 \u203a ext: PDPA export shape (240ms)\n  \u2713  13 e2e/smoke-extended.spec.ts:63:1 \u203a extended \u2014 voice, class, broadcast, call desk (5.3s)\n\n  13 passed (9.8s)"
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [],
+  "generated_at": "2026-10-02T07:14:59.443930Z",
+  "per_test_lines": [
+    "\u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)",
+    "\u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.8s)",
+    "\u2713   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (1.8s)",
+    "\u2713   4 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (1.7s)",
+    "\u2713   5 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (1.7s)",
+    "\u2713   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (1.8s)",
+    "\u2713   7 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (1.7s)",
+    "\u2713   8 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (229ms)",
+    "\u2713   9 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (215ms)",
+    "\u2713  10 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (1.8s)",
+    "\u2713  11 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (1.8s)",
+    "\u2713  12 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (1.7s)",
+    "\u2713   1 e2e/smoke-extended-journeys.spec.ts:26:1 \u203a ext: create class session + join URL shape (313ms)",
+    "\u2713   2 e2e/smoke-extended-journeys.spec.ts:43:1 \u203a ext: device tier LITE hides whiteboard (230ms)",
+    "\u2713   3 e2e/smoke-extended-journeys.spec.ts:57:1 \u203a ext: device tier FULL allows whiteboard (236ms)",
+    "\u2713   4 e2e/smoke-extended-journeys.spec.ts:71:1 \u203a ext: demo load and remove (247ms)",
+    "\u2713   5 e2e/smoke-extended-journeys.spec.ts:82:1 \u203a ext: encrypted backup has checksum (225ms)",
+    "\u2713   6 e2e/smoke-extended-journeys.spec.ts:92:1 \u203a ext: broadcast rejects non-https (232ms)",
+    "\u2713   7 e2e/smoke-extended-journeys.spec.ts:102:1 \u203a ext: call desk queue reachable (228ms)",
+    "\u2713   8 e2e/smoke-extended-journeys.spec.ts:110:1 \u203a ext: raise-hand on session (218ms)",
+    "\u2713   9 e2e/smoke-extended-journeys.spec.ts:131:1 \u203a ext: whiteboard scene roundtrip (235ms)",
+    "\u2713  10 e2e/smoke-extended-journeys.spec.ts:155:1 \u203a ext: poll create Bangla (241ms)",
+    "\u2713  11 e2e/smoke-extended-journeys.spec.ts:176:1 \u203a ext: notify absentees endpoint (234ms)",
+    "\u2713  12 e2e/smoke-extended-journeys.spec.ts:197:1 \u203a ext: PDPA export shape (240ms)",
+    "\u2713  13 e2e/smoke-extended.spec.ts:63:1 \u203a extended \u2014 voice, class, broadcast, call desk (5.3s)"
+  ]
+}
