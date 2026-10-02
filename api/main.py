@@ -3783,6 +3783,40 @@ def create_api_app(
             raise HTTPException(status_code=400, detail=str(e))
         return out
 
+
+    @app.get("/t/{tenant_id}/diagnostics/export")
+    def diagnostics_export(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
+        """PII-redacted support zip (owner/admin)."""
+        _require_tenant(claims, tenant_id)
+        role = str(claims.get("role") or "")
+        if role not in ("owner", "admin", "founder"):
+            raise HTTPException(status_code=403, detail="owner or admin required")
+        from fastapi.responses import Response
+        from services.diagnostics import build_diagnostics_bundle
+        log_path = Path(tempfile.gettempdir()) / "cohortos-api.log"
+        lines: List[str] = []
+        if log_path.exists():
+            try:
+                lines = log_path.read_text(errors="ignore").splitlines()[-500:]
+            except Exception:
+                lines = []
+        secret = os.environ.get("COHORTOS_JWT_SECRET") or ""
+        blob = build_diagnostics_bundle(
+            log_lines=lines,
+            versions={"api": "1.2.0", "tenant_id": tenant_id},
+            config={
+                "env": os.environ.get("COHORTOS_ENV", ""),
+                "rate_limit_disabled": os.environ.get("COHORTOS_RATE_LIMIT_DISABLED", ""),
+            },
+            integrity="ok",
+            extra_secrets=[secret, str(claims.get("sub") or "")],
+        )
+        return Response(
+            content=blob,
+            media_type="application/zip",
+            headers={"Content-Disposition": f'attachment; filename="cohortos-diagnostics-{tenant_id[:8]}.zip"'},
+        )
+
     return app
 
 

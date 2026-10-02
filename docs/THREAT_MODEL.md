@@ -26,3 +26,14 @@
 | 10 | Local model resource exhaustion | RAM gating | PROVEN unit |
 
 Live media, CodeQL repo setting, and full matrix over every route remain **UNVERIFIED** until CI executes them on main.
+
+## P35 coverage map
+| Scenario | Test |
+|----------|------|
+| Cross-tenant IDOR | auth-matrix CI |
+| API 5xx via fuzz | schemathesis v4 CI |
+| OTP brute force | rate-limit probe |
+| npm HIGH in prod | npm_audit_gate --omit=dev |
+| Chroma server RCE | embedded-only + allowlist canary |
+| Payment negative balance | test_fee_properties |
+| Offline data loss | test_offline_unreliable |

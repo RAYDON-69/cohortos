@@ -199,7 +199,7 @@ jobs:
           python-version: "3.12"
       - run: |
           set -euo pipefail
-          pip install -r requirements.txt 'schemathesis>=3.39,<4' hypothesis
+          pip install -r requirements.txt 'schemathesis>=4,<5' hypothesis
       - name: Start API
         env:
           COHORTOS_JWT_SECRET: fuzz-secret-not-for-prod-32charsxx

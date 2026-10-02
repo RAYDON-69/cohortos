@@ -1242,3 +1242,14 @@ EXTENDED if: always(); workers=1 sequential journeys.
 - overrides lodash-es/nanoid for excalidraw HIGH
 - chaos drills, diagnostics redaction, load smoke, readiness.yml scorecard
 
+
+## Phase 35 — Truthful gates + gap hunt (2026-10-02)
+Branch: phase35-truthful-gates-gaps
+Quoted failures:
+- fuzz: schemathesis>=3.39,<4 ResolutionImpossible vs pytest>=9; pin schemathesis>=4,<5; --max-examples confirmed on v4 CLI
+- npm HIGH: nested nanoid 4.0.2 / 3.3.3 under excalidraw; override to 3.3.19 (patched 3.x, no major)
+- readiness: SUCCESS with overall NO-GO; now workflow_run + poll ci-reports 20m + exit 1 on NO-GO
+- load: error_rate=1.0 p50=0.2ms = connection refused; real mix+burst+soak after /health gate; invalid_test if err>5%
+- diagnostics: GET /t/{id}/diagnostics/export + Support Download button
+- migrations: 3 historical cut-points replayed (v_attendance_era, v_exams_content, v_ai_accounts)
+- G1 TRACEABILITY.md; G3 fee hypothesis; G4 locale BD; G5 a11y phone viewport; G6 offline queue; G7 subscription honest NOT-DONE; G8 allowlist canary <=7d FAIL

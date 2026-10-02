@@ -2156,6 +2156,21 @@ export async function billingSubscription(tenantId: string) {
 }
 
 
+
+/** Download PII-redacted diagnostics zip (owner/admin). */
+export async function downloadDiagnostics(tenantId: string): Promise<Blob> {
+  const token = await ensureAccessToken();
+  const base = getApiBaseUrl();
+  const res = await fetch(`${base}${tenantPath(tenantId, "/diagnostics/export")}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => res.statusText);
+    throw new Error(normalizeErrorDetail(detail, `diagnostics ${res.status}`));
+  }
+  return res.blob();
+}
+
 /** E2E / debug: allow Playwright to hydrate memory access token after localStorage inject */
 if (typeof window !== "undefined") {
   (window as any).__COHORTOS_SAVE_TOKENS__ = saveTokens;
