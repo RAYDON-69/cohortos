@@ -40,7 +40,7 @@
     {
       "area": "pip-audit",
       "status": "PASS",
-      "detail": "allowlist_days_left=31"
+      "detail": "allowlist_days_left=30"
     },
     {
       "area": "secrets",
@@ -80,7 +80,7 @@
     {
       "area": "load p95",
       "status": "FAIL",
-      "detail": "{'n': 50, 'errors': 50, 'error_rate': 1.0, 'p50_ms': 2.2227040000046827, 'p95_ms': 304.82970500000306, 'p99_ms': 305.6160539999979, 'budget_p95_ms': 800, 'pass': False}"
+      "detail": "{'n': 50, 'errors': 50, 'error_rate': 1.0, 'p50_ms': 0.195094999995149, 'p95_ms': 323.7935850000042, 'p99_ms': 330.30743000000484, 'budget_p95_ms': 800, 'pass': False}"
     },
     {
       "area": "installer size",
