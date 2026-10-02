@@ -40,7 +40,7 @@
     {
       "area": "npm prod",
       "status": "FAIL",
-      "detail": "security-licenses-36958922804-1.json"
+      "detail": "security-licenses-36959098378-1.json"
     },
     {
       "area": "pip-audit",
@@ -50,12 +50,12 @@
     {
       "area": "licenses",
       "status": "PASS",
-      "detail": "security-licenses-36958922804-1.json"
+      "detail": "security-licenses-36959098378-1.json"
     },
     {
       "area": "secrets",
       "status": "PASS",
-      "detail": "security-licenses-36958922804-1.json"
+      "detail": "security-licenses-36959098378-1.json"
     },
     {
       "area": "load p95",
