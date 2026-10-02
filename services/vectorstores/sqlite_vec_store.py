@@ -32,7 +32,8 @@ class SqliteVecStore(VectorStore):
         if db_path is None:
             db_path = str(Path(tempfile.gettempdir()) / f"cohortos-vec-{tenant_id}.sqlite")
         self.db_path = db_path
-        self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        from services.sqlite_util import open_sqlite
+        self._conn = open_sqlite(self.db_path)
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA busy_timeout=5000")
         self._conn.execute(

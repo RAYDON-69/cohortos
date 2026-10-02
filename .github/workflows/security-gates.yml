@@ -132,9 +132,7 @@ jobs:
           bandit -r services api -ll -f json -o /tmp/bandit.json || true
           python scripts/ci_write_bandit_report.py /tmp/bandit.json /tmp/bandit-report.json
           echo "## Bandit findings" >> "$GITHUB_STEP_SUMMARY"
-          python -c "import json; d=json.load(open('/tmp/bandit.json')); rs=d.get('results') or []; print('count',len(rs));
-[print(f"- {r.get('filename')}:{r.get('line_number')} {r.get('test_id')} {r.get('issue_severity')}: {r.get('issue_text','')[:100]}") for r in rs]
-open('/tmp/bandit_summary.txt','w').write('\n'.join(f"{r.get('filename')}:{r.get('line_number')} {r.get('test_id')}" for r in rs))"
+          python scripts/ci_bandit_summary.py /tmp/bandit.json
           cat /tmp/bandit_summary.txt >> "$GITHUB_STEP_SUMMARY" || true
           bandit -r services api -ll
       - name: Diag bandit always

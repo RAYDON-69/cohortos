@@ -1,0 +1,94 @@
+name: Workflow Lint
+
+on:
+  push:
+    paths:
+      - ".github/**"
+      - "scripts/lint_workflows.py"
+      - "scripts/ci_bandit_summary.py"
+      - "api/auth.py"
+  pull_request:
+    paths:
+      - ".github/**"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install pyyaml
+      - name: Lint workflows
+        run: python scripts/lint_workflows.py
+      - name: actionlint
+        run: |
+          set -euo pipefail
+          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- 1.7.7
+          ./actionlint -color
+      - name: Bandit summary script unit test
+        run: |
+          set -euo pipefail
+          pip install pytest
+          pytest tests/test_workflow_lint.py tests/test_bandit_summary.py -q --tb=short
+
+  api-health-optional:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps exactly as CI
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install pytest httpx
+      - name: Health + start-api env parity
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: health-ci-secret-not-for-prod-xx
+          COHORTOS_FOUNDER_TOKEN: founder-health
+          COHORTOS_AUTH_DB: /tmp/health-auth.db
+          COHORTOS_CLOUD_DB: /tmp/health-cloud.db
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+        run: |
+          set -euo pipefail
+          pytest tests/test_api_health_optional_deps.py tests/test_start_api_env_parity.py -q --tb=short
+
+  dual-tenant-and-scale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install pytest httpx psutil hypothesis
+      - name: Dual-tenant matrix + scale
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: matrix-secret-not-for-prod-32chars
+          COHORTOS_FOUNDER_TOKEN: founder-matrix
+          COHORTOS_AUTH_DB: /tmp/matrix-auth.db
+          COHORTOS_CLOUD_DB: /tmp/matrix-cloud.db
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          SCALE_STUDENTS: "5000"
+          SCALE_ATTENDANCE: "200000"
+          SCALE_FEES: "20000"
+        run: |
+          set -euo pipefail
+          pytest tests/test_dual_tenant_matrix.py tests/test_scale_b6.py -q --tb=short

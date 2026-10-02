@@ -79,3 +79,8 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 
 ## P38
 - All CI API boots MUST set COHORTOS_AUTH_DB and COHORTOS_CLOUD_DB (use .github/actions/start-api).
+
+## P39 rules
+- **Workflow lint must pass** before any workflow change is claimed PROVEN (`python scripts/lint_workflows.py` + actionlint).
+- No multi-line `python -c` inside YAML `run: |` blocks — use scripts/.
+- Optional features must never block `/health`.

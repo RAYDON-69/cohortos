@@ -162,6 +162,16 @@ jobs:
           set -e
           exit $PW_EXIT
 
+
+      - name: Axe serious/critical must be zero
+        working-directory: frontend
+        env:
+          COHORTOS_API_BASE: http://127.0.0.1:8741
+        run: |
+          set -euo pipefail
+          test -f node_modules/axe-core/axe.min.js || npm install axe-core --no-save
+          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1
+
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()
         id: extended

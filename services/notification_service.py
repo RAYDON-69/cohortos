@@ -328,7 +328,8 @@ class NotificationService:
     def _get_db_connection(self) -> sqlite3.Connection:
         """Get database connection with thread safety"""
         if self._db is None:
-            self._db = sqlite3.connect(self.db_path, check_same_thread=False)
+            from services.sqlite_util import open_sqlite
+            self._db = open_sqlite(self.db_path)
             self._db.row_factory = sqlite3.Row
 
         return self._db

@@ -1285,3 +1285,10 @@ E2E already set both paths → green.
 Fix: .github/actions/start-api composite (required env + alive check + health + log tail).
 Bandit: 1 medium B108 highwater /tmp → tempfile.gettempdir(); medium count 0 after.
 Diag publisher scripts/ci_write_diag.py always on failure.
+
+## Phase 39 — Workflow validation + security-gates YAML fix (2026-10-03)
+Branch: phase39-ci-proof from 13a6531
+ROOT: security-gates invalid YAML — multi-line python -c escaped block scalar (line 136).
+Fix: scripts/ci_bandit_summary.py; plain shell in workflow.
+Added scripts/lint_workflows.py + workflow-lint.yml + actionlint.
+mutmut: scripts/run_mutmut.sh was MISSING — that was the failure cause; added with AUTH_DB env + diag.

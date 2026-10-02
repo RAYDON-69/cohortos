@@ -6,6 +6,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import Counter
 from typing import List, Tuple
 
+def _lock_waits():
+    try:
+        from services.sqlite_util import get_lock_wait_count
+        return get_lock_wait_count()
+    except Exception:
+        return int(os.environ.get("SQLITE_LOCK_WAITS", "0") or 0)
+
 BASE = os.environ.get("COHORTOS_API_BASE", "http://127.0.0.1:8741").rstrip("/")
 TOKEN = os.environ.get("COHORTOS_LOAD_TOKEN", "")
 
@@ -93,7 +100,7 @@ def main() -> int:
         "wrong_token_status": wrong_code,
         "wrong_token_rejected": wrong_token_ok,
         "peak_rss_mb": round(peak_rss, 1),
-        "sqlite_lock_waits": int(os.environ.get("SQLITE_LOCK_WAITS", "0") or 0),
+        "sqlite_lock_waits": _lock_waits(),
         "pass": passed,
     }
     open("/tmp/load-report.json", "w").write(json.dumps(doc, indent=2))
