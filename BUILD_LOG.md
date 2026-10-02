@@ -1266,3 +1266,13 @@ C3 Fernet MultiFernet rotation + test
 C4 VectorStore ABC + Memory adapter + ADR-003
 C5 offsite backup folder + wipe/restore counts
 mutmut workflow; axe hard local; refund + parent notice tests
+
+## Phase 37 — Production-ready hardening + adversarial stress (2026-10-02)
+Branch: phase37-production-ready (from be4b1cb)
+A1 scorecard by kind (cohortos.ci-report/v1) not filename
+A2 load 401/403 count as errors + histogram + wrong-token gate
+A3 sqlite-vec DEFAULT VectorStore; Chroma optional; parity test
+A4 Ed25519 update manifest + checksum + anti-downgrade tests
+A5 signed revocation list + offline cache + forged/expired tests
+A6 tools/licence_cli.py keygen/issue/revoke/update — refuses repo private keys
+B1–B7 adversarial unit suites (isolation, money, concurrency, data-loss, clock, input)

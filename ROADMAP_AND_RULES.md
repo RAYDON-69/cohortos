@@ -71,3 +71,8 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - **CORE** (`frontend/e2e/smoke.spec.ts`): required. Must stay green on every main push.
 - **EXTENDED** (`frontend/e2e/smoke-extended.spec.ts`): **required** (continue-on-error removed after 3 green runs on main). Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome`, `extended_outcome`, and `main_sha`.
 - Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome` and `extended_outcome` from `steps.<id>.outcome` (definitive JSON signal).
+
+## P37 notes
+- CI reports use schema cohortos.ci-report/v1 with kind; scorecard indexes by kind.
+- Default RAG backend is sqlite-vec (Chroma optional).
+- Licence revocation via signed static list; soft device binding is deterrence only.

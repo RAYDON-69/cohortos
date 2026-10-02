@@ -20,3 +20,6 @@ Revocation requires online check-in (optional future). Until then, short `exp` +
 
 ## Limits (honest)
 Electron/Python desktop can be patched to skip checks. Mitigation: server-side feature flags for cloud features; licence mainly gates local commercial conscience + support eligibility.
+
+## Soft device binding (P37 A5)
+A non-cryptographic device fingerprint (hostname hash) may be stored alongside the licence for support display. It is **deterrence only**, not DRM — clearing app data resets it.

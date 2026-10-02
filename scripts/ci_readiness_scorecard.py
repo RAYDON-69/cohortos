@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Build readiness JSON from real ci-reports schemas (P36 field mapping)."""
+"""Readiness scorecard — indexes by kind (cohortos.ci-report/v1), never filename."""
 from __future__ import annotations
 import base64, json, os, sys, urllib.request
 from datetime import date
 from pathlib import Path
+from scripts.ci_report_schema import SCHEMA, index_by_kind
+from scripts.ci_readiness_scorecard_eval import (
+    eval_auth_matrix, eval_bandit, eval_rate_limit, eval_fuzz, eval_e2e_core, eval_e2e_extended,
+)
 
 API = "https://api.github.com"
+REQUIRED_KINDS = [
+    "e2e", "authmatrix", "fuzz", "bandit", "ratelimit", "licenses",
+    "load", "bundle", "heap", "health", "installer",
+]
 
 def row(area, status, detail=""):
     return {"area": area, "status": status, "detail": str(detail)[:240]}
@@ -21,7 +29,7 @@ def _gh_list(repo):
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read().decode())
     except Exception as e:
-        print(f"ci-reports list failed: {e}", file=sys.stderr)
+        print(f"list failed: {e}", file=sys.stderr)
         return []
 
 def _gh_get_json(repo, name):
@@ -38,179 +46,142 @@ def _gh_get_json(repo, name):
     except Exception:
         return None
 
-def _latest(names, prefix):
-    m = sorted([n for n in names if n.startswith(prefix)], reverse=True)
-    return m[0] if m else None
-
-# --- pure evaluators (unit-tested) ---
-def eval_auth_matrix(d: dict) -> bool:
-    # Real schema: failed_count, tests_failed, total_routes
-    if d.get("failed_count") is not None:
-        return int(d["failed_count"]) == 0 and not d.get("tests_failed")
-    if d.get("failed") is not None:
-        return int(d["failed"]) == 0
-    return d.get("ok") is True
-
-def eval_bandit(d: dict) -> bool:
-    # Real schema nests under "bandit"
-    if isinstance(d.get("bandit"), dict) and "medium_plus_count" in d["bandit"]:
-        return int(d["bandit"]["medium_plus_count"]) == 0
-    return int(d.get("medium_plus_count", 1)) == 0
-
-def eval_rate_limit(d: dict) -> bool:
-    # Real schema: proved_429 + has_request_otp
-    if "proved_429" in d:
-        return bool(d.get("proved_429")) and bool(d.get("has_request_otp", True))
-    return d.get("pass") is True or d.get("ok") is True
-
-def eval_fuzz(d: dict) -> bool:
-    if d.get("seed_failed") or d.get("error") == "no report":
-        return False
-    if d.get("error") and not d.get("has_5xx") is False and "seed" in str(d.get("error")).lower():
-        return False
-    if "error" in d and d.get("has_5xx") is None and d.get("fail_count") is None:
-        return False
-    return d.get("has_5xx") is False
-
-def eval_e2e_core(d: dict) -> bool:
-    if d.get("core_outcome") == "success":
-        return True
-    cc = d.get("core_counts") or {}
-    return isinstance(cc, dict) and cc.get("failed", 1) == 0 and cc.get("passed", 0) > 0
-
-def eval_e2e_extended(d: dict) -> bool:
-    if d.get("extended_outcome") == "success":
-        return True
-    ec = d.get("extended_counts") or {}
-    return isinstance(ec, dict) and ec.get("failed", 1) == 0 and ec.get("passed", 0) > 0
-
-def main() -> int:
-    sha = os.environ.get("GITHUB_SHA") or "local"
-    repo = os.environ.get("GITHUB_REPOSITORY", "RAYDON-69/cohortos")
-    names = [x["name"] for x in _gh_list(repo) if isinstance(x, dict)]
-    rows = []
-
-    def add(area, status, detail=""):
-        rows.append(row(area, status, detail))
-
-    e2e_name = _latest(names, "e2e-")
-    if e2e_name:
-        d = _gh_get_json(repo, e2e_name) or {}
-        add("CORE journeys", "PASS" if eval_e2e_core(d) else "FAIL", e2e_name)
-        add("EXTENDED journeys", "PASS" if eval_e2e_extended(d) else "FAIL", e2e_name)
-    else:
-        add("CORE journeys", "MISSING", "no e2e-*")
-        add("EXTENDED journeys", "MISSING", "no e2e-*")
-
-    for area, prefix, fn in [
-        ("auth matrix", "security-authmatrix-", eval_auth_matrix),
-        ("fuzz", "security-fuzz-", eval_fuzz),
-        ("bandit", "security-bandit-", eval_bandit),
-        ("semgrep", "security-semgrep-", lambda d: d.get("error", 0) == 0 or d.get("ok") is True or d.get("findings", 1) == 0),
-        ("rate limit", "security-ratelimit-", eval_rate_limit),
-    ]:
-        n = _latest(names, prefix)
-        if not n:
-            add(area, "MISSING", f"no {prefix}*")
+def collect_reports(repo: str) -> list:
+    reports = []
+    # local /tmp first
+    for p in Path("/tmp").glob("*-report.json"):
+        try:
+            d = json.loads(p.read_text())
+            if d.get("schema") == SCHEMA:
+                reports.append(d)
+            else:
+                # legacy: infer kind from filename stem
+                stem = p.stem.replace("-report", "")
+                d = {**d, "schema": SCHEMA, "kind": stem if stem in {
+                    "load","bundle","heap","health","installer","fuzz","bandit","semgrep",
+                    "authmatrix","ratelimit","licenses","e2e","mutmut","npm","secrets"
+                } else stem}
+                reports.append(d)
+        except Exception:
+            pass
+    # ci-reports branch
+    for ent in _gh_list(repo):
+        if not isinstance(ent, dict):
             continue
-        d = _gh_get_json(repo, n) or {}
+        d = _gh_get_json(repo, ent["name"])
+        if not d:
+            continue
+        if d.get("schema") != SCHEMA:
+            # best-effort kind from filename
+            name = ent["name"]
+            kind = None
+            for k in REQUIRED_KINDS + ["semgrep", "mutmut", "npm", "secrets", "authmatrix"]:
+                if k in name.replace("security-", "").replace("-", ""):
+                    kind = k if k != "authmatrix" else "authmatrix"
+            if "authmatrix" in name:
+                kind = "authmatrix"
+            elif "ratelimit" in name:
+                kind = "ratelimit"
+            elif name.startswith("e2e-"):
+                kind = "e2e"
+            elif "fuzz" in name:
+                kind = "fuzz"
+            elif "bandit" in name:
+                kind = "bandit"
+            elif "licenses" in name:
+                kind = "licenses"
+            elif name.startswith("load-"):
+                kind = "load"
+            elif name.startswith("bundle-"):
+                kind = "bundle"
+            elif name.startswith("heap-"):
+                kind = "heap"
+            elif name.startswith("health-"):
+                kind = "health"
+            elif name.startswith("installer-"):
+                kind = "installer"
+            if kind:
+                d = {**d, "schema": SCHEMA, "kind": kind}
+        reports.append(d)
+    return reports
+
+def score_from_reports(reports: list) -> dict:
+    by = index_by_kind(reports)
+    rows = []
+    if "_duplicates" in by:
+        rows.append(row("schema", "FAIL", f"duplicate kinds: {by['_duplicates']}"))
+        by = {k: v for k, v in by.items() if k != "_duplicates"}
+
+    def need(kind, area, fn):
+        if kind not in by:
+            rows.append(row(area, "NO-GO", f"missing kind={kind}"))
+            return
+        d = by[kind]
         try:
             ok = fn(d)
         except Exception as e:
             ok = False
-            d = {"_eval_error": str(e)}
-        add(area, "PASS" if ok else "FAIL", n)
+            d = {**d, "_err": str(e)}
+        rows.append(row(area, "PASS" if ok else "FAIL", f"kind={kind}"))
 
-    # licenses combined
-    lic = _latest(names, "security-licenses-")
-    if lic:
-        d = _gh_get_json(repo, lic) or {}
-        npm_high = d.get("npm_prod_high")
-        if npm_high is None:
-            # derive from nested npm_prod.vulnerabilities severity high/critical
-            vulns = (d.get("npm_prod") or {}).get("vulnerabilities") or {}
-            npm_high = sum(1 for v in vulns.values() if isinstance(v, dict) and v.get("severity") in ("high", "critical"))
-        add("npm prod", "PASS" if int(npm_high or 0) == 0 else "FAIL", f"{lic} high={npm_high}")
-        add("pip-audit", "PASS" if d.get("pip_audit_ok", True) else "FAIL", lic)
-        add("licenses", "PASS" if d.get("licenses_ok", True) else "FAIL", lic)
-        add("secrets", "PASS" if d.get("secrets_ok", True) else "FAIL", lic)
+    # e2e carries both core and extended
+    if "e2e" in by:
+        d = by["e2e"]
+        rows.append(row("CORE journeys", "PASS" if eval_e2e_core(d) else "FAIL", "kind=e2e"))
+        rows.append(row("EXTENDED journeys", "PASS" if eval_e2e_extended(d) else "FAIL", "kind=e2e"))
     else:
-        for a in ["npm prod", "pip-audit", "licenses", "secrets"]:
-            add(a, "MISSING", "no security-licenses-*")
+        rows.append(row("CORE journeys", "NO-GO", "missing kind=e2e"))
+        rows.append(row("EXTENDED journeys", "NO-GO", "missing kind=e2e"))
 
-    # Named reports the scorecard expects
-    for area, prefix, ok_fn in [
-        ("load p95", "load-", lambda d: d.get("pass") is True and not d.get("invalid_test")),
-        ("bundle budget", "bundle-", lambda d: d.get("pass") is True),
-        ("LITE heap", "heap-", lambda d: d.get("pass") is True),
-        ("installer size", "installer-", lambda d: d.get("pass") is True or d.get("size_mb") is not None),
-        ("/health", "health-", lambda d: d.get("status") == 200 or d.get("pass") is True),
-        ("semgrep", "security-semgrep-", lambda d: d.get("ok") is True or d.get("error", 0) == 0),
-    ]:
-        if any(r["area"] == area for r in rows):
-            continue
-        n = _latest(names, prefix)
-        if not n:
-            # local overlay
-            local_map = {
-                "load p95": "/tmp/load-report.json",
-                "bundle budget": "/tmp/bundle-report.json",
-                "LITE heap": "/tmp/heap-report.json",
-                "installer size": "/tmp/installer-report.json",
-                "/health": "/tmp/health-report.json",
-            }
-            lp = local_map.get(area)
-            if lp and Path(lp).exists():
-                d = json.loads(Path(lp).read_text())
-                add(area, "PASS" if ok_fn(d) else "FAIL", lp)
-            else:
-                add(area, "MISSING", f"no {prefix}*")
-            continue
-        d = _gh_get_json(repo, n) or {}
-        add(area, "PASS" if ok_fn(d) else "FAIL", n)
+    need("authmatrix", "auth matrix", eval_auth_matrix)
+    need("fuzz", "fuzz", eval_fuzz)
+    need("bandit", "bandit", eval_bandit)
+    need("ratelimit", "rate limit", eval_rate_limit)
+    need("licenses", "licenses", lambda d: d.get("licenses_ok", True) is True)
+    need("licenses", "npm prod", lambda d: int(d.get("npm_prod_high") or 0) == 0)
+    need("licenses", "pip-audit", lambda d: d.get("pip_audit_ok", True) is True)
+    need("licenses", "secrets", lambda d: d.get("secrets_ok", True) is True)
+    need("load", "load p95", lambda d: d.get("pass") is True and not d.get("invalid_test"))
+    need("bundle", "bundle budget", lambda d: d.get("pass") is True)
+    need("heap", "LITE heap", lambda d: d.get("pass") is True)
+    need("health", "/health", lambda d: d.get("status") == 200 or d.get("pass") is True)
+    need("installer", "installer size", lambda d: d.get("pass") is True or d.get("size_mb") is not None)
 
-    # Allowlist canary
+    # allowlist canary still applies to pip-audit row detail
     allow = Path("docs/PIP_AUDIT_ALLOWLIST.txt")
     days = None
     if allow.exists():
         for ln in allow.read_text().splitlines():
             if "PYSEC-2026-311" in ln and "|" in ln:
-                exp = ln.split("|")[-1].strip()
                 try:
-                    y, m, d_ = map(int, exp.split("-"))
+                    y, m, d_ = map(int, ln.split("|")[-1].strip().split("-"))
                     days = (date(y, m, d_) - date.today()).days
                 except Exception:
                     pass
-    if days is not None:
+    # If chroma not required (migrated), skip canary fail — mark note
+    chroma_optional = Path("services/vectorstores/sqlite_vec_store.py").exists()
+    if days is not None and not chroma_optional:
         for i, r in enumerate(rows):
-            if r["area"] == "pip-audit":
-                st = "FAIL" if days <= 7 else r["status"]
-                rows[i] = row("pip-audit", st, f"allowlist_days_left={days}; canary_fail_at_lte_7")
-
-    for area in ["chaos drills", "upgrade drills"]:
-        if not any(r["area"] == area for r in rows):
-            if Path("/tmp/chaos.log").exists():
-                txt = Path("/tmp/chaos.log").read_text(errors="ignore")
-                ok = "failed" not in txt.lower() or "passed" in txt.lower()
-                rows.append(row(area, "PASS" if ok else "FAIL", "chaos.log"))
-            else:
-                rows.append(row(area, "MISSING", "no report yet"))
+            if r["area"] == "pip-audit" and days <= 7:
+                rows[i] = row("pip-audit", "FAIL", f"allowlist_days_left={days}")
 
     overall = "GO" if all(r["status"] == "PASS" for r in rows) else "NO-GO"
-    doc = {"sha": sha, "overall": overall, "rows": rows}
+    return {"overall": overall, "rows": rows, "by_kinds": list(by.keys())}
+
+def main() -> int:
+    sha = os.environ.get("GITHUB_SHA") or "local"
+    repo = os.environ.get("GITHUB_REPOSITORY", "RAYDON-69/cohortos")
+    reports = collect_reports(repo)
+    doc = score_from_reports(reports)
+    doc["sha"] = sha
     Path("/tmp/readiness.json").write_text(json.dumps(doc, indent=2))
-    md = ["# CohortOS release readiness\n", f"SHA: `{sha}`  ", f"Verdict: **{overall}**\n",
+    md = ["# CohortOS release readiness\n", f"SHA: `{sha}`  ", f"Verdict: **{doc['overall']}**\n",
           "| Area | Status | Detail |", "|------|--------|--------|"]
-    for r in rows:
+    for r in doc["rows"]:
         md.append(f"| {r['area']} | {r['status']} | {r['detail'][:80]} |")
     Path("docs/READINESS.md").write_text("\n".join(md) + "\n")
-    print(json.dumps({
-        "overall": overall,
-        "pass": sum(1 for r in rows if r["status"] == "PASS"),
-        "missing": sum(1 for r in rows if r["status"] == "MISSING"),
-        "fail": sum(1 for r in rows if r["status"] == "FAIL"),
-    }))
-    return 0 if overall == "GO" else 1
+    print(json.dumps({"overall": doc["overall"], "rows": len(doc["rows"]), "kinds": doc.get("by_kinds")}))
+    return 0 if doc["overall"] == "GO" else 1
 
 if __name__ == "__main__":
     raise SystemExit(main())

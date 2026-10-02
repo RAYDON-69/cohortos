@@ -18,3 +18,6 @@ Introduce `VectorStore` ABC + `MemoryVectorStore` (token cosine) as a second ada
 ## Consequences
 - Canary still forces action by 2026-10-25.
 - Do not delete Chroma until second backend proves RAG E2E.
+
+## P37 update
+sqlite-vec (SQLite + token cosine / FTS5) is now **DEFAULT_BACKEND**. Chroma is optional and not imported by default. Allowlist canary no longer blocks release when chroma is unused.
