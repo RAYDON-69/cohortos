@@ -1276,3 +1276,12 @@ A4 Ed25519 update manifest + checksum + anti-downgrade tests
 A5 signed revocation list + offline cache + forged/expired tests
 A6 tools/licence_cli.py keygen/issue/revoke/update — refuses repo private keys
 B1–B7 adversarial unit suites (isolation, money, concurrency, data-loss, clock, input)
+
+## Phase 38 — CI green: dead API root cause + gates (2026-10-02)
+Branch: phase38-ci-green from 0c7e838
+ROOT CAUSE: Security/Readiness Start API omitted COHORTOS_AUTH_DB + COHORTOS_CLOUD_DB.
+create_api_app_or_raise → require_auth_db() raises AuthConfigError → process dies → /health never 200.
+E2E already set both paths → green.
+Fix: .github/actions/start-api composite (required env + alive check + health + log tail).
+Bandit: 1 medium B108 highwater /tmp → tempfile.gettempdir(); medium count 0 after.
+Diag publisher scripts/ci_write_diag.py always on failure.

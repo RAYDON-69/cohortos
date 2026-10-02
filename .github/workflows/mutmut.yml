@@ -3,7 +3,7 @@ name: Mutation Testing
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches: [main, master, "phase38-*"]
     paths:
       - "services/pricing_engine.py"
       - "services/payment_service.py"

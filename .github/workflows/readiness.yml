@@ -35,7 +35,14 @@ jobs:
         run: |
           set -euo pipefail
           pytest tests/test_chaos_data_safety.py tests/test_diagnostics_bundle.py tests/test_upgrade_migrations.py tests/test_safe_http.py tests/test_chroma_embedded_only.py tests/test_migration_replay.py tests/test_fee_properties.py tests/test_locale_bd.py tests/test_offline_unreliable.py tests/test_subscription_licensing.py tests/test_allowlist_canary.py tests/test_diagnostics_api.py -q --tb=short | tee /tmp/chaos.log
-      - name: Start seeded API + real load test
+      - name: Start seeded API
+        uses: ./.github/actions/start-api
+        with:
+          jwt_secret: readiness-secret-not-for-prod-xxxx
+          founder_token: founder-ready
+          auth_db: /tmp/ready-auth.db
+          cloud_db: /tmp/ready-cloud.db
+      - name: Real load test
         env:
           COHORTOS_JWT_SECRET: readiness-secret-not-for-prod-xxxx
           COHORTOS_FOUNDER_TOKEN: founder-ready
@@ -48,12 +55,6 @@ jobs:
           LOAD_BURST_N: "100"
         run: |
           set -euo pipefail
-          nohup python -m uvicorn api.main:create_api_app_or_raise --factory --host 127.0.0.1 --port 8741 > /tmp/api.log 2>&1 &
-          for i in $(seq 1 60); do
-            if curl -sf http://127.0.0.1:8741/health; then echo "API ready"; break; fi
-            sleep 1
-            if [ "$i" -eq 60 ]; then echo "API never ready"; cat /tmp/api.log; exit 1; fi
-          done
           python scripts/ci_seed_fuzz_auth.py --base http://127.0.0.1:8741 --out /tmp/load-auth.json
           export COHORTOS_LOAD_TOKEN=$(python -c "import json; print(json.load(open('/tmp/load-auth.json')).get('access_token',''))")
           python scripts/load_smoke.py

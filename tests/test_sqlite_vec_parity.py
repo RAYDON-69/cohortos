@@ -1,3 +1,4 @@
+import pytest
 """Parity: sqlite-vec default vs memory on fixed corpus (A3)."""
 from services.vectorstores import get_vector_store, DEFAULT_BACKEND
 from services.vectorstores.memory_store import MemoryVectorStore
@@ -30,8 +31,16 @@ def test_topk_overlap_with_memory(tmp_path):
     # recall floor: d1 must be in top-3 for fee query
     assert "d1" in s_ids
 
-def test_rss_hint_reasonable(tmp_path):
+def test_rss_real_10k_chunks(tmp_path):
+    pytest.importorskip("psutil")
+    import psutil, os
+    proc = psutil.Process(os.getpid())
+    before = proc.memory_info().rss
     sql = get_vector_store("sqlite-vec", tenant_id="rss", db_path=str(tmp_path / "r.sqlite"))
-    _fill(sql)
-    # tiny corpus << 4GB
-    assert sql.rss_hint_mb() < 50
+    ids = [f"c{i}" for i in range(10000)]
+    docs = [f"document chunk number {i} with fee attendance exam content" for i in range(10000)]
+    sql.add(ids, docs)
+    after = proc.memory_info().rss
+    delta_mb = (after - before) / (1024 * 1024)
+    print("rss_delta_mb", delta_mb, "file_mb", sql.rss_hint_mb())
+    assert delta_mb < 500, f"10k chunks used {delta_mb} MB"

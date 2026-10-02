@@ -76,3 +76,6 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - CI reports use schema cohortos.ci-report/v1 with kind; scorecard indexes by kind.
 - Default RAG backend is sqlite-vec (Chroma optional).
 - Licence revocation via signed static list; soft device binding is deterrence only.
+
+## P38
+- All CI API boots MUST set COHORTOS_AUTH_DB and COHORTOS_CLOUD_DB (use .github/actions/start-api).

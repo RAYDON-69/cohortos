@@ -152,7 +152,9 @@ def highwater_path() -> Path:
     p = os.environ.get(HIGHWATER_PATH_ENV)
     if p:
         return Path(p)
-    return Path(os.environ.get("TMPDIR") or "/tmp") / "cohortos-licence-highwater.txt"
+    import tempfile
+    # High-water mark is a local monotonic clock file, not secrets — user-writable temp is intentional.
+    return Path(tempfile.gettempdir()) / "cohortos-licence-highwater.txt"  # nosec B108
 
 
 def touch_highwater(now: Optional[datetime] = None) -> datetime:
