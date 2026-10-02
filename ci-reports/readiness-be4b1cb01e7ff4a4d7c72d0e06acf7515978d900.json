@@ -1,0 +1,96 @@
+{
+  "sha": "be4b1cb01e7ff4a4d7c72d0e06acf7515978d900",
+  "overall": "NO-GO",
+  "rows": [
+    {
+      "area": "CORE journeys",
+      "status": "PASS",
+      "detail": "e2e-proof-pass.json"
+    },
+    {
+      "area": "EXTENDED journeys",
+      "status": "PASS",
+      "detail": "e2e-proof-pass.json"
+    },
+    {
+      "area": "auth matrix",
+      "status": "PASS",
+      "detail": "security-authmatrix-36979033239-1.json"
+    },
+    {
+      "area": "fuzz",
+      "status": "FAIL",
+      "detail": "security-fuzz-36979033239-1.json"
+    },
+    {
+      "area": "bandit",
+      "status": "FAIL",
+      "detail": "security-bandit-36979033239-1.json"
+    },
+    {
+      "area": "semgrep",
+      "status": "MISSING",
+      "detail": "no security-semgrep-*"
+    },
+    {
+      "area": "rate limit",
+      "status": "PASS",
+      "detail": "security-ratelimit-36979033239-1.json"
+    },
+    {
+      "area": "npm prod",
+      "status": "PASS",
+      "detail": "security-licenses-36979033239-1.json high=0"
+    },
+    {
+      "area": "pip-audit",
+      "status": "PASS",
+      "detail": "allowlist_days_left=30; canary_fail_at_lte_7"
+    },
+    {
+      "area": "licenses",
+      "status": "PASS",
+      "detail": "security-licenses-36979033239-1.json"
+    },
+    {
+      "area": "secrets",
+      "status": "PASS",
+      "detail": "security-licenses-36979033239-1.json"
+    },
+    {
+      "area": "load p95",
+      "status": "MISSING",
+      "detail": "no load-*"
+    },
+    {
+      "area": "bundle budget",
+      "status": "MISSING",
+      "detail": "no bundle-*"
+    },
+    {
+      "area": "LITE heap",
+      "status": "MISSING",
+      "detail": "no heap-*"
+    },
+    {
+      "area": "installer size",
+      "status": "MISSING",
+      "detail": "no installer-*"
+    },
+    {
+      "area": "/health",
+      "status": "MISSING",
+      "detail": "no health-*"
+    },
+    {
+      "area": "chaos drills",
+      "status": "PASS",
+      "detail": "chaos.log"
+    },
+    {
+      "area": "upgrade drills",
+      "status": "PASS",
+      "detail": "chaos.log"
+    }
+  ]
+}
