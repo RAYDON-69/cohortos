@@ -152,10 +152,13 @@
     "glob": "^10.4.5",
     "tar": "^6.2.1",
     "lodash-es": "^4.17.21",
-    "nanoid": "^3.3.8",
+    "nanoid": "3.3.19",
     "@excalidraw/excalidraw": {
-      "nanoid": "^3.3.8",
+      "nanoid": "3.3.19",
       "lodash-es": "^4.17.21"
+    },
+    "@excalidraw/mermaid-to-excalidraw": {
+      "nanoid": "3.3.19"
     }
   }
 }
