@@ -1,0 +1,242 @@
+{
+  "tests_failed": [
+    {
+      "node": "tests/test_auth_matrix.py::test_cross_tenant_idor_blocked",
+      "detail": "sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464."
+    },
+    {
+      "node": "tests/test_auth_matrix.py::test_adversarial_cases",
+      "detail": "sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464."
+    }
+  ],
+  "failed_count": 2,
+  "passed_hint": [
+    "=========================== short test summary info ============================",
+    "FAILED tests/test_auth_matrix.py::test_cross_tenant_idor_blocked - sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464.",
+    "FAILED tests/test_auth_matrix.py::test_adversarial_cases - sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464."
+  ],
+  "log_tail": "dleware/base.py\", line 173, in call_next\n    raise app_exc from app_exc.__cause__ or app_exc.__context__\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/middleware/base.py\", line 149, in coro\n    await self.app(scope, receive_or_disconnect, send_no_error)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/middleware/cors.py\", line 91, in __call__\n    await self.simple_response(scope, receive, send, request_headers=headers)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/middleware/cors.py\", line 149, in simple_response\n    await self.app(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/middleware/exceptions.py\", line 63, in __call__\n    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py\", line 18, in __call__\n    await self.app(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/routing.py\", line 676, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 2786, in app\n    await route.handle(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 1310, in handle\n    await super().handle(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/routing.py\", line 282, in handle\n    await self.app(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 165, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 151, in app\n    response = await f(request)\n               ^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 727, in app\n    raw_response = await run_endpoint_function(\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/routing.py\", line 362, in run_endpoint_function\n    return await run_in_threadpool(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/starlette/concurrency.py\", line 34, in run_in_threadpool\n    return await anyio.to_thread.run_sync(func)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/anyio/to_thread.py\", line 65, in run_sync\n    return await get_async_backend().run_sync_in_worker_thread(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/anyio/_backends/_asyncio.py\", line 2706, in run_sync_in_worker_thread\n    return await future\n           ^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/anyio/_backends/_asyncio.py\", line 1100, in run\n    result = context.run(func, *args)\n             ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/telemetry/_api.py\", line 240, in _run_sync_endpoint\n    return function(**arguments)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/cohortos/cohortos/api/main.py\", line 611, in centre_trial\n    registry.register_phone_index(\n  File \"/home/runner/work/cohortos/cohortos/api/main.py\", line 387, in register_phone_index\n    rows = self._meta.get_all(\"phone_index\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/cohortos/cohortos/models/base.py\", line 505, in get_all\n    rows = self._conn.execute(\n           ^^^^^^^^^^^^^^^^^^^\nsqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464.\n=============================== warnings summary ===============================\n../../../../../opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/test_auth_matrix.py::test_cross_tenant_idor_blocked - sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464.\nFAILED tests/test_auth_matrix.py::test_adversarial_cases - sqlite3.ProgrammingError: SQLite objects created in a thread can only be used in that same thread. The object was created in thread id 139782228020096 and this is thread id 139781925238464.\n",
+  "total_routes": 177,
+  "classified_public": 12,
+  "classified_authenticated": 3,
+  "classified_tenant_scoped": 150,
+  "classified_founder": 12,
+  "unclassified": [],
+  "routes_sample": [
+    {
+      "path": "/openapi.json",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/docs",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/docs/oauth2-redirect",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/redoc",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/centre-trial",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/signup",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/request-otp",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/verify-otp",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/refresh",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/me",
+      "methods": [
+        "GET"
+      ],
+      "class": "authenticated"
+    },
+    {
+      "path": "/t/{tenant_id}/students",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/duplicate-check",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/roll-preview",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}",
+      "methods": [
+        "PATCH"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}/extra-sessions",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/{student_id}/migrate",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/templates",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/batch/{batch_id}",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/manual",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/late-threshold",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/late-threshold",
+      "methods": [
+        "PUT"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/absentees",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/reviews",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/reviews/{flag_id}/resolve",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    }
+  ],
+  "exit_code": 1
+}
