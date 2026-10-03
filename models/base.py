@@ -88,12 +88,14 @@ CREATE INDEX IF NOT EXISTS idx_records_active
     ON _records (table_name, tenant_id, is_active);
 """
 
-# Per-thread connections for file paths (sqlite3 connections are not cross-thread safe).
-# Keyed by (thread_id, db_path). WAL + busy_timeout set on open.
+# Per-thread connections (sqlite3 connections are not cross-thread safe).
+# File DBs: key = path. Shared memory: key = URI file:cohortos_mem_<id>?mode=memory&cache=shared
+# A sentinel connection per shared-memory URI keeps the DB alive until close_all().
 _conn_lock = threading.Lock()
 _thread_local = threading.local()
-# Keep a registry of all opened connections for close_all()
 _all_conns: Dict[int, Dict[str, sqlite3.Connection]] = {}
+_mem_sentinels: Dict[str, sqlite3.Connection] = {}
+_schema_ready: set = set()  # keys that have had schema applied under lock
 
 
 def _json_default(obj: Any) -> Any:
@@ -314,10 +316,19 @@ class DataAccessLayer:
     ):
         self.tenant_context = tenant_context
         self.db_path = db_path if db_path is not None else ":memory:"
-        if self.db_path == ":memory:":
-            self._conn_key = f":memory:{id(self)}"
+        if self.db_path == ":memory:" or self.db_path.startswith(":memory:"):
+            # Shared-cache URI keyed by path label so all threads/DAL instances
+            # with the same db_path share data (fixes OTP/account under TestClient threads).
+            # Tests needing isolation should pass a tempfile path, not :memory:.
+            label = "default" if self.db_path == ":memory:" else self.db_path.replace(":", "_")
+            self._conn_key = f"file:cohortos_mem_{label}?mode=memory&cache=shared"
+            self._is_shared_memory = True
+        elif self.db_path.startswith("file:") and "mode=memory" in self.db_path:
+            self._conn_key = self.db_path
+            self._is_shared_memory = True
         else:
             self._conn_key = self.db_path
+            self._is_shared_memory = False
         self.pending_operations: List[Dict[str, Any]] = []
         self._closed = False
 
@@ -330,7 +341,7 @@ class DataAccessLayer:
         c.executescript(_SCHEMA_SQL)
         c.commit()
 
-        if auto_migrate and self.db_path not in (":memory:",):
+        if auto_migrate and not getattr(self, "_is_shared_memory", False) and self.db_path not in (":memory:",):
             apply_sqlite_migrations(c)
 
         # Rotating local backups (file-backed only)
@@ -352,9 +363,10 @@ class DataAccessLayer:
         return self._open_connection(getattr(self, "_conn_key", self.db_path))
 
 
+
     @staticmethod
     def _open_connection(db_path: str) -> sqlite3.Connection:
-        """Return calling-thread connection for db_path (or :memory:<id> key)."""
+        """Return calling-thread connection for file path or shared-memory URI."""
         tid = threading.get_ident()
         store = getattr(_thread_local, "conns", None)
         if store is None:
@@ -365,13 +377,28 @@ class DataAccessLayer:
         with _conn_lock:
             if db_path in store:
                 return store[db_path]
-            if db_path.startswith(":memory:"):
-                conn = sqlite3.connect(":memory:", check_same_thread=True)
+            is_mem = db_path.startswith("file:") and "mode=memory" in db_path
+            is_legacy_mem = db_path == ":memory:" or db_path.startswith(":memory:")
+            if is_mem:
+                # Keep a process-wide sentinel so shared memory DB is not dropped
+                if db_path not in _mem_sentinels:
+                    sent = sqlite3.connect(db_path, uri=True, timeout=30.0, check_same_thread=False)
+                    sent.row_factory = sqlite3.Row
+                    try:
+                        sent.execute("PRAGMA foreign_keys=ON")
+                    except Exception:
+                        pass
+                    _mem_sentinels[db_path] = sent
+                conn = sqlite3.connect(db_path, uri=True, timeout=30.0, check_same_thread=True)
                 conn.row_factory = sqlite3.Row
                 try:
                     conn.execute("PRAGMA foreign_keys=ON")
                 except Exception:
                     pass
+            elif is_legacy_mem:
+                # Should not happen after __init__ rewrite; private memory fallback
+                conn = sqlite3.connect(":memory:", check_same_thread=True)
+                conn.row_factory = sqlite3.Row
             else:
                 parent = Path(db_path).parent
                 if str(parent) not in ("", "."):
@@ -385,15 +412,26 @@ class DataAccessLayer:
                     conn.execute("PRAGMA synchronous=NORMAL")
                 except Exception:
                     pass
-            # Every new connection must see schema (per-thread opens do not run __init__)
-            try:
-                conn.executescript(_SCHEMA_SQL)
-                conn.commit()
-            except Exception:
-                pass
-            if not db_path.startswith(":memory:"):
+            # Schema once per key under lock
+            if db_path not in _schema_ready:
                 try:
-                    apply_sqlite_migrations(conn)
+                    conn.executescript(_SCHEMA_SQL)
+                    conn.commit()
+                    if not is_mem and not is_legacy_mem:
+                        apply_sqlite_migrations(conn)
+                    _schema_ready.add(db_path)
+                except Exception:
+                    try:
+                        conn.executescript(_SCHEMA_SQL)
+                        conn.commit()
+                        _schema_ready.add(db_path)
+                    except Exception:
+                        pass
+            else:
+                # Still ensure IF NOT EXISTS on this connection (cheap)
+                try:
+                    conn.executescript(_SCHEMA_SQL)
+                    conn.commit()
                 except Exception:
                     pass
             store[db_path] = conn
@@ -417,7 +455,7 @@ class DataAccessLayer:
 
     @classmethod
     def close_all(cls) -> None:
-        """Close every per-thread file connection (use between simulated restarts)."""
+        """Close every per-thread connection and shared-memory sentinels."""
         with _conn_lock:
             for tid, store in list(_all_conns.items()):
                 if not isinstance(store, dict):
@@ -432,7 +470,13 @@ class DataAccessLayer:
                     except Exception:
                         pass
             _all_conns.clear()
-            # drop thread-local maps too
+            for uri, sent in list(_mem_sentinels.items()):
+                try:
+                    sent.close()
+                except Exception:
+                    pass
+            _mem_sentinels.clear()
+            _schema_ready.clear()
             try:
                 _thread_local.conns = {}
             except Exception:
