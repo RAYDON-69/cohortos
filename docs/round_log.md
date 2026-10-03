@@ -15,3 +15,9 @@ Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
 | 1 | (next) | — | — | shared-cache memory URI + sentinel | — |
 
 | 8 | edbfcb4 | unit-full 612 pass | xdist/readiness | vault dual storage | unit-full GREEN |
+
+## P46
+| SHA | notes |
+|-----|-------|
+| 524f76f | phase* triggers for e2e+security; CI Gate aggregates; E2E/Security now run on push; unit-full 2 fail retrieval tests |
+| 2e85e04 | retrieval quality ctor fix |
