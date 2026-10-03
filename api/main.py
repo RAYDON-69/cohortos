@@ -694,16 +694,16 @@ def create_api_app(
 
     @app.post("/auth/request-otp")
     def request_otp(body: OTPRequest, request: Request):
-        # rate limit applied after body parse via dependency pattern
         identity = body.phone or body.email or "unknown"
-        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") != "1":
+        _test_mode = os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1" or os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1"
+        if not _test_mode:
             try:
                 registry.limiter.check("request-otp", identity, _client_ip(request))
             except RateLimitExceeded as e:
                 raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
-        _blocked = _rate_limit_otp(request, identity if identity != "unknown" else "")
-        if _blocked is not None:
-            return _blocked
+            _blocked = _rate_limit_otp(request, identity if identity != "unknown" else "")
+            if _blocked is not None:
+                return _blocked
 
         tenant_id = body.tenant_id
         centres: list = []
