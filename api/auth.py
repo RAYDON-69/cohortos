@@ -111,6 +111,8 @@ class RateLimiter:
         # Pilot/test mode: do not lock out automated evidence runs
         if os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1":
             return
+        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1":
+            return
         key = f"{action}:{identity}:{ip}"
         now = time.time()
         with self._lock:

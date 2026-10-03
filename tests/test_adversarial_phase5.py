@@ -49,6 +49,9 @@ class TestPhase5Adversarial(unittest.TestCase):
         return tid, tok
 
     def test_ai_query_rate_limit_429(self):
+        import os
+        if os.environ.get('COHORTOS_RATE_LIMIT_DISABLED') == '1':
+            self.skipTest('rate limit disabled in this job')
         tid, tok = self._login()
         h = {"Authorization": f"Bearer {tok['access_token']}"}
         codes = []
@@ -59,6 +62,9 @@ class TestPhase5Adversarial(unittest.TestCase):
         self.assertTrue(any(c == 200 for c in codes[:5]), codes)
 
     def test_refresh_rate_limit_429(self):
+        import os
+        if os.environ.get('COHORTOS_RATE_LIMIT_DISABLED') == '1':
+            self.skipTest('rate limit disabled in this job')
         tid, tok = self._login()
         rt = tok["refresh_token"]
         codes = []

@@ -317,11 +317,9 @@ class DataAccessLayer:
         self.tenant_context = tenant_context
         self.db_path = db_path if db_path is not None else ":memory:"
         if self.db_path == ":memory:" or self.db_path.startswith(":memory:"):
-            # Shared-cache URI keyed by path label so all threads/DAL instances
-            # with the same db_path share data (fixes OTP/account under TestClient threads).
-            # Tests needing isolation should pass a tempfile path, not :memory:.
-            label = "default" if self.db_path == ":memory:" else self.db_path.replace(":", "_")
-            self._conn_key = f"file:cohortos_mem_{label}?mode=memory&cache=shared"
+            # Per-instance shared-cache URI: all threads using THIS DAL share data;
+            # different DAL instances stay isolated (no cross-test pollution).
+            self._conn_key = f"file:cohortos_mem_{uuid.uuid4().hex}?mode=memory&cache=shared"
             self._is_shared_memory = True
         elif self.db_path.startswith("file:") and "mode=memory" in self.db_path:
             self._conn_key = self.db_path
