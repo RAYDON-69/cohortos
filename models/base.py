@@ -385,6 +385,17 @@ class DataAccessLayer:
                     conn.execute("PRAGMA synchronous=NORMAL")
                 except Exception:
                     pass
+            # Every new connection must see schema (per-thread opens do not run __init__)
+            try:
+                conn.executescript(_SCHEMA_SQL)
+                conn.commit()
+            except Exception:
+                pass
+            if not db_path.startswith(":memory:"):
+                try:
+                    apply_sqlite_migrations(conn)
+                except Exception:
+                    pass
             store[db_path] = conn
             _all_conns.setdefault(tid, {})[db_path] = conn
             return conn
