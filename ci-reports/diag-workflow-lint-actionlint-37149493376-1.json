@@ -1,0 +1,6 @@
+{
+  "schema": "cohortos.ci-report/v1",
+  "kind": "diag",
+  "name": "actionlint",
+  "output": ""
+}
