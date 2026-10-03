@@ -40,6 +40,12 @@ jobs:
           founder_token: founder-ready
           auth_db: /tmp/ready-auth.db
           cloud_db: /tmp/ready-cloud.db
+      - name: Build frontend for bundle measurement
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          npm ci || npm install
+          npm run build
       - name: Real load test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

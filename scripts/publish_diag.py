@@ -32,7 +32,11 @@ def main() -> int:
             f.write(json.dumps({k: doc[k] for k in doc if k != "api_log_tail"}, indent=2)[:8000])
             f.write("\n```\n")
     # publish
-    rc = subprocess.call([sys.executable, str(Path(__file__).parent / "publish_ci_report.py"), str(local), remote])
+    import re as _re
+    if not _re.match(r"^[a-zA-Z0-9_.-]+\.json$", remote):
+        print("invalid remote basename")
+        return 2
+    rc = subprocess.call([sys.executable, str(Path(__file__).parent / "publish_ci_report.py"), str(local), remote])  # nosemgrep: dangerous-subprocess-use-tainted-env-args — remote basename allowlisted
     print(f"publish_diag name={name} remote={remote} rc={rc}")
     return 0  # never fail the job solely on publish
 

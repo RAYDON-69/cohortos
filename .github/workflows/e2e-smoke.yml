@@ -10,16 +10,7 @@ permissions:
 on:
   push:
     branches: [main, master, "phase*"]
-    paths:
-      - "frontend/**"
-      - "api/**"
-      - "services/**"
-      - "tests/**"
-      - ".github/workflows/e2e-smoke.yml"
   pull_request:
-    paths:
-      - "frontend/**"
-      - "api/**"
   workflow_dispatch:
 
 jobs:
