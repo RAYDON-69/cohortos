@@ -93,3 +93,7 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - Production path must not install chromadb.
 - Diags for axe/load must land on ci-reports via publish_diag.py.
 - `make verify` is the local mirror of CI unit gates.
+
+## P42
+- Never share one sqlite3 connection across threads. Per-thread connections via DAL factory only.
+- Load gate: any 5xx fails (no tolerance).

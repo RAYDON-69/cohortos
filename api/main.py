@@ -471,6 +471,14 @@ def create_api_app(
     app = FastAPI(title="CohortOS API", version="1.2.0")
     app.state.registry = registry
 
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request, exc):  # noqa: ANN001
+        import logging, uuid as _uuid
+        from fastapi.responses import JSONResponse
+        rid = request.headers.get("x-request-id") or str(_uuid.uuid4())
+        logging.getLogger("cohortos.api").exception("unhandled %s %s", rid, request.url.path)
+        return JSONResponse(status_code=500, content={"detail": "internal_error", "request_id": rid})
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in os.environ.get(

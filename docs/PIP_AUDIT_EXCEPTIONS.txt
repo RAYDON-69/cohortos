@@ -1,0 +1,3 @@
+# Time-boxed pip-audit exceptions (P42). Format: PACKAGE|ADVISORY|EXPIRES|REASON
+# nltk via llama-index-core; TransitionParser/AveragedPerceptron not used in CohortOS
+nltk|PYSEC-2026-3740|2026-11-02|Transitive via llama-index-core; vulnerable save/load APIs never imported in our code

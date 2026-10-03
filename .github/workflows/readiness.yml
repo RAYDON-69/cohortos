@@ -1,9 +1,9 @@
 name: Release Readiness
 
 on:
-  workflow_run:
-    workflows: ["E2E Smoke", "Security and License Gates", "Desktop Package"]
-    types: [completed]
+  push:
+    branches: [main, master, "phase*"]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -15,9 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -91,12 +89,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          python scripts/ci_wait_for_reports.py --sha "${{ github.event.workflow_run.head_sha || github.sha }}" --minutes 20
+          python scripts/ci_wait_for_reports.py --sha "${{ github.sha }}" --minutes 20
       - name: Scorecard (must fail on NO-GO)
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           python scripts/ci_readiness_scorecard.py
@@ -109,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          SHA="${{ github.sha }}"
           OUT="readiness-${SHA}.json"
           cp /tmp/readiness.json /tmp/$OUT 2>/dev/null || echo '{"overall":"NO-GO","error":"scorecard missing"}' > /tmp/$OUT
           python scripts/publish_ci_report.py /tmp/$OUT $OUT

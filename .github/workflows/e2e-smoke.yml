@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - uses: actions/setup-python@v5
         with:
@@ -167,17 +167,33 @@ jobs:
         working-directory: frontend
         env:
           COHORTOS_API_BASE: http://127.0.0.1:8741
+          COHORTOS_WEB_BASE: http://127.0.0.1:5173
         run: |
-          set -euo pipefail
-          test -f node_modules/axe-core/axe.min.js || npm install axe-core --no-save
+          set -uo pipefail
+          : > /tmp/axe.out
+          echo "pwd=$(pwd)" | tee -a /tmp/axe.out
+          ls node_modules/@playwright/test 2>&1 | head -3 | tee -a /tmp/axe.out || true
+          if [ ! -f node_modules/axe-core/axe.min.js ]; then
+            npm install axe-core --no-save 2>&1 | tee -a /tmp/axe.out || true
+          fi
+          if [ ! -x ./node_modules/.bin/playwright ]; then
+            echo "MISSING playwright binary" | tee -a /tmp/axe.out
+            exit 1
+          fi
+          # Ensure vite still up
+          if ! curl -sf http://127.0.0.1:5173 >/dev/null; then
+            npx vite --host 127.0.0.1 --port 5173 > /tmp/vite-axe.log 2>&1 &
+            for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
+          fi
           set +e
-          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1 2>&1 | tee /tmp/axe.out
-          RC=${PIPESTATUS[0]}
+          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1 >> /tmp/axe.out 2>&1
+          RC=$?
           set -e
+          echo "axe_exit=$RC" | tee -a /tmp/axe.out
           {
-            echo "## Axe"
+            echo "## Axe (exit $RC)"
             echo '```'
-            cat test-results/axe-violations.json 2>/dev/null || cat /tmp/axe.out || true
+            tail -n 80 /tmp/axe.out || true
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
           exit $RC
@@ -186,7 +202,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
+          set +e
           python - <<'PY'
           import json, pathlib, shutil
           candidates = [

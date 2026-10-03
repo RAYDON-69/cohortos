@@ -88,9 +88,12 @@ CREATE INDEX IF NOT EXISTS idx_records_active
     ON _records (table_name, tenant_id, is_active);
 """
 
-# Process-wide connection cache for file paths (shared across DAL instances)
+# Per-thread connections for file paths (sqlite3 connections are not cross-thread safe).
+# Keyed by (thread_id, db_path). WAL + busy_timeout set on open.
 _conn_lock = threading.Lock()
-_conn_cache: Dict[str, sqlite3.Connection] = {}
+_thread_local = threading.local()
+# Keep a registry of all opened connections for close_all()
+_all_conns: Dict[int, Dict[str, sqlite3.Connection]] = {}
 
 
 def _json_default(obj: Any) -> Any:
@@ -342,17 +345,37 @@ class DataAccessLayer:
             # Private in-memory DB per instance — required for test isolation
             conn = sqlite3.connect(":memory:", check_same_thread=False)
             conn.row_factory = sqlite3.Row
+            try:
+                conn.execute("PRAGMA foreign_keys=ON")
+            except Exception:
+                pass
             return conn
+        tid = threading.get_ident()
+        store = getattr(_thread_local, "conns", None)
+        if store is None:
+            store = {}
+            _thread_local.conns = store
+        if db_path in store:
+            return store[db_path]
         with _conn_lock:
-            if db_path in _conn_cache:
-                return _conn_cache[db_path]
-            # Ensure parent directory exists
+            # double-check after lock (another path in same thread is fine)
+            if db_path in store:
+                return store[db_path]
             parent = Path(db_path).parent
             if str(parent) not in ("", "."):
                 parent.mkdir(parents=True, exist_ok=True)
-            conn = sqlite3.connect(db_path, check_same_thread=False)
+            # check_same_thread=True: each thread owns its connection
+            conn = sqlite3.connect(db_path, timeout=30.0, check_same_thread=True)
             conn.row_factory = sqlite3.Row
-            _conn_cache[db_path] = conn
+            try:
+                conn.execute("PRAGMA journal_mode=WAL")
+                conn.execute("PRAGMA busy_timeout=30000")
+                conn.execute("PRAGMA foreign_keys=ON")
+                conn.execute("PRAGMA synchronous=NORMAL")
+            except Exception:
+                pass
+            store[db_path] = conn
+            _all_conns.setdefault(tid, {})[db_path] = conn
             return conn
 
     def close(self) -> None:
@@ -370,14 +393,26 @@ class DataAccessLayer:
 
     @classmethod
     def close_all(cls) -> None:
-        """Close every cached file connection (use between simulated restarts)."""
+        """Close every per-thread file connection (use between simulated restarts)."""
         with _conn_lock:
-            for path, conn in list(_conn_cache.items()):
-                try:
-                    conn.close()
-                except Exception:
-                    pass
-            _conn_cache.clear()
+            for tid, store in list(_all_conns.items()):
+                if not isinstance(store, dict):
+                    try:
+                        store.close()
+                    except Exception:
+                        pass
+                    continue
+                for path, conn in list(store.items()):
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
+            _all_conns.clear()
+            # drop thread-local maps too
+            try:
+                _thread_local.conns = {}
+            except Exception:
+                pass
 
     def ensure_migrated(self) -> int:
         """Re-run migration check (idempotent). Returns newly applied count."""

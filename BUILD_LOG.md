@@ -1307,3 +1307,10 @@ Branch: phase41-process-green from 8eb7ab7
 - chromadb removed from production requirements.txt → requirements-legacy-chroma.txt
 - npm overrides: braces, chokidar, uuid, tar; electron ^35
 - make verify / scripts/verify.sh; ci-gate.yml; pre-commit; CODEOWNERS; DoD
+
+## Phase 42 — Concurrency fix + remaining gates (2026-10-03)
+Branch: phase42-concurrency-green from f3366c6
+CRITICAL: shared process-wide sqlite3 connection caused InterfaceError under concurrent FastAPI threads.
+Fix: per-thread connections in models/base.py (WAL, busy_timeout, foreign_keys, check_same_thread=True).
+Test: tests/test_sqlite_thread_safety.py 64 threads mixed R/W — PASS after fix.
+Axe step hardened; readiness no workflow_run untrusted checkout; dependabot cooldown; nested npm overrides.
