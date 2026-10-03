@@ -2671,11 +2671,15 @@ def create_api_app(
         _default_root = section.get("root") or _os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage")
         try:
             store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
-            # Prefer mocked/configured provider when exists() says yes (tests inject oversized streams).
-            if not store.is_configured() or not store.exists(remote_id):
-                local = LocalFsStorageProvider(_default_root)
-                if local.exists(remote_id):
-                    store = local
+            local = LocalFsStorageProvider(_default_root)
+            # Prefer provider that actually has the object (mock tests return exists=True;
+            # real CI uploads land on LocalFs under COHORTOS_STORAGE_ROOT).
+            if store.is_configured() and store.exists(remote_id):
+                pass  # keep store
+            elif local.exists(remote_id):
+                store = local
+            elif not store.is_configured():
+                store = local
             if not store.exists(remote_id):
                 # Last resort: try basename under vault/tenant (legacy uploads)
                 from pathlib import Path as _P
