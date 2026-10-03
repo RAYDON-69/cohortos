@@ -1,0 +1,12 @@
+{
+  "schema": "cohortos.ci-report/v1",
+  "kind": "diag",
+  "name": "diag-bandit-semgrep",
+  "python": "Python 3.12.14",
+  "api_alive": false,
+  "api_log_tail": "",
+  "pip_list_head": "Package        Version\n-------------- -------\nbandit         1.9.4\nmarkdown-it-py 4.2.0\nmdurl          0.1.2\npip            26.2.1\nPygments       2.21.0\nPyYAML         6.0.3\nrich           15.0.0\nstevedore      5.9.1",
+  "bandit_results_count": 0,
+  "bandit_results": [],
+  "schemathesis_tail": ""
+}
