@@ -1,0 +1,2593 @@
+{
+  "schema": "cohortos.ci-report/v1",
+  "kind": "diag",
+  "name": "semgrep",
+  "results": [
+    {
+      "check_id": "package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+      "path": ".github/dependabot.yml",
+      "start": {
+        "line": 3,
+        "col": 5,
+        "offset": 24
+      },
+      "end": {
+        "line": 14,
+        "col": 53,
+        "offset": 331
+      },
+      "extra": {
+        "message": "This Dependabot configuration does not set a cooldown period. Newly published packages can be malicious or unstable. Add a `cooldown` block with `default-days: 7` to each `package-ecosystem` entry under `updates` to wait 7 days before proposing updates to newly published package versions. Reference: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "dependabot"
+          ],
+          "cwe": [
+            "CWE-829: Inclusion of Functionality from Untrusted Control Sphere"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures"
+          ],
+          "confidence": "HIGH",
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "subcategory": [
+            "audit"
+          ],
+          "vulnerability_class": [
+            "Insecure Configuration"
+          ],
+          "references": [
+            "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "source": "https://semgrep.dev/r/package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+          "shortlink": "https://sg.run/5WvGK"
+        },
+        "severity": "MEDIUM",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+      "path": ".github/dependabot.yml",
+      "start": {
+        "line": 16,
+        "col": 5,
+        "offset": 338
+      },
+      "end": {
+        "line": 33,
+        "col": 53,
+        "offset": 920
+      },
+      "extra": {
+        "message": "This Dependabot configuration does not set a cooldown period. Newly published packages can be malicious or unstable. Add a `cooldown` block with `default-days: 7` to each `package-ecosystem` entry under `updates` to wait 7 days before proposing updates to newly published package versions. Reference: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "dependabot"
+          ],
+          "cwe": [
+            "CWE-829: Inclusion of Functionality from Untrusted Control Sphere"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures"
+          ],
+          "confidence": "HIGH",
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "subcategory": [
+            "audit"
+          ],
+          "vulnerability_class": [
+            "Insecure Configuration"
+          ],
+          "references": [
+            "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "source": "https://semgrep.dev/r/package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+          "shortlink": "https://sg.run/5WvGK"
+        },
+        "severity": "MEDIUM",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+      "path": ".github/dependabot.yml",
+      "start": {
+        "line": 35,
+        "col": 5,
+        "offset": 927
+      },
+      "end": {
+        "line": 43,
+        "col": 40,
+        "offset": 1139
+      },
+      "extra": {
+        "message": "This Dependabot configuration does not set a cooldown period. Newly published packages can be malicious or unstable. Add a `cooldown` block with `default-days: 7` to each `package-ecosystem` entry under `updates` to wait 7 days before proposing updates to newly published package versions. Reference: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "dependabot"
+          ],
+          "cwe": [
+            "CWE-829: Inclusion of Functionality from Untrusted Control Sphere"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures"
+          ],
+          "confidence": "HIGH",
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "subcategory": [
+            "audit"
+          ],
+          "vulnerability_class": [
+            "Insecure Configuration"
+          ],
+          "references": [
+            "https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#cooldown"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "source": "https://semgrep.dev/r/package_managers.dependabot.dependabot-missing-cooldown.dependabot-missing-cooldown",
+          "shortlink": "https://sg.run/5WvGK"
+        },
+        "severity": "MEDIUM",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/ci-gate.yml",
+      "start": {
+        "line": 21,
+        "col": 9,
+        "offset": 310
+      },
+      "end": {
+        "line": 21,
+        "col": 34,
+        "offset": 335
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/ci-gate.yml",
+      "start": {
+        "line": 22,
+        "col": 9,
+        "offset": 344
+      },
+      "end": {
+        "line": 22,
+        "col": 38,
+        "offset": 373
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-package.yml",
+      "start": {
+        "line": 21,
+        "col": 9,
+        "offset": 367
+      },
+      "end": {
+        "line": 21,
+        "col": 34,
+        "offset": 392
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-package.yml",
+      "start": {
+        "line": 22,
+        "col": 9,
+        "offset": 401
+      },
+      "end": {
+        "line": 22,
+        "col": 36,
+        "offset": 428
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-package.yml",
+      "start": {
+        "line": 25,
+        "col": 9,
+        "offset": 480
+      },
+      "end": {
+        "line": 25,
+        "col": 38,
+        "offset": 509
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-package.yml",
+      "start": {
+        "line": 48,
+        "col": 9,
+        "offset": 1374
+      },
+      "end": {
+        "line": 48,
+        "col": 41,
+        "offset": 1406
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-release.yml",
+      "start": {
+        "line": 58,
+        "col": 9,
+        "offset": 1700
+      },
+      "end": {
+        "line": 58,
+        "col": 34,
+        "offset": 1725
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-release.yml",
+      "start": {
+        "line": 61,
+        "col": 9,
+        "offset": 1763
+      },
+      "end": {
+        "line": 61,
+        "col": 38,
+        "offset": 1792
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-release.yml",
+      "start": {
+        "line": 115,
+        "col": 9,
+        "offset": 3866
+      },
+      "end": {
+        "line": 115,
+        "col": 36,
+        "offset": 3893
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-release.yml",
+      "start": {
+        "line": 143,
+        "col": 9,
+        "offset": 4835
+      },
+      "end": {
+        "line": 143,
+        "col": 45,
+        "offset": 4871
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/desktop-release.yml",
+      "start": {
+        "line": 163,
+        "col": 9,
+        "offset": 5616
+      },
+      "end": {
+        "line": 163,
+        "col": 45,
+        "offset": 5652
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 33,
+        "col": 9,
+        "offset": 683
+      },
+      "end": {
+        "line": 33,
+        "col": 34,
+        "offset": 708
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 35,
+        "col": 9,
+        "offset": 718
+      },
+      "end": {
+        "line": 35,
+        "col": 38,
+        "offset": 747
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 39,
+        "col": 9,
+        "offset": 804
+      },
+      "end": {
+        "line": 39,
+        "col": 36,
+        "offset": 831
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 350,
+        "col": 9,
+        "offset": 13986
+      },
+      "end": {
+        "line": 350,
+        "col": 41,
+        "offset": 14018
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 360,
+        "col": 9,
+        "offset": 14324
+      },
+      "end": {
+        "line": 360,
+        "col": 41,
+        "offset": 14356
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/e2e-smoke.yml",
+      "start": {
+        "line": 372,
+        "col": 9,
+        "offset": 14717
+      },
+      "end": {
+        "line": 372,
+        "col": 41,
+        "offset": 14749
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/frontend-ci.yml",
+      "start": {
+        "line": 21,
+        "col": 9,
+        "offset": 400
+      },
+      "end": {
+        "line": 21,
+        "col": 34,
+        "offset": 425
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/frontend-ci.yml",
+      "start": {
+        "line": 22,
+        "col": 9,
+        "offset": 434
+      },
+      "end": {
+        "line": 22,
+        "col": 36,
+        "offset": 461
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/local-model-eval.yml",
+      "start": {
+        "line": 15,
+        "col": 9,
+        "offset": 257
+      },
+      "end": {
+        "line": 15,
+        "col": 34,
+        "offset": 282
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/local-model-eval.yml",
+      "start": {
+        "line": 16,
+        "col": 9,
+        "offset": 291
+      },
+      "end": {
+        "line": 16,
+        "col": 38,
+        "offset": 320
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/local-model-eval.yml",
+      "start": {
+        "line": 20,
+        "col": 9,
+        "offset": 409
+      },
+      "end": {
+        "line": 20,
+        "col": 31,
+        "offset": 431
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/mutmut.yml",
+      "start": {
+        "line": 22,
+        "col": 9,
+        "offset": 402
+      },
+      "end": {
+        "line": 22,
+        "col": 34,
+        "offset": 427
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/mutmut.yml",
+      "start": {
+        "line": 23,
+        "col": 9,
+        "offset": 436
+      },
+      "end": {
+        "line": 23,
+        "col": 38,
+        "offset": 465
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/readiness.yml",
+      "start": {
+        "line": 18,
+        "col": 9,
+        "offset": 315
+      },
+      "end": {
+        "line": 18,
+        "col": 34,
+        "offset": 340
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout",
+      "path": ".github/workflows/readiness.yml",
+      "start": {
+        "line": 18,
+        "col": 9,
+        "offset": 315
+      },
+      "end": {
+        "line": 20,
+        "col": 71,
+        "offset": 425
+      },
+      "extra": {
+        "message": "This GitHub Actions workflow file uses `workflow_run` and checks out code from the incoming pull request. When using `workflow_run`, the Action runs in the context of the target repository, which includes access to all repository secrets. Normally, this is safe because the Action only runs code from the target repository, not the incoming PR. However, by checking out the incoming PR code, you're now using the incoming code for the rest of the action. You may be inadvertently executing arbitrary code from the incoming PR with access to repository secrets, which would let an attacker steal repository secrets. This normally happens by running build scripts (e.g., `npm build` and `make`) or dependency installation scripts (e.g., `python setup.py install`). Audit your workflow file to make sure no code from the incoming PR is executed. Please see https://securitylab.github.com/research/github-actions-preventing-pwn-requests/ for additional mitigations.",
+        "metadata": {
+          "category": "security",
+          "owasp": "A01:2017 - Injection",
+          "cwe": "CWE-913: Improper Control of Dynamically-Managed Code Resources",
+          "likelihood": "MEDIUM",
+          "impact": "MEDIUM",
+          "confidence": "MEDIUM",
+          "subcategory": [
+            "vuln"
+          ],
+          "references": [
+            "https://securitylab.github.com/research/github-actions-preventing-pwn-requests/",
+            "https://github.com/justinsteven/advisories/blob/master/2021_github_actions_checkspelling_token_leak_via_advice_symlink.md",
+            "https://www.legitsecurity.com/blog/github-privilege-escalation-vulnerability"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Code Injection"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.workflow-run-target-code-checkout.workflow-run-target-code-checkout",
+          "shortlink": "https://sg.run/A0p6"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/readiness.yml",
+      "start": {
+        "line": 21,
+        "col": 9,
+        "offset": 434
+      },
+      "end": {
+        "line": 21,
+        "col": 38,
+        "offset": 463
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 18,
+        "col": 9,
+        "offset": 259
+      },
+      "end": {
+        "line": 18,
+        "col": 34,
+        "offset": 284
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 19,
+        "col": 9,
+        "offset": 293
+      },
+      "end": {
+        "line": 19,
+        "col": 38,
+        "offset": 322
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 22,
+        "col": 9,
+        "offset": 378
+      },
+      "end": {
+        "line": 22,
+        "col": 36,
+        "offset": 405
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 68,
+        "col": 9,
+        "offset": 2220
+      },
+      "end": {
+        "line": 68,
+        "col": 34,
+        "offset": 2245
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 69,
+        "col": 9,
+        "offset": 2254
+      },
+      "end": {
+        "line": 69,
+        "col": 38,
+        "offset": 2283
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 72,
+        "col": 9,
+        "offset": 2339
+      },
+      "end": {
+        "line": 72,
+        "col": 36,
+        "offset": 2366
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 124,
+        "col": 9,
+        "offset": 4472
+      },
+      "end": {
+        "line": 124,
+        "col": 34,
+        "offset": 4497
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 125,
+        "col": 9,
+        "offset": 4506
+      },
+      "end": {
+        "line": 125,
+        "col": 38,
+        "offset": 4535
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 187,
+        "col": 9,
+        "offset": 7438
+      },
+      "end": {
+        "line": 187,
+        "col": 34,
+        "offset": 7463
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 188,
+        "col": 9,
+        "offset": 7472
+      },
+      "end": {
+        "line": 188,
+        "col": 38,
+        "offset": 7501
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 226,
+        "col": 9,
+        "offset": 8864
+      },
+      "end": {
+        "line": 226,
+        "col": 34,
+        "offset": 8889
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security-gates.yml",
+      "start": {
+        "line": 227,
+        "col": 9,
+        "offset": 8898
+      },
+      "end": {
+        "line": 227,
+        "col": 38,
+        "offset": 8927
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 14,
+        "col": 9,
+        "offset": 186
+      },
+      "end": {
+        "line": 14,
+        "col": 34,
+        "offset": 211
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 17,
+        "col": 9,
+        "offset": 259
+      },
+      "end": {
+        "line": 17,
+        "col": 42,
+        "offset": 292
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 24,
+        "col": 9,
+        "offset": 418
+      },
+      "end": {
+        "line": 24,
+        "col": 34,
+        "offset": 443
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 25,
+        "col": 9,
+        "offset": 452
+      },
+      "end": {
+        "line": 25,
+        "col": 38,
+        "offset": 481
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 42,
+        "col": 9,
+        "offset": 964
+      },
+      "end": {
+        "line": 42,
+        "col": 34,
+        "offset": 989
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 43,
+        "col": 9,
+        "offset": 998
+      },
+      "end": {
+        "line": 43,
+        "col": 36,
+        "offset": 1025
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 70,
+        "col": 9,
+        "offset": 1880
+      },
+      "end": {
+        "line": 70,
+        "col": 34,
+        "offset": 1905
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+      "path": ".github/workflows/security.yml",
+      "start": {
+        "line": 71,
+        "col": 9,
+        "offset": 1914
+      },
+      "end": {
+        "line": 71,
+        "col": 43,
+        "offset": 1948
+      },
+      "extra": {
+        "message": "GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks \u2014 as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+        "metadata": {
+          "category": "security",
+          "cwe": [
+            "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+            "CWE-353: Missing Support for Integrity Check"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software and Data Integrity Failures"
+          ],
+          "references": [
+            "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+          ],
+          "technology": [
+            "github-actions"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues",
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+          "shortlink": "https://sg.run/2LgAL"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ]
+}
