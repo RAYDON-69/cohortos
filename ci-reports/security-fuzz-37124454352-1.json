@@ -1,0 +1,26 @@
+{
+  "error": "centre-trial failed status=500 body={\"detail\":\"internal_error\",\"request_id\":\"0b7acb91-20f3-4994-985e-fc2a57f42642\"}",
+  "has_5xx": true,
+  "fail_count": 1,
+  "seed_failed": true,
+  "steps": [
+    {
+      "step": "health",
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "version": "1.2.0",
+        "pyzk": false,
+        "gemini_sdk": false
+      }
+    },
+    {
+      "step": "centre-trial",
+      "status": 500,
+      "body": {
+        "detail": "internal_error",
+        "request_id": "0b7acb91-20f3-4994-985e-fc2a57f42642"
+      }
+    }
+  ]
+}
