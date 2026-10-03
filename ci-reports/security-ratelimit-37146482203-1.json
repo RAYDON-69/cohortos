@@ -1,0 +1,255 @@
+{
+  "base": "http://127.0.0.1:8741",
+  "health": [
+    {
+      "attempt": 0,
+      "status": 200,
+      "error": null
+    }
+  ],
+  "otp_codes": [
+    {
+      "n": 0,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 1,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 2,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 3,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 4,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 5,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 6,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 7,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 8,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 9,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 10,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 11,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 12,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 13,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 14,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 15,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 16,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 17,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 18,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 19,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 20,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 21,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 22,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 23,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 24,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 25,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 26,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 27,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 28,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 29,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 30,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 31,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 32,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 33,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 34,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 35,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 36,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 37,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 38,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    },
+    {
+      "n": 39,
+      "status": 200,
+      "error": null,
+      "retry_after": null
+    }
+  ],
+  "errors": [],
+  "has_request_otp": true,
+  "proved_429": false
+}
