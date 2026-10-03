@@ -9,7 +9,7 @@ permissions:
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, "phase*"]
     paths:
       - "frontend/**"
       - "api/**"

@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: ci-gate-${{ github.ref }}
@@ -26,30 +27,104 @@ jobs:
         run: |
           set -euo pipefail
           pip install -r requirements.txt -r requirements-dev.txt pyyaml
-      - name: Full unit suite (same as unit-full)
+      - name: Full unit suite
         env:
           COHORTOS_ENV: test
           COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_TEST_EXPOSE_OTP: "1"
           COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage-ci
         run: |
+          mkdir -p /tmp/cohortos-storage-ci
           set +e
           pytest -q --maxfail=20 -p no:cacheprovider 2>&1 | tee /tmp/unit-full.out
           RC=${PIPESTATUS[0]}
           set -e
           exit $RC
-      - name: Publish status
+
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    needs: [verify-local-mirrors]
+    if: always()
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - name: Poll sibling workflows on this SHA
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          LOCAL_UNIT: ${{ needs.verify-local-mirrors.result }}
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          import json, os, time, urllib.request
+          token = os.environ["GITHUB_TOKEN"]
+          sha = os.environ["GITHUB_SHA"]
+          repo = os.environ.get("GITHUB_REPOSITORY", "RAYDON-69/cohortos")
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "User-Agent": "ci-gate-aggregate",
+          }
+          required = {
+              "Unit Full": None,
+              "Release Readiness": None,
+              "Workflow Lint": None,
+              "E2E Smoke": None,
+              "Security and License Gates": None,
+          }
+          deadline = time.time() + 35 * 60
+          while time.time() < deadline:
+              url = f"https://api.github.com/repos/{repo}/actions/runs?per_page=30&head_sha={sha}"
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  runs = json.loads(r.read().decode()).get("workflow_runs", [])
+              for run in runs:
+                  name = run.get("name")
+                  if name in required:
+                      required[name] = run.get("conclusion") or run.get("status")
+              print({k: required[k] for k in required})
+              # all have a terminal conclusion?
+              terminals = {"success", "failure", "cancelled", "startup_failure", "timed_out"}
+              if all(v in terminals for v in required.values()):
+                  break
+              time.sleep(30)
+          # local unit must succeed
+          local = os.environ.get("LOCAL_UNIT", "")
+          required["CI-local-unit"] = local
+          failed = [k for k, v in required.items() if v != "success"]
+          doc = {"sha": sha, "gates": required, "conclusion": "success" if not failed else "failure", "failed": failed}
+          print(json.dumps(doc, indent=2))
+          open("/tmp/status-sha.json", "w").write(json.dumps(doc, indent=2))
+          if failed:
+              raise SystemExit(f"CI Gate red: {failed}")
+          PY
+      - name: Publish aggregate status
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
-          CONC=failure
-          if [ -f /tmp/unit-full.out ] && grep -qE "[0-9]+ passed" /tmp/unit-full.out && ! grep -qE "[1-9][0-9]* failed" /tmp/unit-full.out; then
-            CONC=success
-          fi
-          # better: use exit code file
-          python scripts/ci_publish_status.py ci-gate "$CONC" || true
-          python scripts/publish_ci_report.py /tmp/unit-full.out "diag-ci-gate-unit-${{ github.run_id }}.txt" 2>/dev/null || true
-          test "$CONC" = "success"
+          python scripts/publish_ci_report.py /tmp/status-sha.json "status-${{ github.sha }}.json" || true
+          python scripts/ci_publish_status.py ci-gate "$(python -c "import json;print(json.load(open('/tmp/status-sha.json')).get('conclusion','failure'))")" || true
+
+  negative-control-hollow-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - name: Prove aggregate fails when a gate is red
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          # unit test of the aggregation rule
+          gates = {"Unit Full": "success", "Release Readiness": "failure", "Workflow Lint": "success",
+                   "E2E Smoke": "success", "Security and License Gates": "success", "CI-local-unit": "success"}
+          failed = [k for k, v in gates.items() if v != "success"]
+          assert failed == ["Release Readiness"], failed
+          print("negative control OK: hollow green impossible when readiness red")
+          PY

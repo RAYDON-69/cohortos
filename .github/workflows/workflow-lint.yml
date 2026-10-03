@@ -5,14 +5,8 @@ permissions:
 
 on:
   push:
-    paths:
-      - ".github/**"
-      - "scripts/lint_workflows.py"
-      - "scripts/ci_bandit_summary.py"
-      - "api/auth.py"
+    branches: [main, master, "phase*"]
   pull_request:
-    paths:
-      - ".github/**"
   workflow_dispatch:
 
 jobs:
