@@ -1,0 +1,41 @@
+{
+  "sha": "8eb7ab7336ee1a3da7e728b87c97d1355c1008d2",
+  "main_sha": "8eb7ab7336ee1a3da7e728b87c97d1355c1008d2",
+  "run_id": "37106653130",
+  "run_attempt": "1",
+  "core_outcome": "success",
+  "extended_outcome": "skipped",
+  "core_counts": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": "\nRunning 12 tests using 1 worker\n\n  \u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)\n  \u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.8s)\n  \u2713   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (1.9s)\n  \u2713   4 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (1.7s)\n  \u2713   5 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (1.7s)\n  \u2713   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (1.7s)\n  \u2713   7 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (1.7s)\n  \u2713   8 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (206ms)\n  \u2713   9 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (212ms)\n  \u2713  10 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (1.7s)\n  \u2713  11 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (1.8s)\n  \u2713  12 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (1.7s)\n\n  12 passed (19.9s)"
+  },
+  "extended_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [],
+  "generated_at": "2026-10-03T07:34:51.616864Z",
+  "per_test_lines": [
+    "\u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)",
+    "\u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.8s)",
+    "\u2713   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (1.9s)",
+    "\u2713   4 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (1.7s)",
+    "\u2713   5 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (1.7s)",
+    "\u2713   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (1.7s)",
+    "\u2713   7 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (1.7s)",
+    "\u2713   8 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (206ms)",
+    "\u2713   9 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (212ms)",
+    "\u2713  10 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (1.7s)",
+    "\u2713  11 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (1.8s)",
+    "\u2713  12 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (1.7s)"
+  ]
+}
