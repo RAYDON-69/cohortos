@@ -81,4 +81,4 @@ jobs:
           COHORTOS_ENV: test
           COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
-        run: pytest -q -n 4 -p no:cacheprovider --maxfail=20 -o tmp_path_retention_policy=all
+        run: pytest -q -n 2 --dist loadfile -p no:cacheprovider --maxfail=20 -o tmp_path_retention_policy=all

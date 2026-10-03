@@ -18,3 +18,15 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     # no-op marker for skip budget baseline
     pass
+
+
+import pytest
+
+@pytest.fixture(autouse=True)
+def _isolate_dal():
+    yield
+    try:
+        from models.base import DataAccessLayer
+        DataAccessLayer.close_all()
+    except Exception:
+        pass
