@@ -358,9 +358,16 @@ class DataAccessLayer:
     @property
     def conn(self) -> sqlite3.Connection:
         """Always the calling thread's connection for this db key."""
+        if self._closed and getattr(self, "_is_shared_memory", False):
+            raise RuntimeError("DAL closed")
         if self._closed and self.db_path == ":memory:":
             raise RuntimeError("DAL closed")
         return self._open_connection(getattr(self, "_conn_key", self.db_path))
+
+    @property
+    def _conn(self) -> sqlite3.Connection:
+        """Backward-compat alias for tests/tools that still use dal._conn."""
+        return self.conn
 
 
 

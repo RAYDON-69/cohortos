@@ -16,6 +16,11 @@ from fastapi.testclient import TestClient
 from api.main import create_api_app
 from services.automation_service import AutomationService
 
+def _force_rate_limit_on():
+    import os
+    return os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
+
+
 _phone = itertools.count(1929999000)
 
 
