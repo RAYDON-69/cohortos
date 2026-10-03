@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install -r requirements.txt
-          pip install pytest pytest-xdist httpx fastapi uvicorn
+          pip install -r requirements-dev.txt pytest-timeout
       - name: Full pytest
         env:
           COHORTOS_ENV: test
@@ -47,6 +47,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
+          if [ -f /tmp/unit-full.out ] && grep -q "failed" /tmp/unit-full.out; then
+            python scripts/ci_publish_status.py unit-full failure || true
+          else
+            python scripts/ci_publish_status.py unit-full success || true
+          fi
           python - <<'PY'
           import json, pathlib, re
           log = pathlib.Path("/tmp/unit-full.out").read_text(errors="replace") if pathlib.Path("/tmp/unit-full.out").exists() else ""

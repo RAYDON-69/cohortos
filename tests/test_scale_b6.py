@@ -6,7 +6,6 @@ import tempfile
 from pathlib import Path
 import pytest
 
-@pytest.mark.timeout(600)
 def test_scale_insert_and_query_budget():
     pytest.importorskip("psutil")
     import psutil

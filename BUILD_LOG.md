@@ -1321,3 +1321,10 @@ P42 regression: self._conn held a check_same_thread connection from __init__ thr
 Fix: @property conn → _open_connection(_conn_key) every time; :memory: keyed by id(self).
 Static guard: tests/test_no_shared_sqlite_state.py
 CI: .github/workflows/unit-full.yml (full pytest + xdist)
+
+## Phase 44 — CI loop (2026-10-04)
+Branch: phase44-green-loop from b64659e
+- Fixed unit-full collection: SyntaxError import* inside function in test_tenant_isolation_fuzz.py
+- pytest.ini markers + requirements-dev (pytest-timeout)
+- scripts/ci_wait.py + ci_publish_status.py
+- ci-gate needs unit-full (reusable) and fails if not success

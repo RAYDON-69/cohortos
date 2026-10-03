@@ -1,0 +1,5 @@
+# P44 round log
+
+| iter | timestamp | SHA | green | red | change | diag said |
+|------|-----------|-----|-------|-----|--------|-----------|
+| 0 | start | b64659e | — | unit-full collection, hollow ci-gate, auth-matrix, e2e, load, semgrep, npm | branch phase44 | collection SyntaxError import* inside function |
