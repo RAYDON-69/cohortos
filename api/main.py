@@ -2672,23 +2672,28 @@ def create_api_app(
         try:
             store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
             local = LocalFsStorageProvider(_default_root)
-            # Prefer provider that actually has the object (mock tests return exists=True;
-            # real CI uploads land on LocalFs under COHORTOS_STORAGE_ROOT).
-            if store.is_configured() and store.exists(remote_id):
-                pass  # keep store
-            elif local.exists(remote_id):
-                store = local
-            elif not store.is_configured():
-                store = local
-            if not store.exists(remote_id):
-                # Last resort: try basename under vault/tenant (legacy uploads)
-                from pathlib import Path as _P
-                alt = str(_P("vault") / tenant_id / _P(str(remote_id)).name)
-                if store.exists(alt):
-                    remote_id = alt
-                else:
-                    raise HTTPException(status_code=404, detail="File missing in storage")
-            stream = store.download(remote_id)
+            use_store = store
+            try:
+                configured_has = bool(store.is_configured() and store.exists(remote_id))
+            except Exception:
+                configured_has = False
+            if not configured_has:
+                use_store = local
+                if not local.exists(remote_id):
+                    from pathlib import Path as _P
+                    alt = str(_P("vault") / tenant_id / _P(str(remote_id)).name)
+                    if local.exists(alt):
+                        remote_id = alt
+                    elif store.is_configured():
+                        # last chance: provider claims object (mock oversized tests)
+                        try:
+                            if store.exists(remote_id):
+                                use_store = store
+                        except Exception:
+                            pass
+                    if use_store is local and not local.exists(remote_id):
+                        raise HTTPException(status_code=404, detail="File missing in storage")
+            stream = use_store.download(remote_id)
             # Cap read so a corrupt/huge object cannot hang or OOM the API
             max_bytes = 25 * 1024 * 1024
             data = stream.read(max_bytes + 1)
