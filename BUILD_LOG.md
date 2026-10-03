@@ -1300,3 +1300,10 @@ Branch: phase40-gates-green
 - Axe: CardTitle h3→h1, login main landmark, expanded axe routes + violation JSON diag
 - actionlint: pin binary tarball; composite GITHUB_STEP_SUMMARY safe
 - mutmut: triggers on phase*
+
+## Phase 41 — Process green + supply chain (2026-10-03)
+Branch: phase41-process-green from 8eb7ab7
+- Diag: scripts/publish_diag.py; axe/load write rich JSON to /tmp and ci-reports
+- chromadb removed from production requirements.txt → requirements-legacy-chroma.txt
+- npm overrides: braces, chokidar, uuid, tar; electron ^35
+- make verify / scripts/verify.sh; ci-gate.yml; pre-commit; CODEOWNERS; DoD

@@ -88,3 +88,8 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 ## P40
 - Load tests must set COHORTOS_LOAD_TENANT from seed JSON.
 - Every failing CI step must publish diag-<workflow>-<job>-<run_id>-<attempt>.json to ci-reports.
+
+## P41
+- Production path must not install chromadb.
+- Diags for axe/load must land on ci-reports via publish_diag.py.
+- `make verify` is the local mirror of CI unit gates.

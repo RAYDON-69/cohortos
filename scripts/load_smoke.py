@@ -71,7 +71,7 @@ def main() -> int:
         paths = ["/health", f"/t/{tid}/students", f"/t/{tid}/attendance",
                  f"/t/{tid}/batches", f"/t/{tid}/me" if False else f"/t/{tid}/students"]
         # /me is global — use known good tenant routes only
-        paths = ["/health", f"/t/{tid}/students", f"/t/{tid}/attendance",
+        paths = ["/health", "/me", f"/t/{tid}/students", f"/t/{tid}/attendance",
                  f"/t/{tid}/batches", f"/t/{tid}/templates"]
     else:
         # No tenant → only public health; fail the gate loudly (invalid test)

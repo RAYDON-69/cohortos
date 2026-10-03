@@ -186,18 +186,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           python - <<'PY'
-          import json, pathlib
-          v = pathlib.Path("frontend/test-results/axe-violations.json")
+          import json, pathlib, shutil
+          candidates = [
+              pathlib.Path("/tmp/axe-violations.json"),
+              pathlib.Path("frontend/test-results/axe-violations.json"),
+              pathlib.Path("test-results/axe-violations.json"),
+          ]
+          payload = {}
+          for c in candidates:
+              if c.exists():
+                  payload = json.loads(c.read_text())
+                  break
           log = pathlib.Path("/tmp/axe.out")
-          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"axe",
-                 "violations": json.loads(v.read_text()) if v.exists() else [],
-                 "log_tail": log.read_text(errors="replace")[-4000:] if log.exists() else ""}
-          pathlib.Path("/tmp/diag-axe.json").write_text(json.dumps(doc, indent=2))
+          payload = {
+              "violations": payload.get("violations", payload if isinstance(payload, list) else []),
+              "byRoute": payload.get("byRoute", {}),
+              "byRule": payload.get("byRule", {}),
+              "total": payload.get("total", 0),
+              "log_tail": log.read_text(errors="replace")[-4000:] if log.exists() else "",
+          }
+          pathlib.Path("/tmp/axe-extra.json").write_text(json.dumps(payload, indent=2))
+          print(json.dumps({k: payload[k] for k in ("byRoute","byRule","total")}, indent=2))
           PY
           OUT="diag-e2e-smoke-axe-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          cp /tmp/diag-axe.json /tmp/$OUT
-          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
+          python scripts/publish_diag.py axe "$OUT" /tmp/axe-extra.json
 
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()

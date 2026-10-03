@@ -44,6 +44,7 @@ jobs:
           cloud_db: /tmp/ready-cloud.db
       - name: Real load test
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COHORTOS_JWT_SECRET: readiness-secret-not-for-prod-xxxx
           COHORTOS_FOUNDER_TOKEN: founder-ready
           COHORTOS_TEST_EXPOSE_OTP: "1"
@@ -76,8 +77,7 @@ jobs:
             echo '```'
           } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
           OUT="diag-readiness-load-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          cp /tmp/diag-readiness-load.json /tmp/$OUT 2>/dev/null || cp /tmp/load-report.json /tmp/$OUT
-          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
+          python scripts/publish_diag.py readiness-load "$OUT" /tmp/load-report.json
           python -c "import json; d=json.load(open('/tmp/load-report.json')); print(d); raise SystemExit(0 if d.get('pass') else 1)"
           python scripts/ci_emit_aux_reports.py
           # Publish named reports scorecard expects

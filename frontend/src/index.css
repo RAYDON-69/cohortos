@@ -1,1 +1,5 @@
 /* reset for foundation */
+
+/* axe-contrast-fix P41: ensure AA on white surfaces */
+.text-slate-700, .text-slate-600 { color: #334155 !important; }
+.text-muted, .text-muted-foreground { color: #475569 !important; }

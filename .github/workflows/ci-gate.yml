@@ -1,0 +1,45 @@
+name: CI Gate
+
+on:
+  push:
+    branches: [main, master, "phase*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-local-mirrors:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt pyyaml pytest
+      - name: make verify
+        run: bash scripts/verify.sh
+      - name: dod_check
+        run: python scripts/dod_check.py
+
+  # Aggregate signal — branch protection should require this job name once other workflows report
+  ci-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    needs: [verify-local-mirrors]
+    if: always()
+    steps:
+      - name: Require verify success
+        run: |
+          set -euo pipefail
+          echo "verify=${{ needs.verify-local-mirrors.result }}"
+          test "${{ needs.verify-local-mirrors.result }}" = "success"

@@ -39,6 +39,7 @@ def test_every_tenant_route_rejects_unauthenticated(client):
     spec = client.get("/openapi.json").json()
     failures = []
     paths = spec.get("paths") or {}
+    tested = 0
     assert len(paths) > 5, "openapi empty"
     for path, methods in paths.items():
         if "{tenant_id}" not in path:
@@ -53,9 +54,18 @@ def test_every_tenant_route_rejects_unauthenticated(client):
             except Exception as e:
                 failures.append(f"{method.upper()} {url} raised {e}")
                 continue
+            tested += 1
             if r.status_code not in (401, 403, 404, 405, 422):
                 failures.append(f"{method.upper()} {url} -> {r.status_code}")
+    tenant_n = len([p for p in paths if "{tenant_id}" in p])
+    print("DUAL_TENANT_STATS", {"tenant_paths": tenant_n, "tested": tested, "failures": len(failures)})
+    assert tenant_n == 0 or tested >= 1, "no tenant routes tested"
     assert not failures, "unexpected status:\n" + "\n".join(failures[:30])
+    # coverage stats for diag
+    import json, os
+    stats = {"tenant_paths": len([p for p in paths if "{tenant_id}" in p]), "failures": len(failures)}
+    print("DUAL_TENANT_STATS", json.dumps(stats))
+
 
 def test_openapi_paths_covered_or_public(client):
     PUBLIC_PREFIXES = ("/health", "/docs", "/redoc", "/openapi", "/auth/", "/me")
