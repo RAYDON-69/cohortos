@@ -84,3 +84,7 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - **Workflow lint must pass** before any workflow change is claimed PROVEN (`python scripts/lint_workflows.py` + actionlint).
 - No multi-line `python -c` inside YAML `run: |` blocks — use scripts/.
 - Optional features must never block `/health`.
+
+## P40
+- Load tests must set COHORTOS_LOAD_TENANT from seed JSON.
+- Every failing CI step must publish diag-<workflow>-<job>-<run_id>-<attempt>.json to ci-reports.

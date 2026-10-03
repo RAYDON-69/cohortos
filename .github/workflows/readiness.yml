@@ -57,14 +57,33 @@ jobs:
           set -euo pipefail
           python scripts/ci_seed_fuzz_auth.py --base http://127.0.0.1:8741 --out /tmp/load-auth.json
           export COHORTOS_LOAD_TOKEN=$(python -c "import json; print(json.load(open('/tmp/load-auth.json')).get('access_token',''))")
+          export COHORTOS_LOAD_TENANT=$(python -c "import json; print(json.load(open('/tmp/load-auth.json')).get('tenant_id',''))")
+          echo "load token len=${#COHORTOS_LOAD_TOKEN} tenant=$COHORTOS_LOAD_TENANT"
+          set +e
           python scripts/load_smoke.py
+          LOAD_RC=$?
+          set -e
           test -f /tmp/load-report.json
+          python scripts/ci_write_diag.py diag-readiness-load || true
+          {
+            echo "## Load report"
+            echo '```'
+            cat /tmp/load-report.json || true
+            echo '```'
+            echo "## API log tail"
+            echo '```'
+            tail -n 200 /tmp/api.log || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          OUT="diag-readiness-load-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/diag-readiness-load.json /tmp/$OUT 2>/dev/null || cp /tmp/load-report.json /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
           python -c "import json; d=json.load(open('/tmp/load-report.json')); print(d); raise SystemExit(0 if d.get('pass') else 1)"
           python scripts/ci_emit_aux_reports.py
           # Publish named reports scorecard expects
           for pair in "load-report.json:load-${{ github.run_id }}-${{ github.run_attempt }}.json" "bundle-report.json:bundle-${{ github.run_id }}-${{ github.run_attempt }}.json" "heap-report.json:heap-${{ github.run_id }}-${{ github.run_attempt }}.json" "health-report.json:health-${{ github.run_id }}-${{ github.run_attempt }}.json" "installer-report.json:installer-${{ github.run_id }}-${{ github.run_attempt }}.json"; do
             src="${pair%%:*}"; dest="${pair##*:}"
-            cp /tmp/$src /tmp/$dest 2>/dev/null || echo "{"pass":false}" > /tmp/$dest
+            cp /tmp/$src /tmp/$dest 2>/dev/null || echo '{"pass":false}' > /tmp/$dest
             python scripts/publish_ci_report.py /tmp/$dest $dest || true
           done
       - name: Poll ci-reports for this SHA (up to 20 min)

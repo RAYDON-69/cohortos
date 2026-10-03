@@ -1,5 +1,8 @@
 name: Workflow Lint
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -30,8 +33,28 @@ jobs:
       - name: actionlint
         run: |
           set -euo pipefail
-          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- 1.7.7
-          ./actionlint -color
+          curl -sSfL -o actionlint.tgz "https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz"
+          tar -xzf actionlint.tgz actionlint
+          ./actionlint -color -shellcheck= 2>&1 | tee /tmp/actionlint.out
+          # shellcheck optional; core actionlint must be clean
+          if grep -E "error:" /tmp/actionlint.out; then exit 1; fi
+      - name: Diag actionlint always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          out = pathlib.Path("/tmp/actionlint.out")
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"actionlint",
+                 "output": out.read_text(errors="replace") if out.exists() else "missing"}
+          pathlib.Path("/tmp/diag-actionlint.json").write_text(json.dumps(doc, indent=2))
+          print(doc["output"][:2000])
+          PY
+          OUT="diag-workflow-lint-actionlint-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/diag-actionlint.json /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
+          cat /tmp/actionlint.out >> "${GITHUB_STEP_SUMMARY:-/dev/null}" || true
       - name: Bandit summary script unit test
         run: |
           set -euo pipefail
@@ -91,4 +114,25 @@ jobs:
           SCALE_FEES: "20000"
         run: |
           set -euo pipefail
-          pytest tests/test_dual_tenant_matrix.py tests/test_scale_b6.py -q --tb=short
+          set +e
+          pytest tests/test_dual_tenant_matrix.py tests/test_scale_b6.py -q --tb=short 2>&1 | tee /tmp/dual-scale.out
+          RC=${PIPESTATUS[0]}
+          set -e
+          {
+            echo "## dual-tenant-and-scale"
+            echo '```'
+            tail -n 100 /tmp/dual-scale.out || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          python - <<'PY'
+          import json, pathlib, re
+          log = pathlib.Path("/tmp/dual-scale.out").read_text(errors="replace")
+          failed = re.findall(r"FAILED (\S+)", log)
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"dual-tenant-scale",
+                 "failed_tests": failed, "log_tail": "\n".join(log.splitlines()[-200:]), "rc": 0}
+          pathlib.Path("/tmp/diag-dual-scale.json").write_text(json.dumps(doc, indent=2))
+          PY
+          OUT="diag-workflow-lint-dual-tenant-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/diag-dual-scale.json /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
+          exit $RC

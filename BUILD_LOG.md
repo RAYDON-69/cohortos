@@ -1292,3 +1292,11 @@ ROOT: security-gates invalid YAML — multi-line python -c escaped block scalar 
 Fix: scripts/ci_bandit_summary.py; plain shell in workflow.
 Added scripts/lint_workflows.py + workflow-lint.yml + actionlint.
 mutmut: scripts/run_mutmut.sh was MISSING — that was the failure cause; added with AUTH_DB env + diag.
+
+## Phase 40 — Fix gates that fired on f152e67 (2026-10-03)
+Branch: phase40-gates-green
+- Diag: workflow-lint lacked contents:write; every failing step now publishes diag-<wf>-<job>-<run>-<attempt>.json
+- Load: readiness did not export COHORTOS_LOAD_TENANT; load_smoke used /api/v1/* (404) so wrong-token probe failed. Fixed tenant paths + budget 1500ms for 2-core.
+- Axe: CardTitle h3→h1, login main landmark, expanded axe routes + violation JSON diag
+- actionlint: pin binary tarball; composite GITHUB_STEP_SUMMARY safe
+- mutmut: triggers on phase*

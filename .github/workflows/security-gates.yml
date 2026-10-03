@@ -151,7 +151,25 @@ jobs:
           semgrep --config=p/python --config=p/owasp-top-ten --json -o /tmp/semgrep.json || true
           python scripts/ci_write_semgrep_report.py /tmp/semgrep.json /tmp/semgrep-report.json
           # soft until noise tuned; fail only on ERROR severity if present
-          python -c "import json; d=json.load(open('/tmp/semgrep.json')); errs=[r for r in d.get('results',[]) if r.get('extra',{}).get('severity')=='ERROR']; print('semgrep_errors',len(errs)); raise SystemExit(1 if errs else 0)"
+          python scripts/ci_semgrep_gate.py /tmp/semgrep.json
+          cat /tmp/semgrep_summary.txt >> "${GITHUB_STEP_SUMMARY:-/dev/null}" || true
+      - name: Diag semgrep always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/ci_write_diag.py diag-semgrep || true
+          python - <<'PY'
+          import json, pathlib
+          sp = pathlib.Path("/tmp/semgrep.json")
+          data = json.loads(sp.read_text()) if sp.exists() else {}
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"semgrep",
+                 "results": (data.get("results") or [])[:50]}
+          pathlib.Path("/tmp/diag-semgrep.json").write_text(json.dumps(doc, indent=2))
+          PY
+          OUT="diag-security-gates-semgrep-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/diag-semgrep.json /tmp/$OUT 2>/dev/null || echo '{"error":"no diag"}' > /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
       - name: Publish bandit signal
         if: always()
         env:

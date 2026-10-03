@@ -170,7 +170,34 @@ jobs:
         run: |
           set -euo pipefail
           test -f node_modules/axe-core/axe.min.js || npm install axe-core --no-save
-          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1
+          set +e
+          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1 2>&1 | tee /tmp/axe.out
+          RC=${PIPESTATUS[0]}
+          set -e
+          {
+            echo "## Axe"
+            echo '```'
+            cat test-results/axe-violations.json 2>/dev/null || cat /tmp/axe.out || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          exit $RC
+      - name: Diag axe always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          v = pathlib.Path("frontend/test-results/axe-violations.json")
+          log = pathlib.Path("/tmp/axe.out")
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"axe",
+                 "violations": json.loads(v.read_text()) if v.exists() else [],
+                 "log_tail": log.read_text(errors="replace")[-4000:] if log.exists() else ""}
+          pathlib.Path("/tmp/diag-axe.json").write_text(json.dumps(doc, indent=2))
+          PY
+          OUT="diag-e2e-smoke-axe-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          cp /tmp/diag-axe.json /tmp/$OUT
+          python scripts/publish_ci_report.py /tmp/$OUT $OUT || true
 
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()

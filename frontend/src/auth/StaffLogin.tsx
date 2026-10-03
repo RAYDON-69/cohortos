@@ -132,7 +132,7 @@ export function StaffLogin() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-cream via-sage-100 to-peri-bg"
+      role="main" aria-label="Sign in" className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-cream via-sage-100 to-peri-bg"
       data-testid="staff-login"
     >
       <motion.div
@@ -198,6 +198,7 @@ export function StaffLogin() {
                       />
                     </div>
                     <Button
+                      type="button"
                       className="w-full"
                       disabled={loading || phone.trim().length < 8}
                       onClick={() => void onRequestOtp()}

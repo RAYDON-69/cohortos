@@ -37,15 +37,17 @@ runs:
         COHORTOS_RATE_LIMIT_DISABLED: "1"
         COHORTOS_ENV: test
         API_PORT: ${{ inputs.port }}
+        EXTRA_ENV_BLOCK: ${{ inputs.extra_env }}
       run: |
         set -euo pipefail
         mkdir -p /tmp/cohortos-storage /tmp/cohortos-rag
-        # Apply extra env lines if any
-        if [ -n "${{ inputs.extra_env }}" ]; then
+        if [ -n "${EXTRA_ENV_BLOCK:-}" ]; then
           while IFS= read -r line; do
             [ -z "$line" ] && continue
-            export "$line"
-          done <<< "${{ inputs.extra_env }}"
+            case "$line" in
+              *=*) export "$line" ;;
+            esac
+          done <<< "$EXTRA_ENV_BLOCK"
         fi
         nohup python -m uvicorn api.main:create_api_app_or_raise --factory \
           --host 127.0.0.1 --port "$API_PORT" > /tmp/api.log 2>&1 &
@@ -60,7 +62,7 @@ runs:
               echo '```'
               tail -n 300 /tmp/api.log || true
               echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
             exit 1
           fi
           if curl -sf "http://127.0.0.1:${API_PORT}/health" >/dev/null; then
@@ -78,6 +80,6 @@ runs:
             echo '```'
             tail -n 300 /tmp/api.log || true
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
           exit 1
         fi
