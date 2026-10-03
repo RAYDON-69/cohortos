@@ -314,42 +314,47 @@ class DataAccessLayer:
     ):
         self.tenant_context = tenant_context
         self.db_path = db_path if db_path is not None else ":memory:"
+        if self.db_path == ":memory:":
+            self._conn_key = f":memory:{id(self)}"
+        else:
+            self._conn_key = self.db_path
         self.pending_operations: List[Dict[str, Any]] = []
         self._closed = False
 
         # Backward-compat attribute some older tests may inspect
         self.local_storage: Dict[str, list] = {}
 
-        self._conn = self._open_connection(self.db_path)
-        self._conn.execute("PRAGMA foreign_keys = ON")
-        self._conn.executescript(_SCHEMA_SQL)
-        self._conn.commit()
+        # Open calling-thread connection and ensure schema (no long-lived self.conn)
+        c = self.conn
+        c.execute("PRAGMA foreign_keys = ON")
+        c.executescript(_SCHEMA_SQL)
+        c.commit()
 
         if auto_migrate and self.db_path not in (":memory:",):
-            apply_sqlite_migrations(self._conn)
+            apply_sqlite_migrations(c)
 
         # Rotating local backups (file-backed only)
         self._write_count = 0
         self._backup_every = BACKUP_EVERY_N_WRITES
         if self.db_path not in (":memory:",) and Path(self.db_path).is_file():
             try:
-                create_backup(self.db_path, conn=self._conn)
+                create_backup(self.db_path, conn=c)
             except Exception:
                 pass  # backup must never block startup
 
     # ── connection management ─────────────────────────────────────────
 
+    @property
+    def conn(self) -> sqlite3.Connection:
+        """Always the calling thread's connection for this db key."""
+        if self._closed and self.db_path == ":memory:":
+            raise RuntimeError("DAL closed")
+        return self._open_connection(getattr(self, "_conn_key", self.db_path))
+
+
     @staticmethod
     def _open_connection(db_path: str) -> sqlite3.Connection:
-        if db_path == ":memory:":
-            # Private in-memory DB per instance — required for test isolation
-            conn = sqlite3.connect(":memory:", check_same_thread=False)
-            conn.row_factory = sqlite3.Row
-            try:
-                conn.execute("PRAGMA foreign_keys=ON")
-            except Exception:
-                pass
-            return conn
+        """Return calling-thread connection for db_path (or :memory:<id> key)."""
         tid = threading.get_ident()
         store = getattr(_thread_local, "conns", None)
         if store is None:
@@ -358,38 +363,46 @@ class DataAccessLayer:
         if db_path in store:
             return store[db_path]
         with _conn_lock:
-            # double-check after lock (another path in same thread is fine)
             if db_path in store:
                 return store[db_path]
-            parent = Path(db_path).parent
-            if str(parent) not in ("", "."):
-                parent.mkdir(parents=True, exist_ok=True)
-            # check_same_thread=True: each thread owns its connection
-            conn = sqlite3.connect(db_path, timeout=30.0, check_same_thread=True)
-            conn.row_factory = sqlite3.Row
-            try:
-                conn.execute("PRAGMA journal_mode=WAL")
-                conn.execute("PRAGMA busy_timeout=30000")
-                conn.execute("PRAGMA foreign_keys=ON")
-                conn.execute("PRAGMA synchronous=NORMAL")
-            except Exception:
-                pass
+            if db_path.startswith(":memory:"):
+                conn = sqlite3.connect(":memory:", check_same_thread=True)
+                conn.row_factory = sqlite3.Row
+                try:
+                    conn.execute("PRAGMA foreign_keys=ON")
+                except Exception:
+                    pass
+            else:
+                parent = Path(db_path).parent
+                if str(parent) not in ("", "."):
+                    parent.mkdir(parents=True, exist_ok=True)
+                conn = sqlite3.connect(db_path, timeout=30.0, check_same_thread=True)
+                conn.row_factory = sqlite3.Row
+                try:
+                    conn.execute("PRAGMA journal_mode=WAL")
+                    conn.execute("PRAGMA busy_timeout=30000")
+                    conn.execute("PRAGMA foreign_keys=ON")
+                    conn.execute("PRAGMA synchronous=NORMAL")
+                except Exception:
+                    pass
             store[db_path] = conn
             _all_conns.setdefault(tid, {})[db_path] = conn
             return conn
 
     def close(self) -> None:
-        """Close this layer. File-backed shared connections stay open until
-        close_all() or process exit; :memory: connections are closed here."""
+        """Close this layer. File-backed connections stay until close_all();
+        :memory: connections are closed here."""
         if self._closed:
             return
-        self._closed = True
         if self.db_path == ":memory:":
             try:
-                self._conn.close()
+                # Open without going through closed-guard
+                c = self._open_connection(self.db_path)
+                c.close()
             except Exception:
                 pass
-        # File-backed: leave in cache so other instances keep working
+        self._closed = True
+        # File-backed: leave in per-thread cache so other instances keep working
 
     @classmethod
     def close_all(cls) -> None:
@@ -416,7 +429,7 @@ class DataAccessLayer:
 
     def ensure_migrated(self) -> int:
         """Re-run migration check (idempotent). Returns newly applied count."""
-        return apply_sqlite_migrations(self._conn)
+        return apply_sqlite_migrations(self.conn)
 
     # ── tenant helpers ────────────────────────────────────────────────
 
@@ -435,7 +448,7 @@ class DataAccessLayer:
         self._write_count += 1
         if self._write_count % self._backup_every == 0:
             try:
-                create_backup(self.db_path, conn=self._conn)
+                create_backup(self.db_path, conn=self.conn)
             except Exception:
                 pass
 
@@ -443,7 +456,7 @@ class DataAccessLayer:
         """Force an immediate backup (file-backed only)."""
         if self.db_path in (":memory:",):
             return None
-        return create_backup(self.db_path, conn=self._conn)
+        return create_backup(self.db_path, conn=self.conn)
 
     # ── CRUD (same signatures as in-memory version) ───────────────────
 
@@ -458,7 +471,7 @@ class DataAccessLayer:
         if "is_active" not in payload:
             payload["is_active"] = True
 
-        self._conn.execute(
+        self.conn.execute(
             """
             INSERT OR REPLACE INTO _records
                 (table_name, id, tenant_id, data, is_active, created_at, updated_at)
@@ -474,7 +487,7 @@ class DataAccessLayer:
                 payload.get("updated_at"),
             ),
         )
-        self._conn.commit()
+        self.conn.commit()
         self._note_write()
 
         if self.get_mode() in ["offline-first", "hybrid"]:
@@ -489,7 +502,7 @@ class DataAccessLayer:
 
     def get(self, table_name: str, record_id: uuid.UUID) -> Optional[Dict[str, Any]]:
         """Get a single record for the current tenant."""
-        row = self._conn.execute(
+        row = self.conn.execute(
             """
             SELECT data FROM _records
             WHERE table_name = ? AND id = ? AND tenant_id = ?
@@ -502,7 +515,7 @@ class DataAccessLayer:
 
     def get_all(self, table_name: str) -> List[Dict[str, Any]]:
         """Get all records for the current tenant."""
-        rows = self._conn.execute(
+        rows = self.conn.execute(
             """
             SELECT data FROM _records
             WHERE table_name = ? AND tenant_id = ?
@@ -526,7 +539,7 @@ class DataAccessLayer:
         else:
             active_int = 1 if is_active not in (0, "0", False, "false", None) else 0
 
-        self._conn.execute(
+        self.conn.execute(
             """
             UPDATE _records
             SET data = ?, is_active = ?, updated_at = ?
@@ -541,7 +554,7 @@ class DataAccessLayer:
                 str(self.get_tenant_id()),
             ),
         )
-        self._conn.commit()
+        self.conn.commit()
         self._note_write()
 
         if self.get_mode() in ["offline-first", "hybrid"]:
@@ -564,7 +577,7 @@ class DataAccessLayer:
         existing["is_active"] = False
         existing["updated_at"] = _utcnow()
 
-        self._conn.execute(
+        self.conn.execute(
             """
             UPDATE _records
             SET data = ?, is_active = 0, updated_at = ?
@@ -578,7 +591,7 @@ class DataAccessLayer:
                 str(self.get_tenant_id()),
             ),
         )
-        self._conn.commit()
+        self.conn.commit()
         self._note_write()
 
         if self.get_mode() in ["offline-first", "hybrid"]:

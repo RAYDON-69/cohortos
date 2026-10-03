@@ -97,3 +97,7 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 ## P42
 - Never share one sqlite3 connection across threads. Per-thread connections via DAL factory only.
 - Load gate: any 5xx fails (no tolerance).
+
+## P43
+- Any change under models/ or services/ must pass the full unit-full job before a round is reported done.
+- Never store sqlite3.Connection on self; always use the thread-local factory via `conn` property.

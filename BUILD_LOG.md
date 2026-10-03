@@ -1314,3 +1314,10 @@ CRITICAL: shared process-wide sqlite3 connection caused InterfaceError under con
 Fix: per-thread connections in models/base.py (WAL, busy_timeout, foreign_keys, check_same_thread=True).
 Test: tests/test_sqlite_thread_safety.py 64 threads mixed R/W — PASS after fix.
 Axe step hardened; readiness no workflow_run untrusted checkout; dependabot cooldown; nested npm overrides.
+
+## Phase 43 — DAL conn property (no long-lived self._conn) + unit-full (2026-10-03)
+Branch: phase43-suite-green from 90bb04a
+P42 regression: self._conn held a check_same_thread connection from __init__ thread → ProgrammingError on other threads.
+Fix: @property conn → _open_connection(_conn_key) every time; :memory: keyed by id(self).
+Static guard: tests/test_no_shared_sqlite_state.py
+CI: .github/workflows/unit-full.yml (full pytest + xdist)

@@ -32,7 +32,8 @@ class CloudSyncStore:
         if db_path != ":memory:":
             Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         # Each :memory: connection is private; use shared cache URI for memory tests if needed
-        self._conn = sqlite3.connect(db_path, check_same_thread=False)
+        from services.sqlite_util import open_sqlite
+        self._conn = open_sqlite(db_path)
         self._conn.row_factory = sqlite3.Row
         self._init()
 

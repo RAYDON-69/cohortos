@@ -27,6 +27,20 @@ def load(path: Path):
         err(path, f"YAML parse error: {e}", line)
         return None, text
 
+
+def check_pinned_sha(path, text):
+    import re
+    for i, line in enumerate(text.splitlines(), 1):
+        m = re.search(r"uses:\s*([\w.-]+/[\w.-]+)@([^\s#]+)", line)
+        if not m:
+            continue
+        uses = m.group(1)
+        ref = m.group(2)
+        if uses.startswith("./"):
+            continue
+        if not re.fullmatch(r"[0-9a-fA-F]{40}", ref):
+            err(path, f"unpinned action {uses}@{ref} (need 40-char SHA)", i)
+
 def check_action_ref(path: Path, uses: str):
     if not isinstance(uses, str):
         return
@@ -79,6 +93,7 @@ def main() -> int:
         if data is None:
             continue
         check_workflow(path, data)
+        check_pinned_sha(path, text)
         jobs = list((data.get("jobs") or {}).keys())
         job_summary[path.name] = jobs
         print(f"  OK  {path.relative_to(ROOT)} jobs={jobs}" if path.name not in [e.split(':')[0] for e in ERRORS] else f"  ..  {path.relative_to(ROOT)}")

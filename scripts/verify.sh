@@ -9,7 +9,7 @@ echo "== unit tests (core) =="
 export COHORTOS_ENV=test
 export COHORTOS_JWT_SECRET="${COHORTOS_JWT_SECRET:-verify-secret-not-for-prod-32chars}"
 export COHORTOS_SKIP_MODEL_DOWNLOAD=1
-python -m pytest tests/test_no_chroma_in_prod.py tests/test_scorecard_by_kind.py tests/test_workflow_lint.py tests/test_bandit_summary.py tests/test_start_api_env_parity.py tests/test_money_invariants_b2.py tests/test_sqlite_vec_parity.py -q --tb=line
+python -m pytest tests/test_no_shared_sqlite_state.py tests/test_sqlite_thread_safety.py tests/test_no_chroma_in_prod.py tests/test_scorecard_by_kind.py tests/test_workflow_lint.py tests/test_bandit_summary.py tests/test_start_api_env_parity.py tests/test_money_invariants_b2.py tests/test_sqlite_vec_parity.py -q --tb=line
 echo "== bandit =="
 if command -v bandit >/dev/null; then
   bandit -r services api -ll
