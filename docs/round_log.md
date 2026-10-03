@@ -13,3 +13,5 @@ Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
 ## P45
 | 0 | 4e735c7 | — | 20 unit fails | start | shared mem suspected |
 | 1 | (next) | — | — | shared-cache memory URI + sentinel | — |
+
+| 8 | edbfcb4 | unit-full 612 pass | xdist/readiness | vault dual storage | unit-full GREEN |
