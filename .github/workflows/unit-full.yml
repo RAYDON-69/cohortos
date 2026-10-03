@@ -36,7 +36,9 @@ jobs:
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_TEST_EXPOSE_OTP: "1"
           COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage-ci
         run: |
+          mkdir -p /tmp/cohortos-storage-ci
           set +e
           pytest -q --maxfail=20 -p no:cacheprovider --junitxml=/tmp/junit-unit.xml 2>&1 | tee /tmp/unit-full.out
           RC=${PIPESTATUS[0]}

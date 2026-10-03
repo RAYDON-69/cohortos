@@ -2670,9 +2670,11 @@ def create_api_app(
         import os as _os
         _default_root = section.get("root") or _os.environ.get("COHORTOS_STORAGE_ROOT") or str(Path(tempfile.gettempdir()) / "cohortos-storage")
         try:
-            store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
-            if not store.is_configured() or not store.exists(remote_id):
-                store = LocalFsStorageProvider(_default_root)
+            store = LocalFsStorageProvider(_default_root)
+            if not store.exists(remote_id):
+                alt_store = build_storage_provider(section if section else {"provider": "local", "root": _default_root})
+                if alt_store.is_configured() and alt_store.exists(remote_id):
+                    store = alt_store
             if not store.exists(remote_id):
                 # Last resort: try basename under vault/tenant (legacy uploads)
                 from pathlib import Path as _P
