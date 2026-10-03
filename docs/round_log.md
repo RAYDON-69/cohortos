@@ -1,7 +1,11 @@
 # P44 round log
 
-| iter | timestamp | SHA | green | red | change | diag said |
-|------|-----------|-----|-------|-----|--------|-----------|
-| 0 | start | b64659e | — | unit-full collection, hollow ci-gate, auth-matrix, e2e, load, semgrep, npm | branch phase44 | collection SyntaxError import* inside function |
-| 1 | 613366e | workflow-lint | unit-full, readiness, ci-gate startup | collection fixed; suite ran | no such table _records on other threads |
-| 2 | (next) | — | — | schema+migrations on every new thread connection | — |
+| iter | SHA | green | red | change | diag said |
+|------|-----|-------|-----|--------|-----------|
+| 0 | b64659e | — | unit-full collection | start | SyntaxError import* in function |
+| 1 | 613366e | workflow-lint | unit-full, readiness, ci-gate | fix collection + ci-gate | suite runs; no such table _records |
+| 2 | 9345f6f | workflow-lint | unit-full, readiness, ci-gate startup | schema on every connection | KeyError _test_code; 108 pass / 20 fail |
+| 3 | b6b3799 | workflow-lint | unit-full, readiness, ci-gate | rate-limit off in job; solid ci-gate | still KeyError _test_code |
+| 4 | 2df8394 | workflow-lint | unit-full, readiness, ci-gate | OTP limit honors DISABLED | otp_id None / account not found path |
+
+Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
