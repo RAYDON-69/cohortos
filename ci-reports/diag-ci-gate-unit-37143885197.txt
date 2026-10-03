@@ -1,0 +1,554 @@
+...............F..s..................................................... [ 11%]
+..........FFFFFFFFFFF..FF..............F......F.....FF.FF
+=================================== FAILURES ===================================
+_______________________ test_vault_upload_open_evidence ________________________
+
+api_server = 'http://127.0.0.1:8741'
+session_tokens = ('4cc7c0b2-cdab-4cbb-a206-3d576b3fbddc', {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNmY2YTU2OS...PaM5vmNCUkHDc0aJnWD_x_AjMw4naJlew', 'token_type': 'bearer', 'account_id': 'e6f6a569-d5a1-4eb6-8bed-df513df4f48c', ...})
+
+    def test_vault_upload_open_evidence(api_server, session_tokens):
+        tid, tok = session_tokens
+        h = {"Authorization": f"Bearer {tok['access_token']}", "Content-Type": "application/json"}
+        payload = base64.b64encode(b"e2e-vault-bytes").decode()
+        st, up = _post(f"{api_server}/t/{tid}/vault/upload", {
+            "title": "E2E Notes", "filename": "e2e.txt", "content_base64": payload, "content_type": "text/plain"
+        }, h)
+        assert st == 200, up
+        rid = up["resource_id"]
+>       st, content = _get(f"{api_server}/t/{tid}/vault/{rid}/content", {"Authorization": h["Authorization"]})
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/e2e/test_api_gui_contracts.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/e2e/test_api_gui_contracts.py:29: in _get
+    with urllib.request.urlopen(req, timeout=15) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:215: in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:521: in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:630: in http_response
+    response = self.parent.error(
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:559: in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:492: in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <urllib.request.HTTPDefaultErrorHandler object at 0x7f0316104110>
+req = <urllib.request.Request object at 0x7f0316328bc0>
+fp = <http.client.HTTPResponse object at 0x7f030cc8f7f0>, code = 422
+msg = 'Unprocessable Entity'
+hdrs = <http.client.HTTPMessage object at 0x7f030cd1c200>
+
+    def http_error_default(self, req, fp, code, msg, hdrs):
+>       raise HTTPError(req.full_url, code, msg, hdrs, fp)
+E       urllib.error.HTTPError: HTTP Error 422: Unprocessable Entity
+
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:639: HTTPError
+____________ TestAdversarial.test_ai_query_cannot_leak_other_tenant ____________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_ai_query_cannot_leak_other_tenant>
+
+    def test_ai_query_cannot_leak_other_tenant(self):
+>       tid1, tok1, _ = self._login()
+                        ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_ai_query_cannot_leak_other_tenant>
+phone = '11817777000'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+___________ TestAdversarial.test_bangla_student_and_batch_roundtrip ____________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_bangla_student_and_batch_roundtrip>
+
+    def test_bangla_student_and_batch_roundtrip(self):
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_bangla_student_and_batch_roundtrip>
+phone = '11817777001'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+_____________ TestAdversarial.test_concurrent_sessions_two_devices _____________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_concurrent_sessions_two_devices>
+
+    def test_concurrent_sessions_two_devices(self):
+        """Two refresh chains from same login family — both can rotate independently until reuse."""
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_concurrent_sessions_two_devices>
+phone = '11817777002'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+___________ TestAdversarial.test_expired_or_garbage_refresh_rejected ___________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_expired_or_garbage_refresh_rejected>
+
+    def test_expired_or_garbage_refresh_rejected(self):
+        r = self.client.post("/auth/refresh", json={"refresh_token": "not.a.jwt"})
+        self.assertIn(r.status_code, (401, 403, 422))
+        # tampered token (flip last chars)
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_expired_or_garbage_refresh_rejected>
+phone = '11817777003'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+___________ TestAdversarial.test_fee_reminder_automation_idempotent ____________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_fee_reminder_automation_idempotent>
+
+    def test_fee_reminder_automation_idempotent(self):
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_fee_reminder_automation_idempotent>
+phone = '11817777004'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+_________ TestAdversarial.test_license_seal_hand_edit_must_not_unlock __________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_license_seal_hand_edit_must_not_unlock>
+
+    def test_license_seal_hand_edit_must_not_unlock(self):
+        """
+        Hand-editing seal to locked=false must not unlock if config still locked.
+        Also: if we only trust seal without HMAC today, document as gap and harden.
+        """
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_license_seal_hand_edit_must_not_unlock>
+phone = '11817777005'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+_______________ TestAdversarial.test_replay_after_rotation_fails _______________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_replay_after_rotation_fails>
+
+    def test_replay_after_rotation_fails(self):
+        """Old refresh token must not work after rotation (use-once family)."""
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_replay_after_rotation_fails>
+phone = '11817777006'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+________________ TestAdversarial.test_vault_concurrent_uploads _________________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_concurrent_uploads>
+
+    def test_vault_concurrent_uploads(self):
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_concurrent_uploads>
+phone = '11817777007'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+________________ TestAdversarial.test_vault_oversized_rejected _________________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_oversized_rejected>
+
+    def test_vault_oversized_rejected(self):
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_oversized_rejected>
+phone = '11817777008'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+______________ TestAdversarial.test_vault_path_traversal_filename ______________
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_path_traversal_filename>
+
+    def test_vault_path_traversal_filename(self):
+>       tid, tok, _ = self._login()
+                      ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase4.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase4.TestAdversarial testMethod=test_vault_path_traversal_filename>
+phone = '11817777009'
+
+    def _login(self, phone=None):
+        n = next(_phone)
+        phone = phone or f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"A{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase4.py:45: KeyError
+______________ TestPhase5Adversarial.test_ai_query_rate_limit_429 ______________
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_ai_query_rate_limit_429>
+
+    def test_ai_query_rate_limit_429(self):
+>       tid, tok = self._login()
+                   ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase5.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_ai_query_rate_limit_429>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"P5{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase5.py:42: KeyError
+________ TestPhase5Adversarial.test_license_lock_race_with_batch_create ________
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_license_lock_race_with_batch_create>
+
+    def test_license_lock_race_with_batch_create(self):
+>       tid, tok = self._login()
+                   ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase5.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_license_lock_race_with_batch_create>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"P5{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase5.py:42: KeyError
+______________ TestPhase5Adversarial.test_refresh_rate_limit_429 _______________
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_refresh_rate_limit_429>
+
+    def test_refresh_rate_limit_429(self):
+>       tid, tok = self._login()
+                   ^^^^^^^^^^^^^
+
+tests/test_adversarial_phase5.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_adversarial_phase5.TestPhase5Adversarial testMethod=test_refresh_rate_limit_429>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"P5{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                                                   ^^^^^^^^^^^^^^^^^
+        ).json()
+E       KeyError: '_test_code'
+
+tests/test_adversarial_phase5.py:42: KeyError
+______________ TestSolvePipeline.test_ungrounded_routes_to_review ______________
+
+self = <tests.test_ai.TestSolvePipeline testMethod=test_ungrounded_routes_to_review>
+
+    def test_ungrounded_routes_to_review(self):
+        result = self.app.solve.ask(
+            student_id=self.sid,
+            question="What is the capital of Atlantis underwater kingdom lore?",
+            subject="history",
+            topic="mythology",
+        )
+        self.assertTrue(result["ok"])
+>       self.assertFalse(result["grounded"])
+E       AssertionError: True is not false
+
+tests/test_ai.py:90: AssertionError
+_______________ TestTeachPipeline.test_ungrounded_teach_flagged ________________
+
+self = <tests.test_ai.TestTeachPipeline testMethod=test_ungrounded_teach_flagged>
+
+    def test_ungrounded_teach_flagged(self):
+        item = self.app.teach.generate_item(
+            item_type="mcq",
+            subject="astrology",
+            topic="zodiac",
+            prompt="MCQ on star signs",
+            actor_id=self.actor,
+        )
+>       self.assertFalse(item["grounded"])
+E       AssertionError: True is not false
+
+tests/test_ai.py:227: AssertionError
+____________________ TestAuthFlow.test_cross_tenant_denied _____________________
+
+self = <tests.test_api_auth.TestAuthFlow testMethod=test_cross_tenant_denied>
+
+    def test_cross_tenant_denied(self):
+        tenant_b = str(uuid.uuid4())
+        r = self.client.post(
+            "/auth/request-otp",
+            json={"phone": "01710000001", "tenant_id": self.tenant_id},
+        )
+>       code = r.json()["_test_code"]
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '_test_code'
+
+tests/test_api_auth.py:181: KeyError
+________________ TestAuthFlow.test_protected_students_endpoint _________________
+
+self = <tests.test_api_auth.TestAuthFlow testMethod=test_protected_students_endpoint>
+
+    def test_protected_students_endpoint(self):
+        r = self.client.post(
+            "/auth/request-otp",
+            json={"phone": "01710000001", "tenant_id": self.tenant_id},
+        )
+>       code = r.json()["_test_code"]
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '_test_code'
+
+tests/test_api_auth.py:121: KeyError
+_____________ TestAuthFlow.test_refresh_rotation_and_reuse_revokes _____________
+
+self = <tests.test_api_auth.TestAuthFlow testMethod=test_refresh_rotation_and_reuse_revokes>
+
+    def test_refresh_rotation_and_reuse_revokes(self):
+        r = self.client.post(
+            "/auth/request-otp",
+            json={"phone": "01710000001", "tenant_id": self.tenant_id},
+        )
+>       code = r.json()["_test_code"]
+               ^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '_test_code'
+
+tests/test_api_auth.py:136: KeyError
+___________________ TestAuthFlow.test_request_and_verify_otp ___________________
+
+self = <tests.test_api_auth.TestAuthFlow testMethod=test_request_and_verify_otp>
+
+    def test_request_and_verify_otp(self):
+        r = self.client.post(
+            "/auth/request-otp",
+            json={"phone": "01710000001", "tenant_id": self.tenant_id},
+        )
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+>       self.assertTrue(body.get("otp_id"))
+E       AssertionError: None is not true
+
+tests/test_api_auth.py:96: AssertionError
+=============================== warnings summary ===============================
+../../../../../opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/e2e/test_api_gui_contracts.py::test_vault_upload_open_evidence - urllib.error.HTTPError: HTTP Error 422: Unprocessable Entity
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_ai_query_cannot_leak_other_tenant - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_bangla_student_and_batch_roundtrip - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_concurrent_sessions_two_devices - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_expired_or_garbage_refresh_rejected - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_fee_reminder_automation_idempotent - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_license_seal_hand_edit_must_not_unlock - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_replay_after_rotation_fails - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_vault_concurrent_uploads - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_vault_oversized_rejected - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase4.py::TestAdversarial::test_vault_path_traversal_filename - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase5.py::TestPhase5Adversarial::test_ai_query_rate_limit_429 - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase5.py::TestPhase5Adversarial::test_license_lock_race_with_batch_create - KeyError: '_test_code'
+FAILED tests/test_adversarial_phase5.py::TestPhase5Adversarial::test_refresh_rate_limit_429 - KeyError: '_test_code'
+FAILED tests/test_ai.py::TestSolvePipeline::test_ungrounded_routes_to_review - AssertionError: True is not false
+FAILED tests/test_ai.py::TestTeachPipeline::test_ungrounded_teach_flagged - AssertionError: True is not false
+FAILED tests/test_api_auth.py::TestAuthFlow::test_cross_tenant_denied - KeyError: '_test_code'
+FAILED tests/test_api_auth.py::TestAuthFlow::test_protected_students_endpoint - KeyError: '_test_code'
+FAILED tests/test_api_auth.py::TestAuthFlow::test_refresh_rotation_and_reuse_revokes - KeyError: '_test_code'
+FAILED tests/test_api_auth.py::TestAuthFlow::test_request_and_verify_otp - AssertionError: None is not true
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 20 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+20 failed, 108 passed, 4 skipped, 1 warning in 5.31s
