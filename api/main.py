@@ -679,10 +679,10 @@ def create_api_app(
         return (request.client.host if request.client else "unknown")
 
     def _rate_limit_otp(request: Request, phone: str = ""):
+        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1":
+            return None
         from services.rate_limit import otp_ip_limiter, otp_phone_limiter
-        from fastapi.responses import JSONResponse
-        ip = _client_ip(request)
-        ok, _, retry = otp_ip_limiter.check(f"ip:{ip}")
+        ok, _, retry = otp_ip_limiter.check(f"ip:{_client_ip(request)}")
         if not ok:
             return JSONResponse(status_code=429, content={"detail": "rate_limited"}, headers={"Retry-After": str(retry or 60)})
         if phone:
@@ -696,10 +696,11 @@ def create_api_app(
     def request_otp(body: OTPRequest, request: Request):
         # rate limit applied after body parse via dependency pattern
         identity = body.phone or body.email or "unknown"
-        try:
-            registry.limiter.check("request-otp", identity, _client_ip(request))
-        except RateLimitExceeded as e:
-            raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
+        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") != "1":
+            try:
+                registry.limiter.check("request-otp", identity, _client_ip(request))
+            except RateLimitExceeded as e:
+                raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(e.retry_after)})
         _blocked = _rate_limit_otp(request, identity if identity != "unknown" else "")
         if _blocked is not None:
             return _blocked
@@ -742,7 +743,7 @@ def create_api_app(
             "tenant_id": tenant_id,
             "centres": centres,
         }
-        if os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1" and result.get("_test_code"):
+        if (os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1" or (os.environ.get("COHORTOS_ENV") or "").lower()=="test") and result.get("_test_code"):
             payload["_test_code"] = result["_test_code"]
         return payload
 

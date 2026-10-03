@@ -157,6 +157,9 @@ class TestAuthFlow(unittest.TestCase):
         self.assertEqual(again.status_code, 401)
 
     def test_rate_limit_request_otp(self):
+        old = os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
+        self.addCleanup(lambda: (os.environ.__setitem__("COHORTOS_RATE_LIMIT_DISABLED", old) if old is not None else os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)))
+
         for i in range(5):
             r = self.client.post(
                 "/auth/request-otp",
