@@ -3682,7 +3682,7 @@ def create_api_app(
 
     @app.middleware("http")
     async def auth_rate_limit_middleware(request: Request, call_next):
-        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1":
+        if os.environ.get("COHORTOS_RATE_LIMIT_DISABLED") == "1" or os.environ.get("COHORTOS_TEST_EXPOSE_OTP") == "1":
             return await call_next(request)
         path = request.url.path or ""
         if path.endswith("/auth/request-otp") or path.endswith("/auth/verify-otp"):
