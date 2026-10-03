@@ -1,0 +1,628 @@
+...............F..s..................................................... [ 11%]
+....................s...s..............F......F......................... [ 23%]
+..................................................FFFFFFF...F........... [ 34%]
+.........................F.............................................. [ 46%]
+.........................................................ss............. [ 58%]
+........................................................................ [ 69%]
+....FFF.....FFFFF
+=================================== FAILURES ===================================
+_______________________ test_vault_upload_open_evidence ________________________
+
+api_server = 'http://127.0.0.1:8741'
+session_tokens = ('a29d8fa5-6548-47ab-b765-a09978a09bba', {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzNmYTY3ZS...t-bApi_tiD79EfPqnEooajqslzByXomfw', 'token_type': 'bearer', 'account_id': '633fa67e-45b8-4c10-80e4-8fd23d33db8a', ...})
+
+    def test_vault_upload_open_evidence(api_server, session_tokens):
+        tid, tok = session_tokens
+        h = {"Authorization": f"Bearer {tok['access_token']}", "Content-Type": "application/json"}
+        payload = base64.b64encode(b"e2e-vault-bytes").decode()
+        st, up = _post(f"{api_server}/t/{tid}/vault/upload", {
+            "title": "E2E Notes", "filename": "e2e.txt", "content_base64": payload, "content_type": "text/plain"
+        }, h)
+        assert st == 200, up
+        rid = up["resource_id"]
+>       st, content = _get(f"{api_server}/t/{tid}/vault/{rid}/content", {"Authorization": h["Authorization"]})
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/e2e/test_api_gui_contracts.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/e2e/test_api_gui_contracts.py:29: in _get
+    with urllib.request.urlopen(req, timeout=15) as r:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:215: in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:521: in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:630: in http_response
+    response = self.parent.error(
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:559: in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:492: in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <urllib.request.HTTPDefaultErrorHandler object at 0x7f97d1e6cb30>
+req = <urllib.request.Request object at 0x7f97c805fd70>
+fp = <http.client.HTTPResponse object at 0x7f97c80b5090>, code = 422
+msg = 'Unprocessable Entity'
+hdrs = <http.client.HTTPMessage object at 0x7f97c80b5ca0>
+
+    def http_error_default(self, req, fp, code, msg, hdrs):
+>       raise HTTPError(req.full_url, code, msg, hdrs, fp)
+E       urllib.error.HTTPError: HTTP Error 422: Unprocessable Entity
+
+/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/urllib/request.py:639: HTTPError
+______________ TestSolvePipeline.test_ungrounded_routes_to_review ______________
+
+self = <tests.test_ai.TestSolvePipeline testMethod=test_ungrounded_routes_to_review>
+
+    def test_ungrounded_routes_to_review(self):
+        result = self.app.solve.ask(
+            student_id=self.sid,
+            question="What is the capital of Atlantis underwater kingdom lore?",
+            subject="history",
+            topic="mythology",
+        )
+        self.assertTrue(result["ok"])
+>       self.assertFalse(result["grounded"])
+E       AssertionError: True is not false
+
+tests/test_ai.py:90: AssertionError
+_______________ TestTeachPipeline.test_ungrounded_teach_flagged ________________
+
+self = <tests.test_ai.TestTeachPipeline testMethod=test_ungrounded_teach_flagged>
+
+    def test_ungrounded_teach_flagged(self):
+        item = self.app.teach.generate_item(
+            item_type="mcq",
+            subject="astrology",
+            topic="zodiac",
+            prompt="MCQ on star signs",
+            actor_id=self.actor,
+        )
+>       self.assertFalse(item["grounded"])
+E       AssertionError: True is not false
+
+tests/test_ai.py:227: AssertionError
+______________ TestBiometricLinkBulk.test_bulk_happy_path_by_roll ______________
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_happy_path_by_roll>
+
+    def test_bulk_happy_path_by_roll(self):
+>       tenant_id, headers, _sid, roll = self._fresh_tenant_with_student()
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_biometric_link_bulk.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_happy_path_by_roll>
+
+    def _fresh_tenant_with_student(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bulk {phone}", "owner_phone": phone, "owner_name": "Owner"},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        tenant_id = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone})
+        body = otp.json()
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": body["otp_id"],
+                          ^^^^^^^^^^^^^^
+                "code": body["_test_code"],
+                "tenant_id": body.get("tenant_id") or tenant_id,
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_biometric_link_bulk.py:43: KeyError
+___________ TestBiometricLinkBulk.test_bulk_happy_path_by_student_id ___________
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_happy_path_by_student_id>
+
+    def test_bulk_happy_path_by_student_id(self):
+>       tenant_id, headers, student_id, _roll = self._fresh_tenant_with_student()
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_biometric_link_bulk.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_happy_path_by_student_id>
+
+    def _fresh_tenant_with_student(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bulk {phone}", "owner_phone": phone, "owner_name": "Owner"},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        tenant_id = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone})
+        body = otp.json()
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": body["otp_id"],
+                          ^^^^^^^^^^^^^^
+                "code": body["_test_code"],
+                "tenant_id": body.get("tenant_id") or tenant_id,
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_biometric_link_bulk.py:43: KeyError
+_______ TestBiometricLinkBulk.test_bulk_malformed_missing_device_user_id _______
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_malformed_missing_device_user_id>
+
+    def test_bulk_malformed_missing_device_user_id(self):
+>       tenant_id, headers, student_id, _roll = self._fresh_tenant_with_student()
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_biometric_link_bulk.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_malformed_missing_device_user_id>
+
+    def _fresh_tenant_with_student(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bulk {phone}", "owner_phone": phone, "owner_name": "Owner"},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        tenant_id = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone})
+        body = otp.json()
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": body["otp_id"],
+                          ^^^^^^^^^^^^^^
+                "code": body["_test_code"],
+                "tenant_id": body.get("tenant_id") or tenant_id,
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_biometric_link_bulk.py:43: KeyError
+___________ TestBiometricLinkBulk.test_bulk_mixed_valid_and_invalid ____________
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_mixed_valid_and_invalid>
+
+    def test_bulk_mixed_valid_and_invalid(self):
+>       tenant_id, headers, student_id, _roll = self._fresh_tenant_with_student()
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_biometric_link_bulk.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_mixed_valid_and_invalid>
+
+    def _fresh_tenant_with_student(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bulk {phone}", "owner_phone": phone, "owner_name": "Owner"},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        tenant_id = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone})
+        body = otp.json()
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": body["otp_id"],
+                          ^^^^^^^^^^^^^^
+                "code": body["_test_code"],
+                "tenant_id": body.get("tenant_id") or tenant_id,
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_biometric_link_bulk.py:43: KeyError
+______________ TestBiometricLinkBulk.test_bulk_student_not_found _______________
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_student_not_found>
+
+    def test_bulk_student_not_found(self):
+>       tenant_id, headers, _sid, _roll = self._fresh_tenant_with_student()
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_biometric_link_bulk.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_biometric_link_bulk.TestBiometricLinkBulk testMethod=test_bulk_student_not_found>
+
+    def _fresh_tenant_with_student(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bulk {phone}", "owner_phone": phone, "owner_name": "Owner"},
+        )
+        self.assertEqual(r.status_code, 200, r.text)
+        tenant_id = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone})
+        body = otp.json()
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": body["otp_id"],
+                          ^^^^^^^^^^^^^^
+                "code": body["_test_code"],
+                "tenant_id": body.get("tenant_id") or tenant_id,
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_biometric_link_bulk.py:43: KeyError
+__________ TestCentreTrialOnboarding.test_desk_batch_and_manual_admit __________
+
+self = <tests.test_centre_trial_onboarding.TestCentreTrialOnboarding testMethod=test_desk_batch_and_manual_admit>
+
+    def test_desk_batch_and_manual_admit(self):
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={
+                "centre_name": "Desk Centre",
+                "owner_phone": "01710000004",
+                "owner_name": "Owner",
+            },
+        )
+        tid = r.json()["tenant_id"]
+        r = self.client.post("/auth/request-otp", json={"phone": "01710000004"})
+        r2 = self.client.post(
+            "/auth/verify-otp",
+            json={
+>               "otp_id": r.json()["otp_id"],
+                          ^^^^^^^^^^^^^^^^^^
+                "code": r.json()["_test_code"],
+                "tenant_id": r.json()["tenant_id"],
+            },
+        )
+E       KeyError: 'otp_id'
+
+tests/test_centre_trial_onboarding.py:101: KeyError
+________ TestCentreTrialOnboarding.test_phone_only_otp_and_owner_login _________
+
+self = <tests.test_centre_trial_onboarding.TestCentreTrialOnboarding testMethod=test_phone_only_otp_and_owner_login>
+
+    def test_phone_only_otp_and_owner_login(self):
+        r = self.client.post(
+            "/auth/centre-trial",
+            json={
+                "centre_name": "OTP Centre",
+                "owner_phone": "01710000003",
+                "owner_name": "Owner",
+            },
+        )
+        self.assertEqual(r.status_code, 200)
+        r = self.client.post("/auth/request-otp", json={"phone": "01710000003"})
+>       self.assertEqual(r.status_code, 200)
+E       AssertionError: 429 != 200
+
+tests/test_centre_trial_onboarding.py:66: AssertionError
+_____________ TestCentreTrialOnboarding.test_unknown_phone_no_leak _____________
+
+self = <tests.test_centre_trial_onboarding.TestCentreTrialOnboarding testMethod=test_unknown_phone_no_leak>
+
+    def test_unknown_phone_no_leak(self):
+        r = self.client.post("/auth/request-otp", json={"phone": "01999999998"})
+>       self.assertEqual(r.status_code, 200)
+E       AssertionError: 429 != 200
+
+tests/test_centre_trial_onboarding.py:84: AssertionError
+________________ TestSyncEngineRemote.test_http_sync_endpoints _________________
+
+self = <tests.test_cloud_sync.TestSyncEngineRemote testMethod=test_http_sync_endpoints>
+
+    def test_http_sync_endpoints(self):
+        tenant_id = str(uuid.uuid4())
+        api = create_api_app(jwt_secret=os.environ["COHORTOS_JWT_SECRET"])
+        client = TestClient(api)
+        registry = api.state.registry
+        cm = registry.get_app(tenant_id)
+        cm.accounts.create_account(phone="01718880001")
+        otp = client.post(
+            "/auth/request-otp",
+            json={"phone": "01718880001", "tenant_id": tenant_id},
+        ).json()
+        tokens = client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tenant_id},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_cloud_sync.py:209: KeyError
+______________________ TestBillingAPI.test_draft_invoice _______________________
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_draft_invoice>
+
+    def test_draft_invoice(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase11_billing.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_draft_invoice>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bill{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase11_billing.py:57: KeyError
+__________________ TestBillingAPI.test_subscription_and_plans __________________
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_subscription_and_plans>
+
+    def test_subscription_and_plans(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase11_billing.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_subscription_and_plans>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bill{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase11_billing.py:57: KeyError
+_______________ TestBillingAPI.test_usage_empty_then_after_guard _______________
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_usage_empty_then_after_guard>
+
+    def test_usage_empty_then_after_guard(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase11_billing.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase11_billing.TestBillingAPI testMethod=test_usage_empty_then_after_guard>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Bill{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase11_billing.py:57: KeyError
+_____ TestBillingPaymentAPI.test_checkout_confirm_bkash_mock_activates_sub _____
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_checkout_confirm_bkash_mock_activates_sub>
+
+    def test_checkout_confirm_bkash_mock_activates_sub(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase12_payments.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_checkout_confirm_bkash_mock_activates_sub>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Pay{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase12_payments.py:88: KeyError
+_______________ TestBillingPaymentAPI.test_checkout_stripe_mock ________________
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_checkout_stripe_mock>
+
+    def test_checkout_stripe_mock(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase12_payments.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_checkout_stripe_mock>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Pay{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase12_payments.py:88: KeyError
+________________ TestBillingPaymentAPI.test_providers_endpoint _________________
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_providers_endpoint>
+
+    def test_providers_endpoint(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase12_payments.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_providers_endpoint>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Pay{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase12_payments.py:88: KeyError
+___________________ TestBillingPaymentAPI.test_set_provider ____________________
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_set_provider>
+
+    def test_set_provider(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase12_payments.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase12_payments.TestBillingPaymentAPI testMethod=test_set_provider>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        tid = self.client.post(
+            "/auth/centre-trial",
+            json={"centre_name": f"Pay{phone}", "owner_phone": phone, "owner_name": "O"},
+        ).json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+        tok = self.client.post(
+            "/auth/verify-otp",
+>           json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid},
+                            ^^^^^^^^^^^^^
+        ).json()
+E       KeyError: 'otp_id'
+
+tests/test_phase12_payments.py:88: KeyError
+______________________ TestPhase2.test_ai_query_grounded _______________________
+
+self = <tests.test_phase2_vault_ai_auto.TestPhase2 testMethod=test_ai_query_grounded>
+
+    def test_ai_query_grounded(self):
+>       tid, h = self._login()
+                 ^^^^^^^^^^^^^
+
+tests/test_phase2_vault_ai_auto.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tests.test_phase2_vault_ai_auto.TestPhase2 testMethod=test_ai_query_grounded>
+
+    def _login(self):
+        n = next(_phone)
+        phone = f"01{n:09d}"[-11:]
+        r = self.client.post("/auth/centre-trial", json={"centre_name": f"P2{phone}", "owner_phone": phone, "owner_name": "O"})
+        self.assertEqual(r.status_code, 200, r.text)
+        tid = r.json()["tenant_id"]
+        otp = self.client.post("/auth/request-otp", json={"phone": phone}).json()
+>       tok = self.client.post("/auth/verify-otp", json={"otp_id": otp["otp_id"], "code": otp["_test_code"], "tenant_id": tid}).json()
+                                                                   ^^^^^^^^^^^^^
+E       KeyError: 'otp_id'
+
+tests/test_phase2_vault_ai_auto.py:32: KeyError
+=============================== warnings summary ===============================
+../../../../../opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_class_sessions.py::test_join_url_is_tenant_scoped_and_expiring
+tests/test_class_sessions.py::test_expire_session_invalidates_join
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_class_sessions.py::test_join_url_is_tenant_scoped_and_expiring
+tests/test_class_sessions.py::test_expire_session_invalidates_join
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/jwt/api_jwt.py:370: InsecureKeyLengthWarning: The HMAC key is 29 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+tests/test_class_workspace_pro.py::test_cross_tenant_jwt_reuse_fails
+tests/test_class_workspace_pro.py::test_expired_session_rejects_token
+tests/test_class_workspace_pro.py::test_concurrent_joins_sqlite_style
+tests/test_class_workspace_pro.py::test_open_room_warning_for_public_jitsi
+tests/test_class_workspace_pro.py::test_create_returns_persisted_id_joinable
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 30 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_class_workspace_pro.py::test_cross_tenant_jwt_reuse_fails
+tests/test_class_workspace_pro.py::test_expired_session_rejects_token
+  /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages/jwt/api_jwt.py:370: InsecureKeyLengthWarning: The HMAC key is 30 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/e2e/test_api_gui_contracts.py::test_vault_upload_open_evidence - urllib.error.HTTPError: HTTP Error 422: Unprocessable Entity
+FAILED tests/test_ai.py::TestSolvePipeline::test_ungrounded_routes_to_review - AssertionError: True is not false
+FAILED tests/test_ai.py::TestTeachPipeline::test_ungrounded_teach_flagged - AssertionError: True is not false
+FAILED tests/test_biometric_link_bulk.py::TestBiometricLinkBulk::test_bulk_happy_path_by_roll - KeyError: 'otp_id'
+FAILED tests/test_biometric_link_bulk.py::TestBiometricLinkBulk::test_bulk_happy_path_by_student_id - KeyError: 'otp_id'
+FAILED tests/test_biometric_link_bulk.py::TestBiometricLinkBulk::test_bulk_malformed_missing_device_user_id - KeyError: 'otp_id'
+FAILED tests/test_biometric_link_bulk.py::TestBiometricLinkBulk::test_bulk_mixed_valid_and_invalid - KeyError: 'otp_id'
+FAILED tests/test_biometric_link_bulk.py::TestBiometricLinkBulk::test_bulk_student_not_found - KeyError: 'otp_id'
+FAILED tests/test_centre_trial_onboarding.py::TestCentreTrialOnboarding::test_desk_batch_and_manual_admit - KeyError: 'otp_id'
+FAILED tests/test_centre_trial_onboarding.py::TestCentreTrialOnboarding::test_phone_only_otp_and_owner_login - AssertionError: 429 != 200
+FAILED tests/test_centre_trial_onboarding.py::TestCentreTrialOnboarding::test_unknown_phone_no_leak - AssertionError: 429 != 200
+FAILED tests/test_cloud_sync.py::TestSyncEngineRemote::test_http_sync_endpoints - KeyError: 'otp_id'
+FAILED tests/test_phase11_billing.py::TestBillingAPI::test_draft_invoice - KeyError: 'otp_id'
+FAILED tests/test_phase11_billing.py::TestBillingAPI::test_subscription_and_plans - KeyError: 'otp_id'
+FAILED tests/test_phase11_billing.py::TestBillingAPI::test_usage_empty_then_after_guard - KeyError: 'otp_id'
+FAILED tests/test_phase12_payments.py::TestBillingPaymentAPI::test_checkout_confirm_bkash_mock_activates_sub - KeyError: 'otp_id'
+FAILED tests/test_phase12_payments.py::TestBillingPaymentAPI::test_checkout_stripe_mock - KeyError: 'otp_id'
+FAILED tests/test_phase12_payments.py::TestBillingPaymentAPI::test_providers_endpoint - KeyError: 'otp_id'
+FAILED tests/test_phase12_payments.py::TestBillingPaymentAPI::test_set_provider - KeyError: 'otp_id'
+FAILED tests/test_phase2_vault_ai_auto.py::TestPhase2::test_ai_query_grounded - KeyError: 'otp_id'
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 20 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+20 failed, 424 passed, 8 skipped, 12 warnings in 15.78s
