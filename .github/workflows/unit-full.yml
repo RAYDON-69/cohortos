@@ -35,6 +35,7 @@ jobs:
           COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
           COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
           COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
         run: |
           set +e
           pytest -q --maxfail=20 -p no:cacheprovider --junitxml=/tmp/junit-unit.xml 2>&1 | tee /tmp/unit-full.out
