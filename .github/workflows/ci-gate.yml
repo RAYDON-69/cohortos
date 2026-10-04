@@ -14,8 +14,8 @@ permissions:
   actions: read
 
 concurrency:
-  group: ci-gate-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   verify-local-mirrors:
@@ -92,13 +92,14 @@ jobs:
                       required[name] = run.get("conclusion") or run.get("status")
               print({k: required[k] for k in required})
               # all have a terminal conclusion?
-              terminals = {"success", "failure", "cancelled", "startup_failure", "timed_out"}
+              terminals = {"success", "failure", "cancelled", "startup_failure", "timed_out", "action_required", "neutral", "stale", "skipped"}
               if all(v in terminals for v in required.values()):
                   break
               time.sleep(30)
           # local unit must succeed
           local = os.environ.get("LOCAL_UNIT", "")
           required["CI-local-unit"] = local
+          # anything other than success is FAIL (skipped/cancelled/missing/neutral)
           failed = [k for k, v in required.items() if v != "success"]
           doc = {"sha": sha, "gates": required, "conclusion": "success" if not failed else "failure", "failed": failed}
           print(json.dumps(doc, indent=2))

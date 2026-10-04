@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -17,17 +21,29 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: "20"
+          node-version: "20.18.1"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: npm ci (lockfile must match)
+      - name: Pin npm 10
+        run: |
+          set -euo pipefail
+          npm install -g npm@10.9.2
+          node -v
+          npm -v
+      - name: npm ci (must match lock)
         working-directory: frontend
         env:
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
           npm ci --ignore-scripts --no-audit --no-fund --legacy-peer-deps 2>&1 | tee /tmp/npm-ci.out
-          echo "npm_ci_ok"
+          npm ci --ignore-scripts --no-audit --no-fund --legacy-peer-deps 2>&1 | tee -a /tmp/npm-ci.out
+          echo "double_npm_ci_ok"
+      - name: lock clean after ci
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          git diff --exit-code package-lock.json
       - name: Publish npm-ci diag always
         if: always()
         env:
@@ -37,19 +53,8 @@ jobs:
           python3 - <<'PY'
           import json, pathlib
           text = pathlib.Path("/tmp/npm-ci.out").read_text(errors="replace") if pathlib.Path("/tmp/npm-ci.out").exists() else ""
-          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"npm-ci","log_tail":"\n".join(text.splitlines()[-120:])}
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"npm-ci","log_tail":"\n".join(text.splitlines()[-150:])}
           pathlib.Path("/tmp/diag-npm-ci.json").write_text(json.dumps(doc, indent=2))
-          print(doc["log_tail"][-1500:])
+          print(text[-2000:])
           PY
           python scripts/publish_diag.py npm-ci "diag-npm-ci-${{ github.run_id }}-${{ github.run_attempt }}.json" /tmp/diag-npm-ci.json || true
-      - name: lockfile sync check
-        working-directory: frontend
-        run: |
-          set -euo pipefail
-          cp package-lock.json /tmp/lock.before
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          if ! diff -q package-lock.json /tmp/lock.before >/dev/null; then
-            echo "LOCK_OUT_OF_SYNC"
-            diff -u /tmp/lock.before package-lock.json | head -100 || true
-            exit 1
-          fi

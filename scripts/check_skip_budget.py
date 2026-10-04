@@ -1,35 +1,30 @@
 #!/usr/bin/env python3
-"""Fail if pytest skipped count exceeds committed baseline."""
+"""Fail unless runtime skip count equals committed baseline exactly."""
 from __future__ import annotations
-import json, os, re, subprocess, sys
+import json, os, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "tests" / "skip_budget.json"
 
 
-def static_skip_count() -> int:
-    n = 0
-    for p in (ROOT / "tests").rglob("*.py"):
-        text = p.read_text(errors="replace")
-        n += len(re.findall(r"pytest\.skip\(|@pytest\.mark\.skip(?:if)?\b", text))
-    return n
-
-
-def from_junit() -> int | None:
-    for path in (Path("/tmp/junit-unit.xml"), Path("/tmp/unit-full-junit.xml")):
+def runtime_skips() -> int:
+    for path in (
+        Path("/tmp/junit-skip.xml"),
+        Path("/tmp/junit-unit.xml"),
+        Path("/tmp/unit-full-junit.xml"),
+    ):
         if path.exists():
             text = path.read_text(errors="replace")
             m = re.search(r'skipped="(\d+)"', text)
             if m:
                 return int(m.group(1))
-    # tee log
-    log = Path("/tmp/unit-full.out")
-    if log.exists():
-        m = re.search(r"(\d+)\s+skipped", log.read_text(errors="replace"))
-        if m:
-            return int(m.group(1))
-    return None
+    for path in (Path("/tmp/skip-run.out"), Path("/tmp/unit-full.out")):
+        if path.exists():
+            m = re.search(r"(\d+)\s+skipped", path.read_text(errors="replace"))
+            if m:
+                return int(m.group(1))
+    return -1
 
 
 def main() -> int:
@@ -37,16 +32,16 @@ def main() -> int:
         print("missing tests/skip_budget.json")
         return 2
     budget = json.loads(BASELINE.read_text())
-    max_skips = int(budget.get("max_skips", 0))
-    static_n = static_skip_count()
-    n = from_junit()
-    if n is None:
-        n = static_n
-        print("using static skip marker count (no junit)")
-    print(json.dumps({"skips": n, "max_skips": max_skips, "static_markers": static_n}, indent=2))
-    if n > max_skips:
-        print(f"FAIL skip budget {n} > {max_skips}")
+    expected = int(budget.get("max_skips", budget.get("expected_skips", -1)))
+    n = runtime_skips()
+    print(json.dumps({"runtime_skips": n, "baseline": expected}, indent=2))
+    if n < 0:
+        print("FAIL could not measure runtime skips")
         return 1
+    if n != expected:
+        print(f"FAIL skip count {n} != baseline {expected}")
+        return 1
+    print("skip budget exact match")
     return 0
 
 

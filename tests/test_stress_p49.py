@@ -297,6 +297,7 @@ sys.exit(0)
 """
     )
     failures = []
+    kills = []
     for i in range(200):
         db = str(root / f"c{i}.db")
         tid = str(uuid.uuid4())
@@ -317,9 +318,17 @@ sys.exit(0)
         )
         delay = rng.uniform(0.01, 0.4)
         time.sleep(delay)
+        killed = False
         if proc.poll() is None:
             proc.kill()  # SIGKILL
             proc.wait(timeout=5)
+            killed = True
+            if proc.returncode not in (-9, 1):  # -9 SIGKILL; some platforms map differently
+                # accept if still was killed
+                pass
+            kills.append(1 if killed or proc.returncode == -9 else 0)
+        else:
+            kills.append(0)
         # reopen and integrity check
         try:
             if Path(db).exists() and Path(db).stat().st_size > 0:
@@ -380,4 +389,8 @@ sys.exit(0)
             failures.append((i, "exc", str(e)))
         if len(failures) > 10:
             break
+    delivered = sum(kills) if kills else 0
+    print(f"kills_delivered={delivered}/200 CHAOS_SEED={seed}")
+    # best-effort: at least 50% kills (timing races)
+    assert delivered >= 50, f"too few kills {delivered} seed={seed}"
     assert not failures, f"CHAOS_SEED={seed} failures={failures[:5]}"

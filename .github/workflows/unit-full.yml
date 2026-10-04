@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: unit-full-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   unit-full:

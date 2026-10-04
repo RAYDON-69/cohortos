@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: lock-regen-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   regen:

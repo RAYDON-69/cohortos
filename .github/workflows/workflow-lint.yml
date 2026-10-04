@@ -1,5 +1,9 @@
 name: Workflow Lint
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

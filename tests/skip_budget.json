@@ -1,4 +1,5 @@
 {
-  "max_skips": 12,
-  "notes": "Justified: cryptography optional modules when HAS_CRYPTO false; COHORTOS_RUN_FUZZ opt-in; playwright e2e when no browser. No product skips."
+  "expected_skips": 10,
+  "max_skips": 10,
+  "notes": "Runtime skips measured from unit-full junit. cryptography is required so licence/updater tests should run. COHORTOS_RUN_FUZZ=1 enables schemathesis smoke. Playwright e2e skips only when browser missing (unit job)."
 }

@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   actions: read
@@ -21,7 +25,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: "20"
+          node-version: "20.18.1"
       - name: Install Python deps
         run: |
           set -euo pipefail
@@ -71,7 +75,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: "20"
+          node-version: "20.18.1"
       - name: Install deps
         run: |
           set -euo pipefail

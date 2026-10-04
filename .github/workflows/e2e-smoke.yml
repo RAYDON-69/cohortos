@@ -3,6 +3,10 @@
 # PROVEN for GUI-facing work requires this job green + screenshots.
 name: E2E Smoke
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   actions: read
@@ -29,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: "20"
+          node-version: "20.18.1"
 
       - name: Install Python deps
         working-directory: .

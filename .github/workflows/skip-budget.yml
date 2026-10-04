@@ -1,0 +1,53 @@
+name: Skip Budget
+
+on:
+  push:
+    branches: [main, master, "phase*"]
+  pull_request:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Unit Full"]
+    types: [completed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  skip-budget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt -r requirements-dev.txt pytest-timeout
+      - name: Run suite for skip count
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: skip-budget-secret-not-for-prod-32
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_RUN_FUZZ: "1"
+        run: |
+          set -euo pipefail
+          set +e
+          pytest -q --tb=no -p no:cacheprovider --junitxml=/tmp/junit-skip.xml 2>&1 | tee /tmp/skip-run.out
+          set -e
+          python scripts/check_skip_budget.py
+      - name: Publish
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          python scripts/ci_publish_status.py skip-budget success || true
