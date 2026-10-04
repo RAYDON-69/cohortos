@@ -147,7 +147,7 @@ export function StaffLogin() {
               Coaching desk
             </p>
             <CardTitle className="font-display text-3xl tracking-tight">
-              <h1 className="text-3xl font-semibold tracking-tight m-0">{t("appName") || "CohortOS"}</h1>
+              {t("appName") || "CohortOS"}
             </CardTitle>
             <CardDescription className="text-base text-slate-800">
               {mode === "login"

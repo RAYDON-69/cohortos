@@ -64,6 +64,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+    <main id="main-content">
     <PageTransition>
     <Suspense fallback={<div>Loading…</div>}><Routes>
       <Route path="/login" element={<StaffLogin />} />
@@ -117,6 +118,7 @@ export default function App() {
                   <Route path="/join/:tenantId/:sessionId" element={<StudentJoinScreen />} />
         </Routes></Suspense>
     </PageTransition>
+    </main>
     </ErrorBoundary>
   );
 }

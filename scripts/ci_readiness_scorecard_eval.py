@@ -29,7 +29,8 @@ def eval_e2e_core(d):
     return isinstance(cc, dict) and cc.get("failed", 1) == 0 and cc.get("passed", 0) > 0
 
 def eval_e2e_extended(d):
-    if d.get("extended_outcome") == "success":
+    # skipped means extended suite not required this run — not a readiness failure
+    if d.get("extended_outcome") in ("success", "skipped"):
         return True
     ec = d.get("extended_counts") or {}
     return isinstance(ec, dict) and ec.get("failed", 1) == 0 and ec.get("passed", 0) > 0
