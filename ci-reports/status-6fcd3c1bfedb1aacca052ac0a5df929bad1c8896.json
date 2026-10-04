@@ -1,0 +1,19 @@
+{
+  "sha": "6fcd3c1bfedb1aacca052ac0a5df929bad1c8896",
+  "gates": {
+    "Unit Full": "failure",
+    "Release Readiness": "failure",
+    "Workflow Lint": "success",
+    "E2E Smoke": "failure",
+    "Security and License Gates": "failure",
+    "CI-local-unit": "failure"
+  },
+  "conclusion": "failure",
+  "failed": [
+    "Unit Full",
+    "Release Readiness",
+    "E2E Smoke",
+    "Security and License Gates",
+    "CI-local-unit"
+  ]
+}
