@@ -206,14 +206,15 @@ def test_corrupt_backup_restore_rejected_if_api():
     phone = "01719990001"
     _trial(client, phone, "Backup Centre")
     tid, h = _login(client, phone)
-    # write garbage restore payload
-    r = client.post(
-        f"/t/{tid}/backup/restore",
-        headers=h,
-        json={"path": "/tmp/does-not-exist-cohortos.bak"},
-    )
+    # Missing/invalid body must not succeed (422/400/404)
+    r = client.post(f"/t/{tid}/backup/restore", headers=h, json={})
     if r.status_code == 404:
         pytest.skip("backup restore endpoint not present")
-    assert r.status_code in (400, 404, 422, 500) or r.status_code < 500
-    # must not 2xx on missing file
-    assert r.status_code != 200
+    assert r.status_code != 200, r.text
+    assert r.status_code in (400, 401, 403, 404, 422, 500)
+    r2 = client.post(
+        f"/t/{tid}/backup/restore",
+        headers=h,
+        json={"ciphertext_b64": "not-valid-base64!!!", "path": "/tmp/nope.bak"},
+    )
+    assert r2.status_code != 200, r2.text
