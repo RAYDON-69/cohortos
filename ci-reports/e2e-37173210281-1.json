@@ -1,0 +1,46 @@
+{
+  "sha": "0a97a43046a032009809370844b7fcd5636cb822",
+  "main_sha": "0a97a43046a032009809370844b7fcd5636cb822",
+  "run_id": "37173210281",
+  "run_attempt": "1",
+  "core_outcome": "success",
+  "extended_outcome": "skipped",
+  "core_counts": {
+    "passed": 14,
+    "failed": 2,
+    "skipped": 0,
+    "raw_tail": "  \u2713  13 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (retry #1) (2.9s)\n  \u2713  14 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (retry #1) (2.5s)\n  \u2713  15 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (retry #1) (2.3s)\n  \u2713  16 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (retry #1) (2.3s)\n  \u2713  17 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (retry #1) (2.3s)\n  \u2713  18 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (retry #1) (2.2s)\n  \u2713  19 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (retry #1) (2.2s)\n  \u2713  20 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (retry #1) (70ms)\n  \u2713  21 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (retry #1) (65ms)\n  \u2713  22 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (retry #1) (2.3s)\n  \u2713  23 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (retry #1) (2.3s)\n  \u2713  24 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (retry #1) (2.4s)\n\n\n  1) e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    Error: admissions: Session required after hydrate\n\n      115 |   await page.waitForTimeout(600);\n      116 |   if (await page.getByText(/Session required/i).count()) {\n    > 117 |     throw new Error(\"admissions: Session required after hydrate\");\n          |           ^\n      118 |   }\n      119 |   await expect(page.getByText(/Admit|Admissions|Name|Student|\u09ad\u09b0\u09cd\u09a4\u09bf/i).first()).toBeVisible({ timeout: 15000 });\n      120 |   await shot(page, \"j-admissions\");\n        at /home/runner/work/cohortos/cohortos/frontend/e2e/smoke-journeys.spec.ts:117:11\n\n    attachment #1: screenshot (image/png) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-admissions-list-renders/test-failed-1.png\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    attachment #2: video (video/webm) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-admissions-list-renders/video.webm\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    Error Context: test-results/smoke-journeys-journey-admissions-list-renders/error-context.md\n\n  1 flaky\n    e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  11 passed (30.4s)"
+  },
+  "extended_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [
+    "\u2718   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.6s)",
+    "Error: admissions: Session required after hydrate"
+  ],
+  "generated_at": "2026-10-04T03:11:37.044168Z",
+  "per_test_lines": [
+    "\u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)",
+    "\u2718   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.6s)",
+    "\u2713  13 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (retry #1) (2.9s)",
+    "\u2713  14 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (retry #1) (2.5s)",
+    "\u2713  15 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (retry #1) (2.3s)",
+    "\u2713  16 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (retry #1) (2.3s)",
+    "\u2713  17 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (retry #1) (2.3s)",
+    "\u2713  18 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (retry #1) (2.2s)",
+    "\u2713  19 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (retry #1) (2.2s)",
+    "\u2713  20 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (retry #1) (70ms)",
+    "\u2713  21 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (retry #1) (65ms)",
+    "\u2713  22 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (retry #1) (2.3s)",
+    "\u2713  23 e2e/smoke-journeys.spec.ts:215:1 \u203a journey: AI page without raw token leak text (retry #1) (2.3s)",
+    "\u2713  24 e2e/smoke-journeys.spec.ts:225:1 \u203a journey: automations page (retry #1) (2.4s)"
+  ]
+}
