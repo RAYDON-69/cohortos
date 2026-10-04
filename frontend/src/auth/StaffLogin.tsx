@@ -143,13 +143,13 @@ export function StaffLogin() {
       >
         <Card className="border-border shadow-soft overflow-hidden">
           <CardHeader className="space-y-2 pb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-sage-700">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-800">
               Coaching desk
             </p>
             <CardTitle className="font-display text-3xl tracking-tight">
-              {t("appName") || "CohortOS"}
+              <h1 className="text-3xl font-semibold tracking-tight m-0">{t("appName") || "CohortOS"}</h1>
             </CardTitle>
-            <CardDescription className="text-base text-slate-700">
+            <CardDescription className="text-base text-slate-800">
               {mode === "login"
                 ? "Welcome back — sign in with your phone to open the desk"
                 : "Create your coaching centre in a few minutes"}
