@@ -123,15 +123,24 @@ def test_fee_idempotency_key_replay():
     phone = "01718880001"
     _trial(client, phone, "Fee Centre")
     tid, h = _login(client, phone)
+    br = client.post(
+        f"/t/{tid}/admissions/batches",
+        headers=h,
+        json={"name": "Fee Batch", "code": f"fb-{uuid.uuid4().hex[:6]}"},
+    )
+    assert br.status_code < 400, br.text
+    bj = br.json() or {}
+    batch_id = bj.get("id") or bj.get("batch_id") or (bj.get("batch") or {}).get("id")
+    assert batch_id, br.text
     sr = client.post(
         f"/t/{tid}/students",
         headers=h,
-        json={"name": "S", "phone": "01718880002"},
+        json={"name": "S", "phone": "01718880002", "batch_id": batch_id},
     )
     assert sr.status_code < 500, sr.text
     assert sr.status_code < 400, f"student create required for fee stress: {sr.status_code} {sr.text}"
     body = sr.json() or {}
-    sid = body.get("id") or body.get("student_id")
+    sid = body.get("id") or body.get("student_id") or (body.get("student") or {}).get("id")
     assert sid, body
     key = f"idem-{uuid.uuid4().hex}"
     payload = {
