@@ -26,17 +26,30 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=6144
         run: |
           set -euo pipefail
-          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee /tmp/npm-ci.out
+          echo "npm_ci_ok"
+      - name: Publish npm-ci diag always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          python3 - <<'PY'
+          import json, pathlib
+          text = pathlib.Path("/tmp/npm-ci.out").read_text(errors="replace") if pathlib.Path("/tmp/npm-ci.out").exists() else ""
+          doc = {"schema":"cohortos.ci-report/v1","kind":"diag","name":"npm-ci","log_tail":"\n".join(text.splitlines()[-120:])}
+          pathlib.Path("/tmp/diag-npm-ci.json").write_text(json.dumps(doc, indent=2))
+          print(doc["log_tail"][-1500:])
+          PY
+          python scripts/publish_diag.py npm-ci "diag-npm-ci-${{ github.run_id }}-${{ github.run_attempt }}.json" /tmp/diag-npm-ci.json || true
       - name: lockfile sync check
         working-directory: frontend
         run: |
           set -euo pipefail
-          # package-lock-only must not change lock when already in sync
           cp package-lock.json /tmp/lock.before
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           if ! diff -q package-lock.json /tmp/lock.before >/dev/null; then
-            echo "LOCK_OUT_OF_SYNC: package-lock.json drifted after package-lock-only"
-            diff -u /tmp/lock.before package-lock.json | head -80 || true
+            echo "LOCK_OUT_OF_SYNC"
+            diff -u /tmp/lock.before package-lock.json | head -100 || true
             exit 1
           fi
-          echo "lockfile in sync"
