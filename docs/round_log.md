@@ -35,3 +35,12 @@ Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
 | d121185 | success | success | axe fail | scorecard | npm | unit-xdist GREEN |
 | 2a26c80 | success | success | core flake | scorecard | npm | extended skipped=pass |
 | 71c82b2 | — | — | settings soft | — | lock-regen always | glob overrides |
+
+## P49
+| SHA | notes |
+|-----|-------|
+| 674d5ea | remove **/ overrides; guard test; npm-install-smoke; stress start |
+| 6fcd3c1 | more stress tests |
+| e40b50d | regenerated package-lock; 624p/1f stress backup KeyError |
+| 0da301e | test body fix still KeyError from API |
+| 79e9249 | product: restore_backup 400 on missing ciphertext |
