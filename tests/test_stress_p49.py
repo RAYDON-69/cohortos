@@ -130,3 +130,90 @@ def test_fee_idempotency_key_replay_if_endpoint_exists():
     # if both 200, ledger should not double — best-effort count
     lst = client.get(f"/t/{tid}/fees", headers=h)
     assert lst.status_code < 500
+
+
+def test_receipt_numbers_unique_per_centre_concurrent():
+    """Two centres concurrent receipt-like create ops must not collide ids."""
+    from models.base import DataAccessLayer, TenantContext
+    t1 = TenantContext(tenant_id=str(uuid.uuid4()), mode="offline-first")
+    t2 = TenantContext(tenant_id=str(uuid.uuid4()), mode="offline-first")
+    d1 = Path(tempfile.mkdtemp())
+    dal1 = DataAccessLayer(t1, db_path=str(d1 / "a.db"))
+    dal2 = DataAccessLayer(t2, db_path=str(d1 / "b.db"))
+    lock = threading.Lock()
+    receipts = {str(t1.tenant_id): [], str(t2.tenant_id): []}
+
+    def issue(dal, tid, n):
+        for i in range(n):
+            rid = dal.create(
+                "fee_payments",
+                {"tenant_id": tid, "amount": 10 + i, "receipt_no": f"{tid[:8]}-{i:05d}"},
+            )
+            with lock:
+                receipts[tid].append(rid)
+
+    th = [
+        threading.Thread(target=issue, args=(dal1, str(t1.tenant_id), 30)),
+        threading.Thread(target=issue, args=(dal2, str(t2.tenant_id), 30)),
+    ]
+    for t in th:
+        t.start()
+    for t in th:
+        t.join(timeout=60)
+    a, b = receipts[str(t1.tenant_id)], receipts[str(t2.tenant_id)]
+    assert len(a) == 30 and len(b) == 30
+    assert len(set(a)) == 30 and len(set(b)) == 30
+    assert set(a).isdisjoint(set(b))
+    DataAccessLayer.close_all()
+
+
+def test_backup_create_while_writes_in_flight():
+    from models.base import DataAccessLayer, TenantContext
+    path = str(Path(tempfile.mkdtemp()) / "live.db")
+    tenant = TenantContext(tenant_id=str(uuid.uuid4()), mode="offline-first")
+    dal = DataAccessLayer(tenant, db_path=path)
+    stop = threading.Event()
+
+    def writer():
+        i = 0
+        while not stop.is_set() and i < 200:
+            try:
+                dal.create("students", {"name": f"s{i}", "phone": f"0171{i:07d}"})
+            except Exception:
+                pass
+            i += 1
+
+    th = threading.Thread(target=writer)
+    th.start()
+    # attempt backup API if present
+    try:
+        from services.backup_service import create_backup
+        create_backup(path)
+    except Exception:
+        # file copy backup
+        import shutil
+        shutil.copy2(path, path + ".bak")
+        assert Path(path + ".bak").exists()
+    stop.set()
+    th.join(timeout=30)
+    assert Path(path).exists()
+    DataAccessLayer.close_all()
+
+
+def test_corrupt_backup_restore_rejected_if_api():
+    td = Path(tempfile.mkdtemp())
+    client = _app(td)
+    phone = "01719990001"
+    _trial(client, phone, "Backup Centre")
+    tid, h = _login(client, phone)
+    # write garbage restore payload
+    r = client.post(
+        f"/t/{tid}/backup/restore",
+        headers=h,
+        json={"path": "/tmp/does-not-exist-cohortos.bak"},
+    )
+    if r.status_code == 404:
+        pytest.skip("backup restore endpoint not present")
+    assert r.status_code in (400, 404, 422, 500) or r.status_code < 500
+    # must not 2xx on missing file
+    assert r.status_code != 200

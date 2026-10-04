@@ -44,7 +44,7 @@ jobs:
         working-directory: frontend
         run: |
           set -euo pipefail
-          npm ci || npm install
+          bash ../scripts/ci_step.sh npm-ci -- npm ci || npm install
           npm run build
       - name: Real load test
         env:

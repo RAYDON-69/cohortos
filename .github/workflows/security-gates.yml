@@ -42,7 +42,7 @@ jobs:
         working-directory: frontend
         run: |
           set -euo pipefail
-          (npm ci || npm install)
+          (bash ../scripts/ci_step.sh npm-ci -- npm ci || npm install)
           npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit-prod.json || true
           npm audit --audit-level=high --json > /tmp/npm-audit-all.json || true
           python ../scripts/npm_audit_gate.py --json /tmp/npm-audit-prod.json --dev-json /tmp/npm-audit-all.json
