@@ -1,0 +1,42 @@
+{
+  "sha": "674d5eaf39e8261b5688d52fc257abc080bd8824",
+  "main_sha": "674d5eaf39e8261b5688d52fc257abc080bd8824",
+  "run_id": "37207699515",
+  "run_attempt": "1",
+  "core_outcome": "failure",
+  "extended_outcome": "skipped",
+  "core_counts": {
+    "passed": 5,
+    "failed": 7,
+    "skipped": 0,
+    "raw_tail": "    Expected: visible\n    Timeout: 15000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"toBeVisible\" getByTestId('attendance-history') with timeout 15000ms\n      - waiting for getByTestId('attendance-history')\n\n\n      126 |   await page.goto(h(\"/fees\"));\n      127 |   await page.waitForTimeout(500);\n    > 128 |   await expect(page.getByTestId(\"attendance-history\")).toBeVisible({ timeout: 15000 });\n          |                                                        ^\n      129 |   await expect(page.getByText(\"Missing bearer token\")).toHaveCount(0);\n      130 |   await expect(page.getByText(/Session required/i)).toHaveCount(0);\n      131 |   await shot(page, \"j-fees\");\n        at /home/runner/work/cohortos/cohortos/frontend/e2e/smoke-journeys.spec.ts:128:56\n\n    attachment #1: screenshot (image/png) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-fees-page-without-bearer-error-text-retry1/test-failed-1.png\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    attachment #2: video (video/webm) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-fees-page-without-bearer-error-text-retry1/video.webm\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    Error Context: test-results/smoke-journeys-journey-fees-page-without-bearer-error-text-retry1/error-context.md\n\n    attachment #4: trace (application/zip) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-fees-page-without-bearer-error-text-retry1/trace.zip\n    Usage:\n\n        npx playwright show-trace test-results/smoke-journeys-journey-fees-page-without-bearer-error-text-retry1/trace.zip\n\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n  1 failed\n    e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  9 did not run\n  2 passed (42.8s)"
+  },
+  "extended_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [
+    "\u2718   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (16.7s)",
+    "\u2718  15 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (retry #1) (17.1s)",
+    "Error: expect(locator).toBeVisible() failed",
+    "Error: element(s) not found",
+    "Error: expect(locator).toBeVisible() failed",
+    "Error: element(s) not found"
+  ],
+  "generated_at": "2026-10-04T14:03:33.082585Z",
+  "per_test_lines": [
+    "\u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (1.7s)",
+    "\u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.4s)",
+    "\u2718   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (16.7s)",
+    "\u2713  13 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (retry #1) (2.3s)",
+    "\u2713  14 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (retry #1) (1.9s)",
+    "\u2718  15 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (retry #1) (17.1s)"
+  ]
+}
