@@ -77,7 +77,13 @@ class TenantBackupService:
     def restore_backup(self, package: Dict[str, Any], *, into_empty: bool = True) -> Dict[str, Any]:
         if not self.data_layer:
             raise RuntimeError("no data_layer")
-        token = __import__("base64").b64decode(package["ciphertext_b64"])
+        ct = package.get("ciphertext_b64")
+        if not ct:
+            raise ValueError("ciphertext_b64 required")
+        try:
+            token = __import__("base64").b64decode(ct)
+        except Exception as e:
+            raise ValueError(f"invalid ciphertext_b64: {e}")
         try:
             raw = derive_fernet(self.secret).decrypt(token)
         except InvalidToken as e:

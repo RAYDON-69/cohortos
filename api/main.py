@@ -2056,6 +2056,8 @@ def create_api_app(
             return TenantBackupService(getattr(cm, "data_layer", None)).restore_backup(body)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
+        except KeyError as e:
+            raise HTTPException(status_code=400, detail=f"missing field: {e}")
 
     @app.get("/t/{tenant_id}/export/pdpa")
     def tenant_pdpa_export(tenant_id: str, claims: Dict[str, Any] = Depends(_bearer)):
