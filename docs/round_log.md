@@ -44,3 +44,11 @@ Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
 | e40b50d | regenerated package-lock; 624p/1f stress backup KeyError |
 | 0da301e | test body fix still KeyError from API |
 | 79e9249 | product: restore_backup 400 on missing ciphertext |
+
+## P50 / round 50
+| SHA | notes |
+|-----|-------|
+| 09a71f3 | idempotency mark-paid; skip-budget; chaos stress; npm strict ci |
+| b07c6e6 | e2e testid fees mistake reverted |
+| e7fb83e–6d32f6c | legacy-peer-deps; npm diag shows Missing sass@1.77.8 from lock |
+| 3bfa36e–b77b56b | drop sass override; fee stress batch_id; lock sync |
