@@ -1,0 +1,8 @@
+{
+  "gate": "unit-xdist",
+  "sha": "b07c6e67a9cf0bc43ce7283e58191f6d7d1f458b",
+  "conclusion": "failure",
+  "failed": [],
+  "run_id": "37209083026",
+  "attempt": "1"
+}
