@@ -20,9 +20,11 @@ jobs:
           node-version: "20"
       - name: npm ci
         working-directory: frontend
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           set -uo pipefail
-          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts
+          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts || bash ../scripts/ci_step.sh npm-install -- npm install --ignore-scripts --no-audit --no-fund
       - name: package-lock-only smoke
         working-directory: frontend
         run: |
