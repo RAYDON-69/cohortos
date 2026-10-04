@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main, master, "phase*"]
-    paths:
-      - "frontend/package.json"
-      - "frontend/package-lock.json"
-      - ".github/workflows/lock-regen.yml"
 
 permissions:
   contents: write

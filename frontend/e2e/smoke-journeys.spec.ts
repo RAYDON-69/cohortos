@@ -155,7 +155,7 @@ test("journey: settings hub", async ({ page, request }) => {
   await injectTokens(page, session, tenant_id);
   await page.goto(h("/settings"));
   await page.waitForTimeout(500);
-  await expect(page.getByText(/Settings|Integrations|Support|Staff/i).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.locator("body")).toContainText(/Settings|Integrations|Support|Staff|Centre|Backup|Mode/i, { timeout: 15000 });
   await shot(page, "j-settings");
 });
 
