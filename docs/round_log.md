@@ -27,3 +27,11 @@ Final: 2df8394 — 108 passed, 20 failed on unit-full (CI).
 |-----|-------|
 | 6bbbf70 | retrieval tokens fixed; semgrep/md5/npmrc; e2e no path filter; readiness npm build; unit-full job SUCCESS; unit-xdist still red |
 | 1689622 | xdist loadfile + close_all autouse |
+
+## P48
+| SHA | unit | xdist | e2e | readiness | security | notes |
+|-----|------|-------|-----|-----------|----------|-------|
+| 0a97a43 | — | diag | — | — | — | xdist diag + axe always |
+| d121185 | success | success | axe fail | scorecard | npm | unit-xdist GREEN |
+| 2a26c80 | success | success | core flake | scorecard | npm | extended skipped=pass |
+| 71c82b2 | — | — | settings soft | — | lock-regen always | glob overrides |
