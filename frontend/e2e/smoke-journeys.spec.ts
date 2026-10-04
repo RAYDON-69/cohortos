@@ -125,6 +125,7 @@ test("journey: fees page without bearer error text", async ({ page, request }) =
   await injectTokens(page, session, tenant_id);
   await page.goto(h("/fees"));
   await page.waitForTimeout(500);
+  await expect(page.getByTestId("attendance-history")).toBeVisible({ timeout: 15000 });
   await expect(page.getByText("Missing bearer token")).toHaveCount(0);
   await expect(page.getByText(/Session required/i)).toHaveCount(0);
   await shot(page, "j-fees");
@@ -155,7 +156,7 @@ test("journey: settings hub", async ({ page, request }) => {
   await injectTokens(page, session, tenant_id);
   await page.goto(h("/settings"));
   await page.waitForTimeout(500);
-  await expect(page.locator("body")).toContainText(/Settings|Integrations|Support|Staff|Centre|Backup|Mode/i, { timeout: 15000 });
+  await expect(page.getByTestId("settings-hub")).toBeVisible({ timeout: 15000 });
   await shot(page, "j-settings");
 });
 

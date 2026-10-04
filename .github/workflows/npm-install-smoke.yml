@@ -1,0 +1,30 @@
+name: npm Install Smoke
+
+on:
+  push:
+    branches: [main, master, "phase*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  npm-install-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: "20"
+      - name: npm ci
+        working-directory: frontend
+        run: |
+          set -uo pipefail
+          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts
+      - name: package-lock-only smoke
+        working-directory: frontend
+        run: |
+          set -uo pipefail
+          bash ../scripts/ci_step.sh npm-lock-only -- npm install --package-lock-only --ignore-scripts

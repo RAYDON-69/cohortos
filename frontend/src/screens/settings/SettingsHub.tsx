@@ -68,6 +68,7 @@ export function SettingsHubScreen() {
 
   return (
     <AppShell brand={t("appName")} navItems={nav} crumb="Settings">
+      <div data-testid="settings-hub">
       <h2 className="view-title">Settings</h2>
       <p className="caption muted" style={{ marginBottom: 20 }}>
         Account, centre, billing, integrations, and support — grouped so you can find things quickly.
@@ -91,6 +92,7 @@ export function SettingsHubScreen() {
           </div>
         </section>
       ))}
+    </div>
     </AppShell>
   );
 }

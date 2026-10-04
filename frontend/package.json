@@ -153,22 +153,19 @@
     "tar": "^7.4.3",
     "lodash-es": "^4.18.1",
     "nanoid": "3.3.19",
+    "braces": ">=3.0.3",
+    "chokidar": "^3.6.0",
+    "sass": "^1.77.8",
+    "uuid": "^11.1.1",
     "@excalidraw/excalidraw": {
       "nanoid": "3.3.19",
       "lodash-es": "^4.18.1",
-      "sass": "1.77.8",
-      "chokidar": "3.6.0",
-      "braces": "3.0.3"
+      "sass": "^1.77.8",
+      "chokidar": "^3.6.0",
+      "braces": ">=3.0.3"
     },
     "@excalidraw/mermaid-to-excalidraw": {
       "nanoid": "3.3.19"
-    },
-    "braces": "3.0.3",
-    "chokidar": "3.6.0",
-    "uuid": "^11.1.1",
-    "sass": "1.77.8",
-    "**/braces": "3.0.3",
-    "**/chokidar": "3.6.0",
-    "**/sass": "1.77.8"
+    }
   }
 }
