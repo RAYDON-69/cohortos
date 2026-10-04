@@ -12,21 +12,31 @@ permissions:
 jobs:
   npm-install-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "20"
-      - name: npm ci
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm ci (lockfile must match)
         working-directory: frontend
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
-          set -uo pipefail
-          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts || bash ../scripts/ci_step.sh npm-install -- npm install --ignore-scripts --no-audit --no-fund
-      - name: package-lock-only smoke
+          set -euo pipefail
+          bash ../scripts/ci_step.sh npm-ci -- npm ci --ignore-scripts --no-audit --no-fund
+      - name: lockfile sync check
         working-directory: frontend
         run: |
-          set -uo pipefail
-          bash ../scripts/ci_step.sh npm-lock-only -- npm install --package-lock-only --ignore-scripts
+          set -euo pipefail
+          # package-lock-only must not change lock when already in sync
+          cp package-lock.json /tmp/lock.before
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if ! diff -q package-lock.json /tmp/lock.before >/dev/null; then
+            echo "LOCK_OUT_OF_SYNC: package-lock.json drifted after package-lock-only"
+            diff -u /tmp/lock.before package-lock.json | head -80 || true
+            exit 1
+          fi
+          echo "lockfile in sync"

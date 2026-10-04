@@ -119,6 +119,7 @@ class PaymentActionBody(BaseModel):
     amount: Optional[float] = None
     notes: str = ""
     reason: str = ""
+    idempotency_key: str = ""
 
 class NotifyFlagBody(BaseModel):
     student_id: str
@@ -2419,6 +2420,7 @@ def create_api_app(
             amount=body.amount,
             actor_id=str(claims.get("sub") or ""),
             notes=body.notes,
+            idempotency_key=body.idempotency_key or "",
         )
         return {"payment": payment}
 

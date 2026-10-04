@@ -44,6 +44,19 @@ jobs:
           RC=${PIPESTATUS[0]}
           set -e
           exit $RC
+      - name: Skip budget
+        if: success()
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+        run: |
+          set -euo pipefail
+          # use junit from previous step
+          cp /tmp/junit-unit.xml /tmp/unit-full-junit.xml 2>/dev/null || true
+          python scripts/check_skip_budget.py
       - name: Diag unit-full
         if: always()
         env:

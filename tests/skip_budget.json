@@ -1,0 +1,4 @@
+{
+  "max_skips": 12,
+  "notes": "Justified: cryptography optional modules when HAS_CRYPTO false; COHORTOS_RUN_FUZZ opt-in; playwright e2e when no browser. No product skips."
+}
