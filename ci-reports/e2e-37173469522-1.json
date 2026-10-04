@@ -1,0 +1,51 @@
+{
+  "sha": "2a26c80e92c5a89507149a9f4c8334436d218832",
+  "main_sha": "2a26c80e92c5a89507149a9f4c8334436d218832",
+  "run_id": "37173469522",
+  "run_attempt": "1",
+  "core_outcome": "failure",
+  "extended_outcome": "skipped",
+  "core_counts": {
+    "passed": 15,
+    "failed": 7,
+    "skipped": 0,
+    "raw_tail": "\n  2) e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    Error: expect(locator).toBeVisible() failed\n\n    Locator: getByText(/Settings|Integrations|Support|Staff/i).first()\n    Expected: visible\n    Timeout: 10000ms\n    Error: element(s) not found\n\n    Call log:\n      - Expect \"toBeVisible\" getByText(/Settings|Integrations|Support|Staff/i).first() with timeout 10000ms\n      - waiting for getByText(/Settings|Integrations|Support|Staff/i).first()\n\n\n      156 |   await page.goto(h(\"/settings\"));\n      157 |   await page.waitForTimeout(500);\n    > 158 |   await expect(page.getByText(/Settings|Integrations|Support|Staff/i).first()).toBeVisible({ timeout: 10000 });\n          |                                                                                ^\n      159 |   await shot(page, \"j-settings\");\n      160 | });\n      161 |\n        at /home/runner/work/cohortos/cohortos/frontend/e2e/smoke-journeys.spec.ts:158:80\n\n    attachment #1: screenshot (image/png) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-settings-hub/test-failed-1.png\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    attachment #2: video (video/webm) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    test-results/smoke-journeys-journey-settings-hub/video.webm\n    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n    Error Context: test-results/smoke-journeys-journey-settings-hub/error-context.md\n\n  1 failed\n    e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  1 flaky\n    e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  2 did not run\n  8 passed (58.8s)"
+  },
+  "extended_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [
+    "\u2718   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (12.1s)",
+    "\u2718  22 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (retry #1) (17.9s)",
+    "Error: expect(locator).toHaveCount(expected) failed",
+    "Error: expect(locator).toBeVisible() failed",
+    "Error: element(s) not found"
+  ],
+  "generated_at": "2026-10-04T03:17:17.743835Z",
+  "per_test_lines": [
+    "\u2713   1 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (2.2s)",
+    "\u2713   2 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (1.8s)",
+    "\u2713   3 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (1.6s)",
+    "\u2713   4 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (1.6s)",
+    "\u2713   5 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (1.5s)",
+    "\u2718   6 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (12.1s)",
+    "\u2713  13 e2e/smoke-journeys.spec.ts:99:1 \u203a journey: login shows desk shell (retry #1) (3.0s)",
+    "\u2713  14 e2e/smoke-journeys.spec.ts:111:1 \u203a journey: admissions list renders (retry #1) (2.5s)",
+    "\u2713  15 e2e/smoke-journeys.spec.ts:123:1 \u203a journey: fees page without bearer error text (retry #1) (2.3s)",
+    "\u2713  16 e2e/smoke-journeys.spec.ts:133:1 \u203a journey: exams page loads (retry #1) (2.3s)",
+    "\u2713  17 e2e/smoke-journeys.spec.ts:143:1 \u203a journey: vault page loads (retry #1) (2.3s)",
+    "\u2713  18 e2e/smoke-journeys.spec.ts:153:1 \u203a journey: settings hub (retry #1) (2.3s)",
+    "\u2713  19 e2e/smoke-journeys.spec.ts:162:1 \u203a journey: support shows contact email (retry #1) (2.3s)",
+    "\u2713  20 e2e/smoke-journeys.spec.ts:171:1 \u203a journey: Bangla batch name via API (retry #1) (68ms)",
+    "\u2713  21 e2e/smoke-journeys.spec.ts:187:1 \u203a journey: student create with Bangla name (retry #1) (65ms)",
+    "\u2718  22 e2e/smoke-journeys.spec.ts:205:1 \u203a journey: attendance history route (retry #1) (17.9s)"
+  ]
+}
