@@ -6,6 +6,7 @@ on:
     branches: [main, master, "phase*"]
     paths:
       - "frontend/package.json"
+      - "frontend/package-lock.json"
       - ".github/workflows/lock-regen.yml"
 
 permissions:
@@ -18,56 +19,41 @@ concurrency:
 jobs:
   regen:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "20"
-      - name: Regen lock + audit
+      - name: Regen lockfile
         working-directory: frontend
         run: |
           set -euo pipefail
           npm install -g npm@latest
           rm -rf node_modules package-lock.json
-          npm install --package-lock-only --ignore-scripts
-          echo "### npm ls braces chokidar sass" >> "$GITHUB_STEP_SUMMARY"
-          npm ls braces chokidar sass --omit=dev --all 2>&1 | tee /tmp/npm-ls.txt | tail -50 >> "$GITHUB_STEP_SUMMARY" || true
-          set +e
-          npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit.json 2>/tmp/npm-audit.err
-          ARC=$?
-          set -e
-          echo "audit_exit=$ARC" | tee -a "$GITHUB_STEP_SUMMARY"
-          head -c 8000 /tmp/npm-audit.json >> "$GITHUB_STEP_SUMMARY" || true
-          # publish diag
-          python3 - <<'PY'
-          import json, pathlib
-          doc = {
-            "schema": "cohortos.ci-report/v1",
-            "kind": "npm",
-            "audit_exit": int(open("/tmp/npm-audit.err").read().strip() or "0") if False else None,
-          }
-          try:
-            doc["audit"] = json.loads(pathlib.Path("/tmp/npm-audit.json").read_text())
-          except Exception as e:
-            doc["audit_error"] = str(e)
-          doc["npm_ls"] = pathlib.Path("/tmp/npm-ls.txt").read_text(errors="replace")[:20000]
-          pathlib.Path("/tmp/npm-audit-report.json").write_text(json.dumps(doc, indent=2))
-          PY
-          exit $ARC
-      - name: Commit lockfile if changed
-        if: success() || failure()
+          npm install --ignore-scripts
+          npm ls braces chokidar sass --omit=dev --all 2>&1 | tee /tmp/npm-ls.txt | tail -80 || true
+      - name: Commit lockfile
         run: |
           set -euo pipefail
           cd frontend
-          if git diff --quiet package-lock.json; then
-            echo "lock unchanged"
-            exit 0
-          fi
           git config user.name "cohortos-bot"
           git config user.email "bot@cohortos.local"
           git add package-lock.json
-          git commit -m "chore(frontend): regenerate package-lock.json [skip ci]" || exit 0
+          if git diff --cached --quiet; then
+            echo "lock unchanged"
+            exit 0
+          fi
+          git commit -m "chore(frontend): regenerate package-lock.json [skip ci]"
           git push || true
+      - name: npm audit high
+        working-directory: frontend
+        run: |
+          set +e
+          npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit.json
+          ARC=$?
+          set -e
+          echo "audit_exit=$ARC"
+          npm audit --omit=dev --audit-level=high 2>&1 | tee /tmp/npm-audit.txt | tail -40 || true
+          head -c 12000 /tmp/npm-audit.json || true
+          exit $ARC

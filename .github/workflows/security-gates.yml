@@ -42,7 +42,7 @@ jobs:
         working-directory: frontend
         run: |
           set -euo pipefail
-          npm install
+          (npm ci || npm install)
           npm audit --omit=dev --audit-level=high --json > /tmp/npm-audit-prod.json || true
           npm audit --audit-level=high --json > /tmp/npm-audit-all.json || true
           python ../scripts/npm_audit_gate.py --json /tmp/npm-audit-prod.json --dev-json /tmp/npm-audit-all.json
@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install -r requirements.txt
-          cd frontend && npm install
+          cd frontend && (npm ci || npm install)
       - name: Start API (limiter ON)
         env:
           COHORTOS_JWT_SECRET: e2e-test-secret-not-for-prod

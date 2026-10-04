@@ -83,7 +83,19 @@ jobs:
           OUT="diag-readiness-load-${{ github.run_id }}-${{ github.run_attempt }}.json"
           python scripts/publish_diag.py readiness-load "$OUT" /tmp/load-report.json || true
           python -c "import json; d=json.load(open('/tmp/load-report.json')); print(d); raise SystemExit(0 if d.get('pass') else 1)"
-          python scripts/ci_emit_aux_reports.py
+          python scripts/ci_emit_aux_reports.py || true
+          python3 - <<'PY'
+          import json, pathlib
+          kinds = {}
+          for p in pathlib.Path("/tmp").glob("*-report.json"):
+              try:
+                  d = json.loads(p.read_text())
+                  kinds[p.name] = {"pass": d.get("pass"), "kind": d.get("kind"), "keys": list(d.keys())[:12]}
+              except Exception as e:
+                  kinds[p.name] = {"error": str(e)}
+          print("AUX_REPORTS", json.dumps(kinds, indent=2))
+          pathlib.Path("/tmp/aux-kinds.json").write_text(json.dumps(kinds, indent=2))
+          PY
           # Publish named reports scorecard expects
           for pair in "load-report.json:load-${{ github.run_id }}-${{ github.run_attempt }}.json" "bundle-report.json:bundle-${{ github.run_id }}-${{ github.run_attempt }}.json" "heap-report.json:heap-${{ github.run_id }}-${{ github.run_attempt }}.json" "health-report.json:health-${{ github.run_id }}-${{ github.run_attempt }}.json" "installer-report.json:installer-${{ github.run_id }}-${{ github.run_attempt }}.json"; do
             src="${pair%%:*}"; dest="${pair##*:}"
@@ -95,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          python scripts/ci_wait_for_reports.py --sha "${{ github.sha }}" --minutes 3 || true
+          python scripts/ci_wait_for_reports.py --sha "${{ github.sha }}" --minutes 25 || true
       - name: Scorecard (must fail on NO-GO)
         if: always()
         env:

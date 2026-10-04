@@ -194,32 +194,41 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
-          python - <<'PY'
-          import json, pathlib, shutil
-          candidates = [
-              pathlib.Path("/tmp/axe-violations.json"),
-              pathlib.Path("frontend/test-results/axe-violations.json"),
-              pathlib.Path("test-results/axe-violations.json"),
-          ]
-          payload = {}
-          for c in candidates:
-              if c.exists():
-                  payload = json.loads(c.read_text())
-                  break
-          log = pathlib.Path("/tmp/axe.out")
-          payload = {
-              "violations": payload.get("violations", payload if isinstance(payload, list) else []),
-              "byRoute": payload.get("byRoute", {}),
-              "byRule": payload.get("byRule", {}),
-              "total": payload.get("total", 0),
-              "log_tail": log.read_text(errors="replace")[-4000:] if log.exists() else "",
+          mkdir -p /tmp
+          : > /tmp/axe-diag-extra.json
+          python3 - <<'PY'
+          import json, pathlib
+          axe_out = pathlib.Path("/tmp/axe.out").read_text(errors="replace") if pathlib.Path("/tmp/axe.out").exists() else "(no /tmp/axe.out)"
+          viol_path = pathlib.Path("frontend/test-results/axe-violations.json")
+          if not viol_path.exists():
+              viol_path = pathlib.Path("test-results/axe-violations.json")
+          viol = {}
+          if viol_path.exists():
+              try:
+                  viol = json.loads(viol_path.read_text())
+              except Exception as e:
+                  viol = {"parse_error": str(e), "raw": viol_path.read_text(errors="replace")[:5000]}
+          # normalize counts
+          rules = {}
+          items = viol if isinstance(viol, list) else viol.get("violations") or viol.get("results") or []
+          if isinstance(items, list):
+              for v in items:
+                  rid = v.get("id") or v.get("ruleId") or "unknown"
+                  impact = v.get("impact") or ""
+                  rules[rid] = rules.get(rid, 0) + 1
+          doc = {
+              "axe_out_tail": "\n".join(axe_out.splitlines()[-120:]),
+              "violations": viol,
+              "counts_per_rule": rules,
+              "serious_critical": [k for k,v in (viol if isinstance(viol,dict) else {}).items()] if False else rules,
           }
-          pathlib.Path("/tmp/axe-extra.json").write_text(json.dumps(payload, indent=2))
-          print(json.dumps({k: payload[k] for k in ("byRoute","byRule","total")}, indent=2))
+          pathlib.Path("/tmp/axe-diag-extra.json").write_text(json.dumps(doc, indent=2))
+          print(json.dumps({"counts_per_rule": rules, "out_len": len(axe_out)}, indent=2))
           PY
           OUT="diag-e2e-smoke-axe-${{ github.run_id }}-${{ github.run_attempt }}.json"
-          python scripts/publish_diag.py axe "$OUT" /tmp/axe-extra.json
-
+          python scripts/publish_diag.py e2e-axe "$OUT" /tmp/axe-diag-extra.json || true
+          # never fail this step
+          exit 0
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()
         id: extended

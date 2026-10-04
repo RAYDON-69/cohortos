@@ -5,6 +5,9 @@ on:
     branches: [main, master, "phase*"]
   pull_request:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Unit Full", "E2E Smoke", "Security and License Gates", "Release Readiness", "Workflow Lint"]
+    types: [completed]
 
 permissions:
   contents: write
