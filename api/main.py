@@ -1323,9 +1323,17 @@ def create_api_app(
 
 
     @app.post("/t/{tenant_id}/ai/query")
-    def ai_query(tenant_id: str, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
+    def ai_query(tenant_id: str, request: Request, body: Dict[str, Any] = Body(...), claims: Dict[str, Any] = Depends(_bearer)):
         """Minimal agentic answer grounded in centre lists (students/batches/exams)."""
         _require_tenant(claims, tenant_id)
+        try:
+            registry.limiter.check(
+                "ai_query",
+                str(claims.get("sub") or tenant_id)[:24],
+                request.client.host if request.client else "",
+            )
+        except RateLimitExceeded as e:
+            raise HTTPException(status_code=429, detail=str(e), headers={"Retry-After": str(getattr(e, "retry_after", 60))})
         cm = registry.get_app(tenant_id)
         keys = _ai_keys_normalized(cm.config.get_section("ai_keys") or {})
         students = cm.admission.list_students(active_only=False) if hasattr(cm, "admission") else []

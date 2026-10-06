@@ -124,9 +124,9 @@ def test_fee_idempotency_key_replay():
     _trial(client, phone, "Fee Centre")
     tid, h = _login(client, phone)
     br = client.post(
-        f"/t/{tid}/admissions/batches",
+        f"/t/{tid}/batches",
         headers=h,
-        json={"name": "Fee Batch", "code": f"fb-{uuid.uuid4().hex[:6]}"},
+        json={"name": "Fee Batch", "days": ["Sat", "Sun"], "hour": 16},
     )
     assert br.status_code < 400, br.text
     bj = br.json() or {}
@@ -283,8 +283,8 @@ for i in range(5):
     existing = [r for r in dal.get_all("payment_records") if r.get("idempotency_key") == key]
     if existing:
         sys.exit(0)
-    if i == 2:
-        time.sleep(2.0)  # kill window
+    if i == 0:
+        time.sleep(8.0)
     dal.create("payment_records", {
         "student_id": "s1",
         "year": 2026,
@@ -326,7 +326,9 @@ sys.exit(0)
             if proc.returncode not in (-9, 1):  # -9 SIGKILL; some platforms map differently
                 # accept if still was killed
                 pass
-            kills.append(1 if killed or proc.returncode == -9 else 0)
+            kills.append(1 if proc.returncode == -9 else 0)
+            if proc.returncode != -9:
+                failures.append((i, 'rc', proc.returncode))
         else:
             kills.append(0)
         # reopen and integrity check
@@ -392,5 +394,5 @@ sys.exit(0)
     delivered = sum(kills) if kills else 0
     print(f"kills_delivered={delivered}/200 CHAOS_SEED={seed}")
     # best-effort: at least 50% kills (timing races)
-    assert delivered >= 50, f"too few kills {delivered} seed={seed}"
+    assert delivered == 200, f"CHAOS_SEED={seed} kills_delivered={delivered} want 200"
     assert not failures, f"CHAOS_SEED={seed} failures={failures[:5]}"

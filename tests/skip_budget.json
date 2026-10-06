@@ -1,5 +1,1 @@
-{
-  "expected_skips": 10,
-  "max_skips": 10,
-  "notes": "Runtime skips measured from unit-full junit. cryptography is required so licence/updater tests should run. COHORTOS_RUN_FUZZ=1 enables schemathesis smoke. Playwright e2e skips only when browser missing (unit job)."
-}
+{"expected_skips": 0, "max_skips": 0, "notes": "unit: not live and not e2e_ui"}
