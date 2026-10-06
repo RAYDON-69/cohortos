@@ -48,34 +48,58 @@ class TestPhase5Adversarial(unittest.TestCase):
         ).json()
         return tid, tok
 
+
     def test_ai_query_rate_limit_429(self):
-        import os
-        if os.environ.get('COHORTOS_RATE_LIMIT_DISABLED') == '1':
-            self.skipTest('rate limit disabled in this job')
         tid, tok = self._login()
-        h = {"Authorization": f"Bearer {tok['access_token']}"}
-        codes = []
-        for _ in range(12):
-            r = self.client.post(f"/t/{tid}/ai/query", headers=h, json={"question": "ping"})
-            codes.append(r.status_code)
-        self.assertIn(429, codes, f"expected 429 under hammer, got {codes}")
-        self.assertTrue(any(c == 200 for c in codes[:5]), codes)
+        prev_otp = os.environ.get("COHORTOS_TEST_EXPOSE_OTP")
+        prev_rl = os.environ.get("COHORTOS_RATE_LIMIT_DISABLED")
+        os.environ["COHORTOS_TEST_EXPOSE_OTP"] = "0"
+        os.environ["COHORTOS_RATE_LIMIT_DISABLED"] = "0"
+        try:
+            h = {"Authorization": f"Bearer {tok['access_token']}"}
+            codes = []
+            for _ in range(12):
+                r = self.client.post(f"/t/{tid}/ai/query", headers=h, json={"question": "ping"})
+                codes.append(r.status_code)
+            self.assertIn(429, codes, f"expected 429 under hammer, got {codes}")
+            self.assertTrue(any(c == 200 for c in codes[:5]), codes)
+        finally:
+            if prev_otp is not None:
+                os.environ["COHORTOS_TEST_EXPOSE_OTP"] = prev_otp
+            else:
+                os.environ.pop("COHORTOS_TEST_EXPOSE_OTP", None)
+            if prev_rl is not None:
+                os.environ["COHORTOS_RATE_LIMIT_DISABLED"] = prev_rl
+            else:
+                os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
 
     def test_refresh_rate_limit_429(self):
-        import os
-        if os.environ.get('COHORTOS_RATE_LIMIT_DISABLED') == '1':
-            self.skipTest('rate limit disabled in this job')
         tid, tok = self._login()
-        rt = tok["refresh_token"]
-        codes = []
-        for _ in range(12):
-            r = self.client.post("/auth/refresh", json={"refresh_token": rt})
-            codes.append(r.status_code)
-            if r.status_code == 200:
-                rt = r.json()["refresh_token"]
-            if r.status_code == 429:
-                break
-        self.assertIn(429, codes, f"expected 429 on refresh hammer, got {codes}")
+        prev_otp = os.environ.get("COHORTOS_TEST_EXPOSE_OTP")
+        prev_rl = os.environ.get("COHORTOS_RATE_LIMIT_DISABLED")
+        os.environ["COHORTOS_TEST_EXPOSE_OTP"] = "0"
+        os.environ["COHORTOS_RATE_LIMIT_DISABLED"] = "0"
+        try:
+            rt = tok["refresh_token"]
+            codes = []
+            for _ in range(12):
+                r = self.client.post("/auth/refresh", json={"refresh_token": rt})
+                codes.append(r.status_code)
+                if r.status_code == 200:
+                    rt = r.json().get("refresh_token") or rt
+                if r.status_code == 429:
+                    break
+            self.assertIn(429, codes, f"expected 429 on refresh hammer, got {codes}")
+        finally:
+            if prev_otp is not None:
+                os.environ["COHORTOS_TEST_EXPOSE_OTP"] = prev_otp
+            else:
+                os.environ.pop("COHORTOS_TEST_EXPOSE_OTP", None)
+            if prev_rl is not None:
+                os.environ["COHORTOS_RATE_LIMIT_DISABLED"] = prev_rl
+            else:
+                os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
+
 
     def test_license_lock_race_with_batch_create(self):
         tid, tok = self._login()
