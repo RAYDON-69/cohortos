@@ -12,6 +12,7 @@ import os
 import urllib.request
 from pathlib import Path
 import pytest
+pytestmark = pytest.mark.e2e_ui
 
 EVIDENCE = Path(__file__).resolve().parents[2] / "evidence" / "e2e"
 EVIDENCE.mkdir(parents=True, exist_ok=True)
