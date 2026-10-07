@@ -250,7 +250,8 @@ export function FileViewer({
     let cancelled = false;
     (async () => {
       try {
-        const Plyr = (await import("plyr")).default;
+        const _plyrMod: any = await import("plyr");
+        const Plyr = _plyrMod.default ?? _plyrMod;
         await import("plyr/dist/plyr.css");
         if (cancelled) return;
         const el = mediaRef.current!.querySelector("video, audio") as HTMLElement | null;

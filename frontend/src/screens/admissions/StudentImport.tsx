@@ -26,7 +26,8 @@ export function StudentImportPanel() {
     setRaw(buf);
     if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
       // exceljs replaces sheetjs/xlsx (stale high-severity advisories on npm xlsx)
-      const ExcelJS = (await import("exceljs")).default;
+      const _xlsxMod: any = await import("exceljs");
+      const ExcelJS = _xlsxMod.default ?? _xlsxMod;
       const wb = new ExcelJS.Workbook();
       await wb.xlsx.load(buf);
       const sheet = wb.worksheets[0];
