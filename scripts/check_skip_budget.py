@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "tests" / "skip_budget.json"
 
 def runtime_skips() -> int:
-    for path in (Path("/tmp/junit-skip.xml"), Path("/tmp/junit-unit.xml"), Path("/tmp/unit-full-junit.xml")):
+    for path in (Path("/tmp/junit-skip.xml"), Path("/tmp/junit-unit.xml"), Path("/tmp/junit-merge.xml"), Path("/tmp/unit-full-junit.xml")):
         if path.exists():
             m = re.search(r'skipped="(\d+)"', path.read_text(errors="replace"))
             if m:

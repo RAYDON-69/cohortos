@@ -3,7 +3,7 @@ name: Lockfile Regen
 on:
   workflow_dispatch:
   push:
-    branches: [main, master, "phase*"]
+    branches: [main]
 
 permissions:
   contents: write

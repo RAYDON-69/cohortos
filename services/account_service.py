@@ -467,6 +467,18 @@ class AccountService:
                 )
             except Exception:
                 pass
+        else:
+            # Laptop / no notification bus: local file or Twilio via build_sms_provider
+            try:
+                from services.sms_provider import build_sms_provider, SmsNotConfiguredError
+                if channel == "sms" and destination:
+                    sms = build_sms_provider({})
+                    sms.send(
+                        str(destination),
+                        f"Your CohortOS login code is {code}. Valid {ttl} minutes.",
+                    )
+            except Exception:
+                pass
 
         # For tests: return code only when mock / no real provider
         out: Dict[str, Any] = {

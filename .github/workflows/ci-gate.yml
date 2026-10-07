@@ -2,7 +2,7 @@ name: CI Gate
 
 on:
   push:
-    branches: [main, master, "phase*"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
   workflow_run:
