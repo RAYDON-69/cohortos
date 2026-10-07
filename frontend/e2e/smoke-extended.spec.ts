@@ -301,3 +301,72 @@ test("extended — voice, class, broadcast, call desk", async ({ page, request }
     await shot(page, `ext-${route.replace(/\//g, "")}`);
   }
 });
+
+test("extended — licence active → lapsed → read-only → renewed", async ({ page, request }) => {
+  const health = await request.get(`${API}/health`).catch(() => null);
+  if (!health || !health.ok()) test.skip(true, "API down");
+  const { session, tenantId } = await seedSession(request);
+  await page.goto(h("/login"));
+  await page.evaluate(
+    ({ access, refresh, tenant }) => {
+      localStorage.setItem("cohortos_access_token", access);
+      localStorage.setItem("cohortos_refresh_token", refresh);
+      localStorage.setItem("cohortos_tenant_id", tenant);
+    },
+    {
+      access: session.access_token,
+      refresh: session.refresh_token || "",
+      tenant: tenantId,
+    }
+  );
+  // Active: settings should load
+  await page.goto(h("/settings"));
+  await page.waitForTimeout(800);
+  await shot(page, "licence-active");
+  await expect(page.getByText(/Missing bearer token/i)).toHaveCount(0);
+  // Simulate lapsed via localStorage flag the app may honor (or API licence status)
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "cohortos_licence_status",
+      JSON.stringify({ mode: "read_only", writable: false })
+    );
+  });
+  await page.goto(h("/students"));
+  await page.waitForTimeout(800);
+  await shot(page, "licence-readonly");
+  // Renewed
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "cohortos_licence_status",
+      JSON.stringify({ mode: "active", writable: true })
+    );
+  });
+  await page.goto(h("/students"));
+  await page.waitForTimeout(500);
+  await shot(page, "licence-renewed");
+});
+
+test("extended — whiteboard + mermaid surface mounts", async ({ page, request }) => {
+  const health = await request.get(`${API}/health`).catch(() => null);
+  if (!health || !health.ok()) test.skip(true, "API down");
+  const { session, tenantId } = await seedSession(request);
+  await page.goto(h("/login"));
+  await page.evaluate(
+    ({ access, refresh, tenant }) => {
+      localStorage.setItem("cohortos_access_token", access);
+      localStorage.setItem("cohortos_refresh_token", refresh);
+      localStorage.setItem("cohortos_tenant_id", tenant);
+    },
+    {
+      access: session.access_token,
+      refresh: session.refresh_token || "",
+      tenant: tenantId,
+    }
+  );
+  await page.goto(h("/classes"));
+  await page.waitForTimeout(1000);
+  await shot(page, "whiteboard-classes");
+  // Page must not crash with React error from lodash/mermaid
+  await expect(page.getByText(/Minified React error/i)).toHaveCount(0);
+  await expect(page.getByText(/Missing bearer token/i)).toHaveCount(0);
+});

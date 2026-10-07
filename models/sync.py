@@ -56,7 +56,7 @@ class SyncOperation:
 
         # Sort keys for consistent hashing
         sorted_data = json.dumps(hash_data, sort_keys=True, default=str)
-        return hashlib.md5(sorted_data.encode()).hexdigest()
+        return hashlib.md5(sorted_data.encode(), usedforsecurity=False).hexdigest()  # content fingerprint for sync dedupe, not auth
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage"""

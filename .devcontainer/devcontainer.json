@@ -1,0 +1,11 @@
+{
+  "name": "CohortOS verify",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
+  },
+  "postCreateCommand": "pip install -r requirements.txt -r requirements-dev.txt && cd frontend && npm ci --ignore-scripts --no-audit --no-fund --legacy-peer-deps || true",
+  "postStartCommand": "bash scripts/final_verify.sh --low-mem || true",
+  "forwardPorts": [8000, 4173],
+  "remoteUser": "vscode"
+}

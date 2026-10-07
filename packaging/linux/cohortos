@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PREFIX="${COHORTOS_HOME:-$HOME/.local/share/cohortos}"
+CFGDIR="${XDG_CONFIG_HOME:-$HOME/.config}/cohortos"
+ENVF="$CFGDIR/cohortos.env"
+PIDF="$PREFIX/cohortos.pid"
+LOGF="$PREFIX/logs/api.log"
+
+load_env() {
+  if [ -f "$ENVF" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$ENVF"
+    set +a
+  fi
+}
+
+cmd_version() {
+  if [ -f "$PREFIX/BUILD_INFO.json" ]; then
+    cat "$PREFIX/BUILD_INFO.json"
+  else
+    echo "not installed"
+  fi
+}
+
+cmd_start() {
+  load_env
+  mkdir -p "$PREFIX/logs" "$PREFIX/data"
+  if [ -f "$PIDF" ] && kill -0 "$(cat "$PIDF")" 2>/dev/null; then
+    echo "already running pid=$(cat "$PIDF")"
+    exit 0
+  fi
+  # shellcheck disable=SC1091
+  source "$PREFIX/venv/bin/activate"
+  export PYTHONPATH="$PREFIX${PYTHONPATH:+:$PYTHONPATH}"
+  BIND="${COHORTOS_BIND:-127.0.0.1}"
+  PORT="${COHORTOS_PORT:-8000}"
+  nohup python -m uvicorn api.main:create_api_app --factory \
+    --host "$BIND" --port "$PORT" --workers 1 \
+    >"$LOGF" 2>&1 &
+  echo $! >"$PIDF"
+  echo "started pid=$(cat "$PIDF") http://${BIND}:${PORT}"
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    if curl -sf "http://${BIND}:${PORT}/health" >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.5
+  done
+  if [ "${1:-}" = "--open" ]; then
+    xdg-open "http://${BIND}:${PORT}" 2>/dev/null || true
+  fi
+}
+
+cmd_stop() {
+  if [ -f "$PIDF" ]; then
+    kill "$(cat "$PIDF")" 2>/dev/null || true
+    rm -f "$PIDF"
+    echo "stopped"
+  else
+    echo "not running"
+  fi
+}
+
+cmd_status() {
+  load_env
+  BIND="${COHORTOS_BIND:-127.0.0.1}"
+  PORT="${COHORTOS_PORT:-8000}"
+  if [ -f "$PIDF" ] && kill -0 "$(cat "$PIDF")" 2>/dev/null; then
+    echo "running pid=$(cat "$PIDF")"
+    curl -sf "http://${BIND}:${PORT}/health" || echo "health: down"
+  else
+    echo "stopped"
+  fi
+}
+
+cmd_backup() {
+  load_env
+  BIND="${COHORTOS_BIND:-127.0.0.1}"
+  PORT="${COHORTOS_PORT:-8000}"
+  DEST="${1:-$PREFIX/data/backup-$(date +%Y%m%d-%H%M%S)}"
+  mkdir -p "$DEST"
+  cp -a "${COHORTOS_AUTH_DB:-$PREFIX/data/auth.db}" "$DEST/" 2>/dev/null || true
+  cp -a "${COHORTOS_CLOUD_DB:-$PREFIX/data/cloud.db}" "$DEST/" 2>/dev/null || true
+  echo "backup at $DEST"
+}
+
+cmd_restore() {
+  load_env
+  SRC="${1:?usage: cohortos restore <backup-dir>}"
+  cmd_stop || true
+  cp -a "$SRC/." "${COHORTOS_DATA_DIR:-$PREFIX/data}/"
+  echo "restored from $SRC — run: cohortos start"
+}
+
+cmd_bootstrap() {
+  load_env
+  BIND="${COHORTOS_BIND:-127.0.0.1}"
+  PORT="${COHORTOS_PORT:-8000}"
+  BASE="http://${BIND}:${PORT}"
+  PHONE="${1:-01710000001}"
+  NAME="${2:-My Centre}"
+  echo "Creating centre via /auth/centre-trial ..."
+  RESP=$(curl -sf -X POST "$BASE/auth/centre-trial" \
+    -H 'Content-Type: application/json' \
+    -d "{\"centre_name\":\"$NAME\",\"owner_phone\":\"$PHONE\",\"owner_name\":\"Owner\"}")
+  echo "$RESP" | python3 -m json.tool 2>/dev/null || echo "$RESP"
+  TID=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tenant_id',''))" 2>/dev/null || true)
+  echo "Requesting OTP ..."
+  OTP_RESP=$(curl -sf -X POST "$BASE/auth/request-otp" \
+    -H 'Content-Type: application/json' \
+    -d "{\"phone\":\"$PHONE\"}")
+  echo "$OTP_RESP" | python3 -m json.tool 2>/dev/null || echo "$OTP_RESP"
+  OTP_FILE="${COHORTOS_LOCAL_OTP_FILE:-$PREFIX/data/otp_log.txt}"
+  LATEST="${OTP_FILE%/*}/otp_latest.txt"
+  echo "Without Twilio, OTP is written to:"
+  echo "  $OTP_FILE"
+  echo "  $LATEST"
+  if [ -f "$LATEST" ]; then
+    echo "Latest OTP message:"
+    cat "$LATEST"
+  else
+    echo "Open the desk UI, request OTP, then read $LATEST (or configure Twilio)."
+  fi
+  echo "Verify OTP in the browser at $BASE (or POST /auth/verify-otp)."
+  echo "tenant_id=$TID phone=$PHONE"
+}
+
+usage() {
+  cat << U
+cohortos — CohortOS laptop control
+  start [--open]   start API on 127.0.0.1:8000
+  stop             stop API
+  status           process + /health
+  backup [dir]     copy SQLite files
+  restore <dir>    restore from backup dir
+  bootstrap [phone] [centre_name]
+  version
+U
+}
+
+case "${1:-}" in
+  start) shift; cmd_start "$@" ;;
+  stop) cmd_stop ;;
+  status) cmd_status ;;
+  backup) shift; cmd_backup "$@" ;;
+  restore) shift; cmd_restore "$@" ;;
+  bootstrap) shift; cmd_bootstrap "$@" ;;
+  version) cmd_version ;;
+  *) usage; exit 1 ;;
+esac

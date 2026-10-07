@@ -3,23 +3,18 @@
 # PROVEN for GUI-facing work requires this job green + screenshots.
 name: E2E Smoke
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   actions: read
 
 on:
   push:
-    branches: [main, master]
-    paths:
-      - "frontend/**"
-      - "api/**"
-      - "services/**"
-      - "tests/**"
-      - ".github/workflows/e2e-smoke.yml"
+    branches: [main]
   pull_request:
-    paths:
-      - "frontend/**"
-      - "api/**"
   workflow_dispatch:
 
 jobs:
@@ -30,15 +25,15 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2  # v4.2.2
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: "20"
+          node-version: "20.18.1"
 
       - name: Install Python deps
         working-directory: .
@@ -162,6 +157,82 @@ jobs:
           set -e
           exit $PW_EXIT
 
+
+      - name: Axe serious/critical must be zero
+        working-directory: frontend
+        env:
+          COHORTOS_API_BASE: http://127.0.0.1:8741
+          COHORTOS_WEB_BASE: http://127.0.0.1:5173
+        run: |
+          set -uo pipefail
+          : > /tmp/axe.out
+          echo "pwd=$(pwd)" | tee -a /tmp/axe.out
+          ls node_modules/@playwright/test 2>&1 | head -3 | tee -a /tmp/axe.out || true
+          if [ ! -f node_modules/axe-core/axe.min.js ]; then
+            npm install axe-core --no-save 2>&1 | tee -a /tmp/axe.out || true
+          fi
+          if [ ! -x ./node_modules/.bin/playwright ]; then
+            echo "MISSING playwright binary" | tee -a /tmp/axe.out
+            exit 1
+          fi
+          # Ensure vite still up
+          if ! curl -sf http://127.0.0.1:5173 >/dev/null; then
+            npx vite --host 127.0.0.1 --port 5173 > /tmp/vite-axe.log 2>&1 &
+            for i in $(seq 1 30); do curl -sf http://127.0.0.1:5173 >/dev/null && break; sleep 1; done
+          fi
+          set +e
+          ./node_modules/.bin/playwright test e2e/axe-hard.spec.ts --reporter=list --workers=1 >> /tmp/axe.out 2>&1
+          RC=$?
+          set -e
+          echo "axe_exit=$RC" | tee -a /tmp/axe.out
+          {
+            echo "## Axe (exit $RC)"
+            echo '```'
+            tail -n 80 /tmp/axe.out || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          exit $RC
+      - name: Diag axe always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          mkdir -p /tmp
+          : > /tmp/axe-diag-extra.json
+          python3 - <<'PY'
+          import json, pathlib
+          axe_out = pathlib.Path("/tmp/axe.out").read_text(errors="replace") if pathlib.Path("/tmp/axe.out").exists() else "(no /tmp/axe.out)"
+          viol_path = pathlib.Path("frontend/test-results/axe-violations.json")
+          if not viol_path.exists():
+              viol_path = pathlib.Path("test-results/axe-violations.json")
+          viol = {}
+          if viol_path.exists():
+              try:
+                  viol = json.loads(viol_path.read_text())
+              except Exception as e:
+                  viol = {"parse_error": str(e), "raw": viol_path.read_text(errors="replace")[:5000]}
+          # normalize counts
+          rules = {}
+          items = viol if isinstance(viol, list) else viol.get("violations") or viol.get("results") or []
+          if isinstance(items, list):
+              for v in items:
+                  rid = v.get("id") or v.get("ruleId") or "unknown"
+                  impact = v.get("impact") or ""
+                  rules[rid] = rules.get(rid, 0) + 1
+          doc = {
+              "axe_out_tail": "\n".join(axe_out.splitlines()[-120:]),
+              "violations": viol,
+              "counts_per_rule": rules,
+              "serious_critical": [k for k,v in (viol if isinstance(viol,dict) else {}).items()] if False else rules,
+          }
+          pathlib.Path("/tmp/axe-diag-extra.json").write_text(json.dumps(doc, indent=2))
+          print(json.dumps({"counts_per_rule": rules, "out_len": len(axe_out)}, indent=2))
+          PY
+          OUT="diag-e2e-smoke-axe-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python scripts/publish_diag.py e2e-axe "$OUT" /tmp/axe-diag-extra.json || true
+          # never fail this step
+          exit 0
       - name: Run EXTENDED smoke (voice/class/broadcast/call-desk)
         if: success()
         id: extended
@@ -296,7 +367,7 @@ jobs:
       - name: Upload playwright text log (always; tiny — survives quota better)
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: e2e-smoke-playwright-log
           path: frontend/test-results/playwright-output.txt
@@ -306,7 +377,7 @@ jobs:
       - name: Upload screenshots (always; ignore empty / quota)
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: e2e-smoke-screenshots
           path: |
@@ -318,7 +389,7 @@ jobs:
       - name: Upload failure video / trace (failures only; ignore quota)
         if: failure()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: e2e-smoke-failure
           path: |

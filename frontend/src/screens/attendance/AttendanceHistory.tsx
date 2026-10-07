@@ -63,7 +63,7 @@ export function AttendanceHistoryScreen() {
 
   return (
     <AppShell brand={t("appName")} navItems={nav} crumb={`Owner / Desk · Absentees`}>
-      <h2 className="view-title">Absentee history</h2>
+      <div data-testid="attendance-history"><h2 className="view-title">Absentee history</h2>
       <p className="caption muted" style={{ marginBottom: 20 }}>
         Prior day&apos;s absentees — expand further back for the rebuke workflow.
       </p>
@@ -190,6 +190,6 @@ export function AttendanceHistoryScreen() {
         }
         .absentee-list li:last-child { border-bottom: none; }
       `}</style>
-    </AppShell>
+    </div></AppShell>
   );
 }

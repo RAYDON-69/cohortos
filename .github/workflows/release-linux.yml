@@ -1,0 +1,106 @@
+name: Release Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version
+        required: true
+        default: "0.1.0-rc1"
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: release-linux-${{ github.sha }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: "20.18.1"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Python deps
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Unit gates
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: release-ci-secret-not-for-prod-32
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+        run: |
+          set -euo pipefail
+          pytest tests/ -q --tb=line --junitxml=/tmp/junit-unit.xml -m "not live and not e2e_ui"
+          python scripts/check_skip_budget.py
+          pytest tests/test_route_inventory.py tests/test_boot_backup_restore.py tests/test_ci_gate_logic.py tests/test_local_otp_file_sms.py -q --tb=line
+
+      - name: Package Linux
+        env:
+          COHORTOS_VERSION: ${{ github.event.inputs.version || github.ref_name }}
+        run: |
+          set -euo pipefail
+          bash scripts/package_linux.sh
+
+      - name: Smoke in clean ubuntu:24.04 container
+        run: |
+          set -euo pipefail
+          VER="${{ github.event.inputs.version || github.ref_name }}"
+          VER="${VER#v}"
+          TARBALL="dist/linux/cohortos-linux-x86_64-${VER}.tar.gz"
+          test -f "$TARBALL"
+          docker run --rm -v "$PWD/dist/linux:/release:ro" -v "$PWD/scripts:/scripts:ro" ubuntu:24.04 bash -lc '
+            set -euo pipefail
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3 python3-venv python3-pip curl ca-certificates >/dev/null
+            mkdir -p /tmp/c && tar -xzf /release/cohortos-linux-x86_64-*.tar.gz -C /tmp/c
+            cd /tmp/c && bash install.sh
+            export PATH="$HOME/.local/bin:$PATH"
+            cohortos start
+            sleep 2
+            curl -sf http://127.0.0.1:8000/health | grep -q ok || curl -sf http://127.0.0.1:8000/health
+            curl -sf http://127.0.0.1:8000/ | head -c 200
+            cohortos bootstrap 01719990001 "Smoke Centre" || true
+            cohortos backup /tmp/bak
+            test -d /tmp/bak
+            cohortos stop
+            echo SMOKE_OK
+          '
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: cohortos-linux-x86_64
+          path: |
+            dist/linux/*.tar.gz
+            dist/linux/SHA256SUMS
+
+      - name: GitHub pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VER="${{ github.event.inputs.version || github.ref_name }}"
+          VER="${VER#v}"
+          gh release create "v${VER}" \
+            dist/linux/cohortos-linux-x86_64-*.tar.gz \
+            dist/linux/SHA256SUMS \
+            --prerelease \
+            --title "CohortOS Linux ${VER}" \
+            --notes "Pre-release Linux package. See docs/INSTALL_LINUX.md." \
+            --target "${{ github.sha }}" \
+            || gh release upload "v${VER}" dist/linux/cohortos-linux-x86_64-*.tar.gz dist/linux/SHA256SUMS --clobber

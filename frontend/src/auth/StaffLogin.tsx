@@ -132,7 +132,7 @@ export function StaffLogin() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-cream via-sage-100 to-peri-bg"
+      role="main" aria-label="Sign in" className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-cream via-sage-100 to-peri-bg"
       data-testid="staff-login"
     >
       <motion.div
@@ -143,13 +143,13 @@ export function StaffLogin() {
       >
         <Card className="border-border shadow-soft overflow-hidden">
           <CardHeader className="space-y-2 pb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-sage-700">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-800">
               Coaching desk
             </p>
             <CardTitle className="font-display text-3xl tracking-tight">
               {t("appName") || "CohortOS"}
             </CardTitle>
-            <CardDescription className="text-base text-slate-700">
+            <CardDescription className="text-base text-slate-800">
               {mode === "login"
                 ? "Welcome back — sign in with your phone to open the desk"
                 : "Create your coaching centre in a few minutes"}
@@ -198,6 +198,7 @@ export function StaffLogin() {
                       />
                     </div>
                     <Button
+                      type="button"
                       className="w-full"
                       disabled={loading || phone.trim().length < 8}
                       onClick={() => void onRequestOtp()}

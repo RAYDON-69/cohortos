@@ -1,0 +1,7 @@
+# P41 — money, tenant, licence, backup require owner review
+/services/licence_service.py @RAYDON-69
+/services/revocation.py @RAYDON-69
+/services/updater.py @RAYDON-69
+/services/tenant_backup.py @RAYDON-69
+/api/auth.py @RAYDON-69
+/scripts/run_mutmut.sh @RAYDON-69

@@ -1253,3 +1253,78 @@ Quoted failures:
 - diagnostics: GET /t/{id}/diagnostics/export + Support Download button
 - migrations: 3 historical cut-points replayed (v_attendance_era, v_exams_content, v_ai_accounts)
 - G1 TRACEABILITY.md; G3 fee hypothesis; G4 locale BD; G5 a11y phone viewport; G6 offline queue; G7 subscription honest NOT-DONE; G8 allowlist canary <=7d FAIL
+
+## Phase 36 — Green scorecard honestly + commercial holes (2026-10-02)
+Branch: phase36-green-scorecard
+Quoted:
+- lodash-es HIGH: override pinned ^4.17.21 (vulnerable); fixed ^4.18.1
+- fuzz no report: seed under set -e before set +e; Start API never failed; seed always writes report
+- scorecard FAIL on green jobs: wrong keys (failed vs failed_count; bandit nested; proved_429 vs pass)
+C1 licence Ed25519 + grace + read-only + clock highwater
+C2 no auto-updater documented + signing cost table
+C3 Fernet MultiFernet rotation + test
+C4 VectorStore ABC + Memory adapter + ADR-003
+C5 offsite backup folder + wipe/restore counts
+mutmut workflow; axe hard local; refund + parent notice tests
+
+## Phase 37 — Production-ready hardening + adversarial stress (2026-10-02)
+Branch: phase37-production-ready (from be4b1cb)
+A1 scorecard by kind (cohortos.ci-report/v1) not filename
+A2 load 401/403 count as errors + histogram + wrong-token gate
+A3 sqlite-vec DEFAULT VectorStore; Chroma optional; parity test
+A4 Ed25519 update manifest + checksum + anti-downgrade tests
+A5 signed revocation list + offline cache + forged/expired tests
+A6 tools/licence_cli.py keygen/issue/revoke/update — refuses repo private keys
+B1–B7 adversarial unit suites (isolation, money, concurrency, data-loss, clock, input)
+
+## Phase 38 — CI green: dead API root cause + gates (2026-10-02)
+Branch: phase38-ci-green from 0c7e838
+ROOT CAUSE: Security/Readiness Start API omitted COHORTOS_AUTH_DB + COHORTOS_CLOUD_DB.
+create_api_app_or_raise → require_auth_db() raises AuthConfigError → process dies → /health never 200.
+E2E already set both paths → green.
+Fix: .github/actions/start-api composite (required env + alive check + health + log tail).
+Bandit: 1 medium B108 highwater /tmp → tempfile.gettempdir(); medium count 0 after.
+Diag publisher scripts/ci_write_diag.py always on failure.
+
+## Phase 39 — Workflow validation + security-gates YAML fix (2026-10-03)
+Branch: phase39-ci-proof from 13a6531
+ROOT: security-gates invalid YAML — multi-line python -c escaped block scalar (line 136).
+Fix: scripts/ci_bandit_summary.py; plain shell in workflow.
+Added scripts/lint_workflows.py + workflow-lint.yml + actionlint.
+mutmut: scripts/run_mutmut.sh was MISSING — that was the failure cause; added with AUTH_DB env + diag.
+
+## Phase 40 — Fix gates that fired on f152e67 (2026-10-03)
+Branch: phase40-gates-green
+- Diag: workflow-lint lacked contents:write; every failing step now publishes diag-<wf>-<job>-<run>-<attempt>.json
+- Load: readiness did not export COHORTOS_LOAD_TENANT; load_smoke used /api/v1/* (404) so wrong-token probe failed. Fixed tenant paths + budget 1500ms for 2-core.
+- Axe: CardTitle h3→h1, login main landmark, expanded axe routes + violation JSON diag
+- actionlint: pin binary tarball; composite GITHUB_STEP_SUMMARY safe
+- mutmut: triggers on phase*
+
+## Phase 41 — Process green + supply chain (2026-10-03)
+Branch: phase41-process-green from 8eb7ab7
+- Diag: scripts/publish_diag.py; axe/load write rich JSON to /tmp and ci-reports
+- chromadb removed from production requirements.txt → requirements-legacy-chroma.txt
+- npm overrides: braces, chokidar, uuid, tar; electron ^35
+- make verify / scripts/verify.sh; ci-gate.yml; pre-commit; CODEOWNERS; DoD
+
+## Phase 42 — Concurrency fix + remaining gates (2026-10-03)
+Branch: phase42-concurrency-green from f3366c6
+CRITICAL: shared process-wide sqlite3 connection caused InterfaceError under concurrent FastAPI threads.
+Fix: per-thread connections in models/base.py (WAL, busy_timeout, foreign_keys, check_same_thread=True).
+Test: tests/test_sqlite_thread_safety.py 64 threads mixed R/W — PASS after fix.
+Axe step hardened; readiness no workflow_run untrusted checkout; dependabot cooldown; nested npm overrides.
+
+## Phase 43 — DAL conn property (no long-lived self._conn) + unit-full (2026-10-03)
+Branch: phase43-suite-green from 90bb04a
+P42 regression: self._conn held a check_same_thread connection from __init__ thread → ProgrammingError on other threads.
+Fix: @property conn → _open_connection(_conn_key) every time; :memory: keyed by id(self).
+Static guard: tests/test_no_shared_sqlite_state.py
+CI: .github/workflows/unit-full.yml (full pytest + xdist)
+
+## Phase 44 — CI loop (2026-10-04)
+Branch: phase44-green-loop from b64659e
+- Fixed unit-full collection: SyntaxError import* inside function in test_tenant_isolation_fuzz.py
+- pytest.ini markers + requirements-dev (pytest-timeout)
+- scripts/ci_wait.py + ci_publish_status.py
+- ci-gate needs unit-full (reusable) and fails if not success

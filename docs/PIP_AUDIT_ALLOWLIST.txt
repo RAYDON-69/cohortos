@@ -1,3 +1,4 @@
+# P41: chromadb removed from production requirements — allowlist entries below are legacy only
 # id | reason | expires YYYY-MM-DD
 # Only when no fixed version exists upstream.
 # chromadb CVE-2026-45829 / PYSEC-2026-311: pre-auth RCE on Chroma SERVER /api/v2/.../collections.

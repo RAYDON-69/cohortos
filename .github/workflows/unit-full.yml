@@ -1,0 +1,128 @@
+name: Unit Full
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  unit-full:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5  # v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt pytest-timeout
+      - name: Full pytest
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage-ci
+        run: |
+          mkdir -p /tmp/cohortos-storage-ci
+          set +e
+          pytest -q --maxfail=20 -p no:cacheprovider --junitxml=/tmp/junit-unit.xml 2>&1 | tee /tmp/unit-full.out
+          RC=${PIPESTATUS[0]}
+          set -e
+          exit $RC
+      - name: Skip budget
+        if: success()
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+        run: |
+          set -euo pipefail
+          # use junit from previous step
+          cp /tmp/junit-unit.xml /tmp/unit-full-junit.xml 2>/dev/null || true
+          python scripts/check_skip_budget.py
+      - name: Diag unit-full
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          if [ -f /tmp/unit-full.out ] && grep -q "failed" /tmp/unit-full.out; then
+            python scripts/ci_publish_status.py unit-full failure || true
+          else
+            python scripts/ci_publish_status.py unit-full success || true
+          fi
+          python - <<'PY'
+          import json, pathlib, re
+          log = pathlib.Path("/tmp/unit-full.out").read_text(errors="replace") if pathlib.Path("/tmp/unit-full.out").exists() else ""
+          failed = re.findall(r"FAILED (\S+)", log)
+          doc = {"failed": failed, "log_tail": "\n".join(log.splitlines()[-200:])}
+          pathlib.Path("/tmp/unit-extra.json").write_text(json.dumps(doc, indent=2))
+          PY
+          OUT="diag-unit-full-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python scripts/publish_diag.py unit-full "$OUT" /tmp/unit-extra.json || true
+
+  unit-xdist:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          set -euo pipefail
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: xdist
+        env:
+          COHORTOS_ENV: test
+          COHORTOS_JWT_SECRET: unit-full-secret-not-for-prod-32chars
+          COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+          COHORTOS_TEST_EXPOSE_OTP: "1"
+          COHORTOS_RATE_LIMIT_DISABLED: "1"
+          COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage-xdist
+        run: |
+          set -uo pipefail
+          mkdir -p /tmp/cohortos-storage-xdist
+          set +e
+          pytest -q -n 2 --dist loadfile -p no:cacheprovider --maxfail=30 --tb=line 2>&1 | tee /tmp/xdist.out
+          RC=${PIPESTATUS[0]}
+          set -e
+          echo "xdist_exit=$RC"
+          exit $RC
+      - name: Diag xdist always
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          python3 - <<'PY'
+          import json, pathlib, re
+          log = pathlib.Path("/tmp/xdist.out").read_text(errors="replace") if pathlib.Path("/tmp/xdist.out").exists() else ""
+          failed = re.findall(r"FAILED (\S+)", log)
+          doc = {"failed": failed, "log_tail": "\n".join(log.splitlines()[-250:]), "summary": [l for l in log.splitlines() if "passed" in l and "failed" in l]}
+          pathlib.Path("/tmp/xdist-extra.json").write_text(json.dumps(doc, indent=2))
+          print(json.dumps(doc, indent=2)[:4000])
+          PY
+          OUT="diag-unit-xdist-${{ github.run_id }}-${{ github.run_attempt }}.json"
+          python scripts/publish_diag.py unit-xdist "$OUT" /tmp/xdist-extra.json || true
+          python scripts/ci_publish_status.py unit-xdist "$([ -f /tmp/xdist.out ] && grep -qE '[1-9][0-9]* failed' /tmp/xdist.out && echo failure || echo success)" || true

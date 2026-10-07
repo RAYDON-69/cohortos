@@ -3,6 +3,8 @@ Unified data access service for CohortOS
 """
 
 from typing import Dict, List, Optional, Type, Any
+
+LOCK_WAIT_COUNT = {"n": 0}
 import uuid
 from datetime import datetime, timezone
 
@@ -381,3 +383,6 @@ class DataService:
             existing = self.get_all_roles()
             if not any(r['name'] == role_data['name'] for r in existing):
                 self.create_role(role_data['name'], role_data['description'])
+
+def get_lock_wait_count() -> int:
+    return int(LOCK_WAIT_COUNT.get("n", 0))

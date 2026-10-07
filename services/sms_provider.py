@@ -40,6 +40,26 @@ class TwilioSmsProvider(SmsProvider):
         return {"ok": True, "provider": "twilio", "sid": out.get("sid"), "status": out.get("status"), "raw": out}
 
 
+
+class LocalFileSmsProvider(SmsProvider):
+    """Write OTP messages to a local file (laptop installs without Twilio)."""
+
+    def __init__(self, path: str):
+        self.path = path
+
+    def send(self, to_phone: str, body: str) -> Dict[str, Any]:
+        import datetime
+        from pathlib import Path
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
+        line = f"{datetime.datetime.now(datetime.timezone.utc).isoformat()}\tto={to_phone}\t{body}\n"
+        with open(self.path, "a", encoding="utf-8") as f:
+            f.write(line)
+        # also write latest-only for CLI helpers
+        latest = Path(self.path).with_name("otp_latest.txt")
+        latest.write_text(body + "\n", encoding="utf-8")
+        return {"ok": True, "provider": "local_file", "path": self.path}
+
+
 def build_sms_provider(config: Optional[Dict[str, Any]] = None) -> SmsProvider:
     cfg = config or {}
     sid = cfg.get("twilio_account_sid") or os.environ.get("COHORTOS_TWILIO_ACCOUNT_SID")
@@ -47,7 +67,9 @@ def build_sms_provider(config: Optional[Dict[str, Any]] = None) -> SmsProvider:
     from_n = cfg.get("twilio_from") or os.environ.get("COHORTOS_TWILIO_FROM")
     if sid and token and from_n:
         return TwilioSmsProvider(sid, token, from_n)
+    local_path = cfg.get("local_otp_file") or os.environ.get("COHORTOS_LOCAL_OTP_FILE")
+    if local_path:
+        return LocalFileSmsProvider(local_path)
     raise SmsNotConfiguredError(
-        "SMS not configured. Set COHORTOS_TWILIO_ACCOUNT_SID, COHORTOS_TWILIO_AUTH_TOKEN, COHORTOS_TWILIO_FROM "
-        "or Messaging settings."
+        "SMS not configured. Set COHORTOS_TWILIO_* or COHORTOS_LOCAL_OTP_FILE for laptop installs."
     )

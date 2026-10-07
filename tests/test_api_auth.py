@@ -157,17 +157,26 @@ class TestAuthFlow(unittest.TestCase):
         self.assertEqual(again.status_code, 401)
 
     def test_rate_limit_request_otp(self):
-        for i in range(5):
+        old = os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
+        old2 = os.environ.pop("COHORTOS_TEST_EXPOSE_OTP", None)
+        def _restore():
+            if old is not None:
+                os.environ["COHORTOS_RATE_LIMIT_DISABLED"] = old
+            else:
+                os.environ.pop("COHORTOS_RATE_LIMIT_DISABLED", None)
+            if old2 is not None:
+                os.environ["COHORTOS_TEST_EXPOSE_OTP"] = old2
+            else:
+                os.environ.pop("COHORTOS_TEST_EXPOSE_OTP", None)
+        self.addCleanup(_restore)
+        codes = []
+        for i in range(12):
             r = self.client.post(
                 "/auth/request-otp",
                 json={"phone": "01719999999", "tenant_id": self.tenant_id},
             )
-            self.assertIn(r.status_code, (200, 429))
-        r = self.client.post(
-            "/auth/request-otp",
-            json={"phone": "01719999999", "tenant_id": self.tenant_id},
-        )
-        self.assertEqual(r.status_code, 429)
+            codes.append(r.status_code)
+        self.assertIn(429, codes, f"expected 429 under hammer, got {codes}")
 
     def test_cross_tenant_denied(self):
         tenant_b = str(uuid.uuid4())

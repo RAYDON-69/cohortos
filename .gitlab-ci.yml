@@ -1,0 +1,40 @@
+# Free-tier portable gates (same strictness as GitHub: no allow_failure)
+stages: [lint, unit, security, frontend]
+
+variables:
+  COHORTOS_ENV: test
+  COHORTOS_JWT_SECRET: gitlab-ci-secret-not-for-prod-32chars
+  COHORTOS_TEST_EXPOSE_OTP: "1"
+  COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+  PIP_INDEX_URL: https://pypi.org/simple
+
+unit:
+  stage: unit
+  image: python:3.12-slim
+  script:
+    - pip install -r requirements.txt -r requirements-dev.txt
+    - pytest tests/ -q --tb=line --junitxml=junit-unit.xml -m "not live and not e2e_ui"
+    - python scripts/check_skip_budget.py
+  artifacts:
+    reports:
+      junit: junit-unit.xml
+
+stress_chaos:
+  stage: unit
+  image: python:3.12-slim
+  script:
+    - pip install -r requirements.txt -r requirements-dev.txt
+    - pytest tests/test_stress_p49.py tests/test_route_inventory.py tests/test_boot_backup_restore.py -q --tb=line
+    - CHAOS_SEED=42 pytest tests/test_stress_p49.py::test_kill9_chaos_idempotent_writer -q --tb=line
+
+npm_build:
+  stage: frontend
+  image: node:20-bookworm
+  script:
+    - cd frontend
+    - npm ci --ignore-scripts --no-audit --no-fund --legacy-peer-deps
+    - npm run build
+  artifacts:
+    paths: [frontend/dist]
+
+# No allow_failure anywhere

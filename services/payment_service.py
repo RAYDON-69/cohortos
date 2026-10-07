@@ -184,6 +184,14 @@ class PaymentService:
 
     # ── Mark paid / unpaid (unlocked only) ────────────────────────────
 
+    def find_by_idempotency(self, key: str) -> Optional[Dict[str, Any]]:
+        if not key:
+            return None
+        for r in self.data_layer.get_all('payment_records'):
+            if r.get('idempotency_key') == key:
+                return r
+        return None
+
     def mark_paid(
         self,
         student_id: str,
@@ -193,11 +201,17 @@ class PaymentService:
         receipt_ref: Optional[str] = None,
         actor_id: Optional[str] = None,
         notes: str = '',
+        idempotency_key: str = '',
     ) -> Dict[str, Any]:
         """
         Set status=paid. Does NOT lock — locking is a separate explicit action.
         Fails if already locked.
+        Replay with the same idempotency_key returns the existing paid row.
         """
+        if idempotency_key:
+            existing = self.find_by_idempotency(idempotency_key)
+            if existing is not None:
+                return existing
         rec = self.ensure_payment(student_id, year, month, actor_id=actor_id)
         if rec.get('locked'):
             raise PaymentLockedError(
@@ -209,6 +223,8 @@ class PaymentService:
         }
         if notes:
             updates['notes'] = notes
+        if idempotency_key:
+            updates['idempotency_key'] = idempotency_key
         if self.is_amount_mode():
             if amount is not None:
                 updates['amount'] = float(amount)

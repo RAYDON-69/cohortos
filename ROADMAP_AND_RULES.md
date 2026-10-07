@@ -71,3 +71,33 @@ Owner: Claude (planning/verification). Read this file in full at the start of EV
 - **CORE** (`frontend/e2e/smoke.spec.ts`): required. Must stay green on every main push.
 - **EXTENDED** (`frontend/e2e/smoke-extended.spec.ts`): **required** (continue-on-error removed after 3 green runs on main). Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome`, `extended_outcome`, and `main_sha`.
 - Every run publishes `ci-reports/e2e-<run_id>-<attempt>.json` with `core_outcome` and `extended_outcome` from `steps.<id>.outcome` (definitive JSON signal).
+
+## P37 notes
+- CI reports use schema cohortos.ci-report/v1 with kind; scorecard indexes by kind.
+- Default RAG backend is sqlite-vec (Chroma optional).
+- Licence revocation via signed static list; soft device binding is deterrence only.
+
+## P38
+- All CI API boots MUST set COHORTOS_AUTH_DB and COHORTOS_CLOUD_DB (use .github/actions/start-api).
+
+## P39 rules
+- **Workflow lint must pass** before any workflow change is claimed PROVEN (`python scripts/lint_workflows.py` + actionlint).
+- No multi-line `python -c` inside YAML `run: |` blocks — use scripts/.
+- Optional features must never block `/health`.
+
+## P40
+- Load tests must set COHORTOS_LOAD_TENANT from seed JSON.
+- Every failing CI step must publish diag-<workflow>-<job>-<run_id>-<attempt>.json to ci-reports.
+
+## P41
+- Production path must not install chromadb.
+- Diags for axe/load must land on ci-reports via publish_diag.py.
+- `make verify` is the local mirror of CI unit gates.
+
+## P42
+- Never share one sqlite3 connection across threads. Per-thread connections via DAL factory only.
+- Load gate: any 5xx fails (no tolerance).
+
+## P43
+- Any change under models/ or services/ must pass the full unit-full job before a round is reported done.
+- Never store sqlite3.Connection on self; always use the thread-local factory via `conn` property.

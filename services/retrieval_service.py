@@ -145,7 +145,7 @@ class RetrievalService:
             lex = bm25.get(i, 0.0)
             # Hybrid: semantic primary, BM25 secondary
             score = 0.65 * sem + 0.35 * (lex / (1.0 + lex))
-            if score > 0.02:
+            if score > 0.22:
                 ranked.append((score, ch))
         ranked.sort(key=lambda x: x[0], reverse=True)
         results: List[RetrievalChunk] = []

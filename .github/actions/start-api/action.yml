@@ -1,0 +1,85 @@
+name: Start CohortOS API
+description: Unified API boot for E2E, Security Gates, Readiness — fails fast with log tail if process dies or /health never 200
+inputs:
+  port:
+    description: Listen port
+    default: "8741"
+  jwt_secret:
+    description: COHORTOS_JWT_SECRET
+    required: true
+  founder_token:
+    description: COHORTOS_FOUNDER_TOKEN
+    required: true
+  auth_db:
+    description: COHORTOS_AUTH_DB path
+    default: /tmp/cohortos-auth.db
+  cloud_db:
+    description: COHORTOS_CLOUD_DB path
+    default: /tmp/cohortos-cloud.db
+  extra_env:
+    description: Optional extra KEY=VAL lines
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Boot uvicorn and wait for /health
+      shell: bash
+      env:
+        COHORTOS_JWT_SECRET: ${{ inputs.jwt_secret }}
+        COHORTOS_FOUNDER_TOKEN: ${{ inputs.founder_token }}
+        COHORTOS_AUTH_DB: ${{ inputs.auth_db }}
+        COHORTOS_CLOUD_DB: ${{ inputs.cloud_db }}
+        COHORTOS_STORAGE_ROOT: /tmp/cohortos-storage
+        COHORTOS_RAG_DIR: /tmp/cohortos-rag
+        COHORTOS_SKIP_MODEL_DOWNLOAD: "1"
+        COHORTOS_TEST_EXPOSE_OTP: "1"
+        COHORTOS_PILOT_OTP: "1"
+        COHORTOS_RATE_LIMIT_DISABLED: "1"
+        COHORTOS_ENV: test
+        API_PORT: ${{ inputs.port }}
+        EXTRA_ENV_BLOCK: ${{ inputs.extra_env }}
+      run: |
+        set -euo pipefail
+        mkdir -p /tmp/cohortos-storage /tmp/cohortos-rag
+        if [ -n "${EXTRA_ENV_BLOCK:-}" ]; then
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            case "$line" in
+              *=*) export "$line" ;;
+            esac
+          done <<< "$EXTRA_ENV_BLOCK"
+        fi
+        nohup python -m uvicorn api.main:create_api_app_or_raise --factory \
+          --host 127.0.0.1 --port "$API_PORT" > /tmp/api.log 2>&1 &
+        echo $! > /tmp/api.pid
+        READY=0
+        for i in $(seq 1 60); do
+          if ! kill -0 "$(cat /tmp/api.pid)" 2>/dev/null; then
+            echo "API process died before /health"
+            tail -n 300 /tmp/api.log || true
+            {
+              echo "## API boot failure"
+              echo '```'
+              tail -n 300 /tmp/api.log || true
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+            exit 1
+          fi
+          if curl -sf "http://127.0.0.1:${API_PORT}/health" >/dev/null; then
+            READY=1
+            echo "API ready on :$API_PORT"
+            break
+          fi
+          sleep 1
+        done
+        if [ "$READY" != "1" ]; then
+          echo "API never became healthy"
+          tail -n 300 /tmp/api.log || true
+          {
+            echo "## API health timeout"
+            echo '```'
+            tail -n 300 /tmp/api.log || true
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+          exit 1
+        fi
