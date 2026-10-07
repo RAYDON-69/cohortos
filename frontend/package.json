@@ -31,7 +31,7 @@
     "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.4",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^6.3.289",
     "plyr": "^3.7.8",
     "photoswipe": "^5.4.4",
     "papaparse": "^5.4.1",
