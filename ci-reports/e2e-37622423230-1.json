@@ -1,0 +1,28 @@
+{
+  "sha": "62909b03c563dc27da5cea1a245e812601066ec7",
+  "main_sha": "62909b03c563dc27da5cea1a245e812601066ec7",
+  "run_id": "37622423230",
+  "run_attempt": "1",
+  "core_outcome": "skipped",
+  "extended_outcome": "skipped",
+  "core_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "extended_counts": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "raw_tail": ""
+  },
+  "flags": {
+    "COHORTOS_TEST_EXPOSE_OTP": "1",
+    "COHORTOS_SKIP_MODEL_DOWNLOAD": "1",
+    "continue_on_error_extended": false
+  },
+  "failing_snippets": [],
+  "generated_at": "2026-10-07T13:02:56.349205Z",
+  "per_test_lines": []
+}
