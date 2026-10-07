@@ -118,7 +118,7 @@ jobs:
 
       - name: Install frontend deps
         working-directory: frontend
-        run: npm install
+        run: npm ci --no-audit --no-fund --legacy-peer-deps
 
       - name: Build renderer
         working-directory: frontend
