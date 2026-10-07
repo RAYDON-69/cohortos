@@ -2,7 +2,7 @@
   "sha": "62909b03c563dc27da5cea1a245e812601066ec7",
   "gates": {
     "Unit Full": "failure",
-    "Release Readiness": "in_progress",
+    "Release Readiness": "failure",
     "Workflow Lint": "success",
     "E2E Smoke": "failure",
     "Security and License Gates": "failure",
