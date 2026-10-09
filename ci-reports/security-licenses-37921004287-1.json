@@ -1,0 +1,950 @@
+{
+  "job": "licenses-and-audit",
+  "pip_audit": {
+    "dependencies": [
+      {
+        "name": "llama-index-core",
+        "version": "0.14.25",
+        "vulns": []
+      },
+      {
+        "name": "aiohttp",
+        "version": "3.14.4",
+        "vulns": []
+      },
+      {
+        "name": "banks",
+        "version": "2.5.1",
+        "vulns": []
+      },
+      {
+        "name": "dirtyjson",
+        "version": "1.0.8",
+        "vulns": []
+      },
+      {
+        "name": "filetype",
+        "version": "1.2.0",
+        "vulns": []
+      },
+      {
+        "name": "llama-index-workflows",
+        "version": "2.25.0",
+        "vulns": []
+      },
+      {
+        "name": "multidict",
+        "version": "6.9.1",
+        "vulns": []
+      },
+      {
+        "name": "nest-asyncio",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "tenacity",
+        "version": "9.2.1",
+        "vulns": []
+      },
+      {
+        "name": "tqdm",
+        "version": "4.70.1",
+        "vulns": []
+      },
+      {
+        "name": "yarl",
+        "version": "1.25.1",
+        "vulns": []
+      },
+      {
+        "name": "pytest",
+        "version": "9.1.1",
+        "vulns": []
+      },
+      {
+        "name": "pluggy",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "fastapi",
+        "version": "0.143.0",
+        "vulns": []
+      },
+      {
+        "name": "uvicorn",
+        "version": "0.54.0",
+        "vulns": []
+      },
+      {
+        "name": "pyjwt",
+        "version": "2.15.1",
+        "vulns": []
+      },
+      {
+        "name": "httpx",
+        "version": "0.28.1",
+        "vulns": []
+      },
+      {
+        "name": "httpcore",
+        "version": "1.0.9",
+        "vulns": []
+      },
+      {
+        "name": "numpy",
+        "version": "2.5.3",
+        "vulns": []
+      },
+      {
+        "name": "onnxruntime",
+        "version": "1.31.0",
+        "vulns": []
+      },
+      {
+        "name": "tokenizers",
+        "version": "0.23.3",
+        "vulns": []
+      },
+      {
+        "name": "huggingface-hub",
+        "version": "2.2.0",
+        "vulns": []
+      },
+      {
+        "name": "click",
+        "version": "8.5.0",
+        "vulns": []
+      },
+      {
+        "name": "hf-xet",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "httpx2",
+        "version": "2.13.1",
+        "vulns": []
+      },
+      {
+        "name": "httpcore2",
+        "version": "2.13.1",
+        "vulns": []
+      },
+      {
+        "name": "pypdf",
+        "version": "6.20.0",
+        "vulns": []
+      },
+      {
+        "name": "cryptography",
+        "version": "50.0.2",
+        "vulns": []
+      },
+      {
+        "name": "aiohappyeyeballs",
+        "version": "2.7.1",
+        "vulns": []
+      },
+      {
+        "name": "aiosignal",
+        "version": "1.4.0",
+        "vulns": []
+      },
+      {
+        "name": "annotated-doc",
+        "version": "0.0.5",
+        "vulns": []
+      },
+      {
+        "name": "anyio",
+        "version": "4.15.1",
+        "vulns": []
+      },
+      {
+        "name": "attrs",
+        "version": "26.1.0",
+        "vulns": []
+      },
+      {
+        "name": "cffi",
+        "version": "2.1.1",
+        "vulns": []
+      },
+      {
+        "name": "deprecated",
+        "version": "3.0.0",
+        "vulns": []
+      },
+      {
+        "name": "wrapt",
+        "version": "2.5.0",
+        "vulns": []
+      },
+      {
+        "name": "filelock",
+        "version": "4.0.12",
+        "vulns": []
+      },
+      {
+        "name": "frozenlist",
+        "version": "1.8.0",
+        "vulns": []
+      },
+      {
+        "name": "fsspec",
+        "version": "2026.9.0",
+        "vulns": []
+      },
+      {
+        "name": "h11",
+        "version": "0.16.0",
+        "vulns": []
+      },
+      {
+        "name": "idna",
+        "version": "3.20",
+        "vulns": []
+      },
+      {
+        "name": "iniconfig",
+        "version": "2.3.1",
+        "vulns": []
+      },
+      {
+        "name": "llama-index-instrumentation",
+        "version": "0.6.0",
+        "vulns": []
+      },
+      {
+        "name": "networkx",
+        "version": "3.7",
+        "vulns": []
+      },
+      {
+        "name": "nltk",
+        "version": "3.10.3",
+        "vulns": [
+          {
+            "id": "PYSEC-2026-3740",
+            "fix_versions": [],
+            "aliases": [
+              "GHSA-8mgp-746c-j5xp",
+              "CVE-2026-81726"
+            ],
+            "description": "### Summary  Several model-artifact APIs still treat caller-controlled model paths as ordinary filenames even when NLTK path security is enforced. The same outside-root paths are rejected by guarded helpers, but these public read and write flows still use raw file APIs.  ### Details  - **Vulnerability type:** File sandbox bypass - **Affected component:** `TransitionParser.train`, `TransitionParser.parse`, `AveragedPerceptron.save`, `AveragedPerceptron.load`, `PerceptronTagger.save_to_json`, `save_maxent_params` - **Affected versions:** Published `3.9.4` and current source `v3.10.0-rc2` both reproduced. - **Patched versions:** Not yet patched - **Root cause:** Model import and export helpers use built-in `open()` on caller-controlled paths instead of pathsec-aware helpers.  `TransitionParser.train()` writes outside allowed roots, `TransitionParser.parse()` reads outside allowed roots, `AveragedPerceptron` bypasses the sandbox in both directions, and adjacent read-side helpers in the same family already show the intended guarded behavior. I confirmed outside-root reads and writes while `pathsec.open()` or the guarded sibling helpers rejected the same paths.  ### PoC  **Preconditions** - The application enables `pathsec` enforcement and lets untrusted workflows choose model import or export paths.  **Steps** 1. Enable `pathsec.ENFORCE=True` and restrict allowed roots to a dedicated sandbox directory. 2. Use public model import or export APIs with paths that point outside that root. 3. Observe the same paths are rejected by negative-control guarded helpers such as `pathsec.open()`, `PerceptronTagger.load_from_json()`, or `load_maxent_params()`. 4. Observe the vulnerable APIs still read or write outside-root files successfully.  **Minimal reproducible excerpt**  ```text transition_train_exists True transition_parse_loader_read_bytes 13 averaged_load_keys ['bias'] maxent_save wrote ['alwayson.tab', 'labels.txt'] ```  ### Impact  Consumers that rely on `pathsec` for local containment can be tricked into reading or overwriting files outside approved roots through normal model persistence and loading APIs.  ### Remediation  Route all model-path file access through `nltk.pathsec.open()` or existing pathsec-aware helpers, and add regression tests that pair each vulnerable API with a negative control on the same path."
+          }
+        ]
+      },
+      {
+        "name": "opentelemetry-api",
+        "version": "1.45.1",
+        "vulns": []
+      },
+      {
+        "name": "pillow",
+        "version": "12.3.0",
+        "vulns": []
+      },
+      {
+        "name": "propcache",
+        "version": "0.5.4",
+        "vulns": []
+      },
+      {
+        "name": "protobuf",
+        "version": "7.36.2",
+        "vulns": []
+      },
+      {
+        "name": "pydantic",
+        "version": "2.14.0",
+        "vulns": []
+      },
+      {
+        "name": "pydantic-core",
+        "version": "2.50.0",
+        "vulns": []
+      },
+      {
+        "name": "annotated-types",
+        "version": "0.8.0",
+        "vulns": []
+      },
+      {
+        "name": "pygments",
+        "version": "2.21.0",
+        "vulns": []
+      },
+      {
+        "name": "pyyaml",
+        "version": "6.0.3",
+        "vulns": []
+      },
+      {
+        "name": "regex",
+        "version": "2026.9.29",
+        "vulns": []
+      },
+      {
+        "name": "requests",
+        "version": "2.34.2",
+        "vulns": []
+      },
+      {
+        "name": "charset-normalizer",
+        "version": "3.5.2",
+        "vulns": []
+      },
+      {
+        "name": "urllib3",
+        "version": "2.8.0",
+        "vulns": []
+      },
+      {
+        "name": "certifi",
+        "version": "2026.7.22",
+        "vulns": []
+      },
+      {
+        "name": "sqlalchemy",
+        "version": "2.1.4",
+        "vulns": []
+      },
+      {
+        "name": "greenlet",
+        "version": "3.5.6",
+        "vulns": []
+      },
+      {
+        "name": "starlette",
+        "version": "1.7.0",
+        "vulns": []
+      },
+      {
+        "name": "tiktoken",
+        "version": "0.14.0",
+        "vulns": []
+      },
+      {
+        "name": "tinytag",
+        "version": "2.3.2",
+        "vulns": []
+      },
+      {
+        "name": "truststore",
+        "version": "0.10.4",
+        "vulns": []
+      },
+      {
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspect",
+        "version": "0.9.0",
+        "vulns": []
+      },
+      {
+        "name": "mypy-extensions",
+        "version": "1.1.0",
+        "vulns": []
+      },
+      {
+        "name": "typing-inspection",
+        "version": "0.4.4",
+        "vulns": []
+      },
+      {
+        "name": "aiosqlite",
+        "version": "0.22.1",
+        "vulns": []
+      },
+      {
+        "name": "dataclasses-json",
+        "version": "0.6.7",
+        "vulns": []
+      },
+      {
+        "name": "marshmallow",
+        "version": "3.26.2",
+        "vulns": []
+      },
+      {
+        "name": "defusedxml",
+        "version": "0.7.1",
+        "vulns": []
+      },
+      {
+        "name": "flatbuffers",
+        "version": "25.12.19",
+        "vulns": []
+      },
+      {
+        "name": "griffe",
+        "version": "2.3.2",
+        "vulns": []
+      },
+      {
+        "name": "griffecli",
+        "version": "2.3.2",
+        "vulns": []
+      },
+      {
+        "name": "griffelib",
+        "version": "2.3.2",
+        "vulns": []
+      },
+      {
+        "name": "colorama",
+        "version": "0.4.6",
+        "vulns": []
+      },
+      {
+        "name": "jinja2",
+        "version": "3.1.6",
+        "vulns": []
+      },
+      {
+        "name": "markupsafe",
+        "version": "3.0.4",
+        "vulns": []
+      },
+      {
+        "name": "joblib",
+        "version": "1.6.0",
+        "vulns": []
+      },
+      {
+        "name": "cloudpickle",
+        "version": "3.1.2",
+        "vulns": []
+      },
+      {
+        "name": "platformdirs",
+        "version": "4.12.4",
+        "vulns": []
+      },
+      {
+        "name": "pycparser",
+        "version": "3.1",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "pip_licenses": [
+    {
+      "License": "Apache-2.0",
+      "Name": "CacheControl",
+      "Version": "0.14.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "Deprecated",
+      "Version": "3.0.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "Jinja2",
+      "Version": "3.1.6"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "MarkupSafe",
+      "Version": "3.0.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "PyJWT",
+      "Version": "2.15.1"
+    },
+    {
+      "License": "MIT License",
+      "Name": "PyYAML",
+      "Version": "6.0.3"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "Pygments",
+      "Version": "2.21.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "SQLAlchemy",
+      "Version": "2.1.4"
+    },
+    {
+      "License": "Python Software Foundation License",
+      "Name": "aiohappyeyeballs",
+      "Version": "2.7.1"
+    },
+    {
+      "License": "Apache-2.0 AND MIT",
+      "Name": "aiohttp",
+      "Version": "3.14.4"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "aiosignal",
+      "Version": "1.4.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "aiosqlite",
+      "Version": "0.22.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "annotated-doc",
+      "Version": "0.0.5"
+    },
+    {
+      "License": "MIT",
+      "Name": "annotated-types",
+      "Version": "0.8.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "anyio",
+      "Version": "4.15.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "attrs",
+      "Version": "26.1.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "banks",
+      "Version": "2.5.1"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "boolean.py",
+      "Version": "5.0"
+    },
+    {
+      "License": "Mozilla Public License 2.0 (MPL 2.0)",
+      "Name": "certifi",
+      "Version": "2026.7.22"
+    },
+    {
+      "License": "MIT-0",
+      "Name": "cffi",
+      "Version": "2.1.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "charset-normalizer",
+      "Version": "3.5.2"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "click",
+      "Version": "8.5.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "cloudpickle",
+      "Version": "3.1.2"
+    },
+    {
+      "License": "BSD License",
+      "Name": "colorama",
+      "Version": "0.4.6"
+    },
+    {
+      "License": "Apache-2.0 OR BSD-3-Clause",
+      "Name": "cryptography",
+      "Version": "50.0.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "cyclonedx-python-lib",
+      "Version": "11.12.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "dataclasses-json",
+      "Version": "0.6.7"
+    },
+    {
+      "License": "Python Software Foundation License",
+      "Name": "defusedxml",
+      "Version": "0.7.1"
+    },
+    {
+      "License": "Academic Free License (AFL); MIT License",
+      "Name": "dirtyjson",
+      "Version": "1.0.8"
+    },
+    {
+      "License": "MIT",
+      "Name": "fastapi",
+      "Version": "0.143.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "filelock",
+      "Version": "4.0.12"
+    },
+    {
+      "License": "MIT License",
+      "Name": "filetype",
+      "Version": "1.2.0"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "flatbuffers",
+      "Version": "25.12.19"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "frozenlist",
+      "Version": "1.8.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "fsspec",
+      "Version": "2026.9.0"
+    },
+    {
+      "License": "MIT AND PSF-2.0",
+      "Name": "greenlet",
+      "Version": "3.5.6"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffe",
+      "Version": "2.3.2"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffecli",
+      "Version": "2.3.2"
+    },
+    {
+      "License": "ISC",
+      "Name": "griffelib",
+      "Version": "2.3.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "h11",
+      "Version": "0.16.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "hf-xet",
+      "Version": "1.7.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "httpcore",
+      "Version": "1.0.9"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "httpcore2",
+      "Version": "2.13.1"
+    },
+    {
+      "License": "BSD License",
+      "Name": "httpx",
+      "Version": "0.28.1"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "httpx2",
+      "Version": "2.13.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "huggingface_hub",
+      "Version": "2.2.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "idna",
+      "Version": "3.20"
+    },
+    {
+      "License": "MIT",
+      "Name": "iniconfig",
+      "Version": "2.3.1"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "joblib",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "license-expression",
+      "Version": "30.4.4"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-core",
+      "Version": "0.14.25"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-instrumentation",
+      "Version": "0.6.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "llama-index-workflows",
+      "Version": "2.25.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "markdown-it-py",
+      "Version": "4.2.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "marshmallow",
+      "Version": "3.26.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "mdurl",
+      "Version": "0.1.2"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "msgpack",
+      "Version": "1.2.3"
+    },
+    {
+      "License": "Apache License 2.0",
+      "Name": "multidict",
+      "Version": "6.9.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "mypy_extensions",
+      "Version": "1.1.0"
+    },
+    {
+      "License": "BSD License",
+      "Name": "nest-asyncio",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "networkx",
+      "Version": "3.7"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "nltk",
+      "Version": "3.10.3"
+    },
+    {
+      "License": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "Name": "numpy",
+      "Version": "2.5.3"
+    },
+    {
+      "License": "MIT License",
+      "Name": "onnxruntime",
+      "Version": "1.31.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "opentelemetry-api",
+      "Version": "1.45.1"
+    },
+    {
+      "License": "MIT License",
+      "Name": "packageurl-python",
+      "Version": "0.17.6"
+    },
+    {
+      "License": "Apache-2.0 OR BSD-2-Clause",
+      "Name": "packaging",
+      "Version": "26.3"
+    },
+    {
+      "License": "MIT-CMU",
+      "Name": "pillow",
+      "Version": "12.3.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pip-requirements-parser",
+      "Version": "32.0.1"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "pip_api",
+      "Version": "0.0.35"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "pip_audit",
+      "Version": "2.10.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "platformdirs",
+      "Version": "4.12.4"
+    },
+    {
+      "License": "MIT License",
+      "Name": "pluggy",
+      "Version": "1.6.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "propcache",
+      "Version": "0.5.4"
+    },
+    {
+      "License": "3-Clause BSD License",
+      "Name": "protobuf",
+      "Version": "7.36.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "py-serializable",
+      "Version": "2.1.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "pycparser",
+      "Version": "3.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "pydantic",
+      "Version": "2.14.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pydantic_core",
+      "Version": "2.50.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pyparsing",
+      "Version": "3.3.3"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "pypdf",
+      "Version": "6.20.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "pytest",
+      "Version": "9.1.1"
+    },
+    {
+      "License": "Apache-2.0 AND CNRI-Python",
+      "Name": "regex",
+      "Version": "2026.9.29"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "requests",
+      "Version": "2.34.2"
+    },
+    {
+      "License": "MIT License",
+      "Name": "rich",
+      "Version": "15.0.0"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "sortedcontainers",
+      "Version": "2.4.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "starlette",
+      "Version": "1.7.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "tenacity",
+      "Version": "9.2.1"
+    },
+    {
+      "License": "MIT License\n\nCopyright (c) 2022 OpenAI, Shantanu Jain\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+      "Name": "tiktoken",
+      "Version": "0.14.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "tinytag",
+      "Version": "2.3.2"
+    },
+    {
+      "License": "Apache Software License",
+      "Name": "tokenizers",
+      "Version": "0.23.3"
+    },
+    {
+      "License": "MIT",
+      "Name": "tomli",
+      "Version": "2.5.0"
+    },
+    {
+      "License": "MIT License",
+      "Name": "tomli_w",
+      "Version": "1.2.0"
+    },
+    {
+      "License": "MPL-2.0 AND MIT",
+      "Name": "tqdm",
+      "Version": "4.70.1"
+    },
+    {
+      "License": "MIT",
+      "Name": "truststore",
+      "Version": "0.10.4"
+    },
+    {
+      "License": "MIT License",
+      "Name": "typing-inspect",
+      "Version": "0.9.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "typing-inspection",
+      "Version": "0.4.4"
+    },
+    {
+      "License": "PSF-2.0",
+      "Name": "typing_extensions",
+      "Version": "4.16.0"
+    },
+    {
+      "License": "MIT",
+      "Name": "urllib3",
+      "Version": "2.8.0"
+    },
+    {
+      "License": "BSD-3-Clause",
+      "Name": "uvicorn",
+      "Version": "0.54.0"
+    },
+    {
+      "License": "BSD-2-Clause",
+      "Name": "wrapt",
+      "Version": "2.5.0"
+    },
+    {
+      "License": "Apache-2.0",
+      "Name": "yarl",
+      "Version": "1.25.1"
+    }
+  ]
+}
