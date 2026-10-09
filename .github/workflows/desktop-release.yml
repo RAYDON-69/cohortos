@@ -160,7 +160,7 @@ jobs:
       # Publish to GitHub Release assets (NOT Actions artifacts — avoids storage quota).
       # Rolling tag desktop-latest always points at the newest successful package set.
       - name: Publish to GitHub Release (desktop-latest)
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
           tag_name: desktop-latest
           name: CohortOS desktop (latest build)
@@ -180,7 +180,7 @@ jobs:
       # When triggered by a version tag (v*), also attach the same files to that release.
       - name: Publish to version tag release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64  # v3.0.3
         with:
           files: ${{ matrix.asset_glob }}
           fail_on_unmatched_files: false
