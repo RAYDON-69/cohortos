@@ -1,0 +1,233 @@
+{
+  "tests_failed": [],
+  "failed_count": 0,
+  "passed_hint": [
+    "",
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "12 passed, 1 warning in 1.36s"
+  ],
+  "log_tail": "............                                                             [100%]\n=============================== warnings summary ===============================\n../../../../../opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/_pytest/config/__init__.py:1464\n  /opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: timeout\n  \n    self._warn_or_fail_if_strict(f\"Unknown config option: {key}\\n\")\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n12 passed, 1 warning in 1.36s\n",
+  "total_routes": 177,
+  "classified_public": 12,
+  "classified_authenticated": 3,
+  "classified_tenant_scoped": 150,
+  "classified_founder": 12,
+  "unclassified": [],
+  "routes_sample": [
+    {
+      "path": "/openapi.json",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/docs",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/docs/oauth2-redirect",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/redoc",
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/centre-trial",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/signup",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/request-otp",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/verify-otp",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/refresh",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "class": "public"
+    },
+    {
+      "path": "/me",
+      "methods": [
+        "GET"
+      ],
+      "class": "authenticated"
+    },
+    {
+      "path": "/t/{tenant_id}/students",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/duplicate-check",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/roll-preview",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}",
+      "methods": [
+        "PATCH"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/batches/{batch_id}/extra-sessions",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/students/{student_id}/migrate",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/templates",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/batch/{batch_id}",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/manual",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/late-threshold",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/late-threshold",
+      "methods": [
+        "PUT"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/absentees",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/reviews",
+      "methods": [
+        "GET"
+      ],
+      "class": "tenant-scoped"
+    },
+    {
+      "path": "/t/{tenant_id}/attendance/reviews/{flag_id}/resolve",
+      "methods": [
+        "POST"
+      ],
+      "class": "tenant-scoped"
+    }
+  ],
+  "exit_code": 0
+}
