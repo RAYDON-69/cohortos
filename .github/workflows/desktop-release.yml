@@ -143,9 +143,19 @@ jobs:
       - name: List installer outputs
         shell: bash
         run: |
-          echo "=== frontend/release-desktop ==="
-          ls -la frontend/release-desktop/ || true
-          find frontend/release-desktop -type f 2>/dev/null | head -40
+          set -eu
+          echo "=== frontend/release-desktop (top level) ==="
+          ls -la frontend/release-desktop/
+          case "${{ matrix.os }}" in
+            linux) PAT='*.AppImage' ;;
+            win)   PAT='*.exe' ;;
+            mac)   PAT='*.dmg' ;;
+          esac
+          COUNT=$(find frontend/release-desktop -maxdepth 1 -type f -name "$PAT" | wc -l | tr -d ' ')
+          find frontend/release-desktop -maxdepth 1 -type f -name "$PAT" -exec ls -la {} \;
+          if [ "$COUNT" -lt 1 ]; then
+            echo "ERROR: no $PAT installer produced"; exit 1
+          fi
 
       # Publish to GitHub Release assets (NOT Actions artifacts — avoids storage quota).
       # Rolling tag desktop-latest always points at the newest successful package set.
