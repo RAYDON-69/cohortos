@@ -1,0 +1,8 @@
+{
+  "gate": "ci-gate",
+  "sha": "418e0fc1804e24aba5caf5109bd73d828bf2b960",
+  "conclusion": "failure",
+  "failed": [],
+  "run_id": "37918526082",
+  "attempt": "1"
+}
