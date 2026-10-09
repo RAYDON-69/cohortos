@@ -1,0 +1,26 @@
+{
+  "schema": "cohortos.ci-report/v1",
+  "kind": "load",
+  "invalid_test": false,
+  "n": 100,
+  "tenant_id": "826985b9-8060-4959-a619-aecfbffde149",
+  "errors": 0,
+  "error_rate": 0.0,
+  "p50_ms": 31.56617899998082,
+  "p95_ms": 48.44777100001352,
+  "p99_ms": 62.804698000007875,
+  "budget_p95_ms": 1500,
+  "per_path_status_histogram": {
+    "/health:200": 17,
+    "/me:200": 17,
+    "/t/826985b9-8060-4959-a619-aecfbffde149/students:200": 17,
+    "/t/826985b9-8060-4959-a619-aecfbffde149/attendance:200": 17,
+    "/t/826985b9-8060-4959-a619-aecfbffde149/batches:200": 16,
+    "/t/826985b9-8060-4959-a619-aecfbffde149/templates:200": 16
+  },
+  "wrong_token_status": 401,
+  "wrong_token_rejected": true,
+  "peak_rss_mb": 25.0,
+  "sqlite_lock_waits": 0,
+  "pass": true
+}
